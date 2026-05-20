@@ -7,11 +7,25 @@ import { getNavigationTree, type FootnoteRef } from '@/lib/sanity.queries'
 export const prerender = false
 
 const navTree = await getNavigationTree()
-const entries: FootnoteRef[] = sanity
-  ? await sanity.fetch(`*[_type == "bibliographyEntry"] | order(number asc) {
+const rawEntries: FootnoteRef[] = sanity
+  ? await sanity.fetch(`*[_type == "bibliographyEntry"]{
       _id, _type, number, title, citation, url, sourceType
     }`)
   : []
+
+function isPlaceholder(e: FootnoteRef): boolean {
+  return Boolean(e.title?.includes('(TBD)') || e.citation?.startsWith('Bibliography entry #'))
+}
+
+const numbered = rawEntries
+  .filter((e) => typeof e.number === 'number')
+  .sort((a, b) => (a.number ?? 0) - (b.number ?? 0))
+
+const unnumbered = rawEntries
+  .filter((e) => typeof e.number !== 'number')
+  .sort((a, b) => (a.title ?? a.citation ?? '').localeCompare(b.title ?? b.citation ?? ''))
+
+const placeholderCount = numbered.filter(isPlaceholder).length
 ---
 
 <StandardLayout title="Bibliography — The SEAM Standard" description="Numbered citations referenced throughout the SEAM Standard.">
@@ -27,21 +41,73 @@ const entries: FootnoteRef[] = sanity
 
       <header class="border-b border-warm-300 pb-4">
         <h1 class="text-3xl font-semibold text-warm-900">Bibliography</h1>
-        <p class="mt-2 text-warm-700">
+        <p class="mt-2 text-sm text-warm-700">
           Numbered citations referenced throughout the SEAM Standard. Each entry
           is linked from the activities that cite it.
         </p>
+        {
+          placeholderCount > 0 && (
+            <p class="mt-2 text-xs italic text-warm-500">
+              {placeholderCount} numbered {placeholderCount === 1 ? 'entry is' : 'entries are'} pending — the full bibliography from Appendix B has not yet been transcribed.
+            </p>
+          )
+        }
       </header>
 
       {
-        entries.length === 0 ? (
-          <p class="mt-8 text-warm-500">No bibliography entries yet.</p>
-        ) : (
-          <ol class="mt-8 space-y-4">
-            {entries.map((e) => (
-              <li id={`bib-${e.number}`} class="scroll-mt-6 grid grid-cols-[3rem_1fr] gap-x-3">
-                <span class="font-mono text-sm text-warm-500">[{e.number}]</span>
-                <div>
+        numbered.length > 0 && (
+          <section class="mt-8">
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-warm-500">
+              Numbered entries
+            </h2>
+            <ol class="space-y-3">
+              {numbered.map((e) => {
+                const pending = isPlaceholder(e)
+                return (
+                  <li
+                    id={`bib-${e.number}`}
+                    class:list={[
+                      'scroll-mt-6 grid grid-cols-[3rem_1fr] gap-x-3 border-b border-warm-100 pb-3',
+                      pending && 'opacity-50',
+                    ]}
+                  >
+                    <span class="font-mono text-sm text-warm-500">[{e.number}]</span>
+                    <div>
+                      {pending ? (
+                        <span class="italic text-warm-500">Pending transcription</span>
+                      ) : e.url ? (
+                        <a
+                          href={e.url}
+                          class="text-warm-800 hover:text-seam-700 underline-offset-2 hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {e.citation}
+                        </a>
+                      ) : (
+                        <span class="text-warm-800">{e.citation}</span>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
+        )
+      }
+
+      {
+        unnumbered.length > 0 && (
+          <section class="mt-10">
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-warm-500">
+              Other sources cited
+            </h2>
+            <p class="mb-3 text-xs text-warm-500">
+              Sources that appear only in activity "Referenced Source" sections, not as numbered footnotes.
+            </p>
+            <ul class="space-y-3">
+              {unnumbered.map((e) => (
+                <li class="border-b border-warm-100 pb-3">
                   {e.url ? (
                     <a
                       href={e.url}
@@ -54,15 +120,10 @@ const entries: FootnoteRef[] = sanity
                   ) : (
                     <span class="text-warm-800">{e.citation}</span>
                   )}
-                  {e.sourceType && (
-                    <p class="mt-0.5 text-xs uppercase tracking-wider text-warm-500">
-                      {e.sourceType}
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
+                </li>
+              ))}
+            </ul>
+          </section>
         )
       }
     </article>
