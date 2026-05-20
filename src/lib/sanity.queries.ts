@@ -706,6 +706,76 @@ export async function getIntroSectionBySlug(slug: string): Promise<IntroSection 
   )
 }
 
+// ─── Landing-page query ───────────────────────────────────────────────────
+
+export interface LandingActivity {
+  activityId: string
+  title: string
+  slug: string
+  activityType: 'Driver' | 'Impact'
+  ratingSystemApplication?: RatingSystemApplication
+}
+
+export interface LandingObjective {
+  title: string
+  slug: string
+  objectiveCode: string
+  number: number
+  headlineGoal?: string
+  activities: LandingActivity[]
+}
+
+export interface LandingConcept {
+  title: string
+  slug: string
+  code: string
+  number: number
+  headlineGoal?: string
+  objectives: LandingObjective[]
+}
+
+export interface LandingPillar {
+  title: string
+  slug: string
+  number: number
+  iconUrl?: string
+  summary?: string
+  concepts: LandingConcept[]
+}
+
+export async function getLandingData(): Promise<LandingPillar[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "pillar"] | order(number asc) {
+    title,
+    "slug": slug.current,
+    number,
+    iconUrl,
+    summary,
+    "concepts": *[_type == "concept" && pillar._ref == ^._id] | order(number asc) {
+      title,
+      "slug": slug.current,
+      code,
+      number,
+      headlineGoal,
+      "objectives": *[_type == "objective" && concept._ref == ^._id] | order(number asc) {
+        title,
+        "slug": slug.current,
+        objectiveCode,
+        number,
+        headlineGoal,
+        "activities": *[_type == "activity" && objective._ref == ^._id] | order(activityId asc) {
+          activityId,
+          title,
+          "slug": slug.current,
+          activityType,
+          ratingSystemApplication
+        }
+      }
+    }
+  }`)
+}
+
 export interface GlossaryEntry {
   term: string
   slug: string
