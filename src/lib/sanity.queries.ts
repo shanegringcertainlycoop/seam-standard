@@ -181,6 +181,13 @@ export interface Activity {
   documentationSectionFootnote?: FootnoteRef
   documentationLeadIn?: PortableTextBlock[]
   documentationItems?: DocumentationItem[]
+  documentationTemplates?: Array<{
+    _key: string
+    title: string
+    columns: string[]
+    exampleRows?: Array<{ _key?: string; cells: string[] }>
+    footnote?: string
+  }>
   definitions?: Definition[]
   guidance?: GuidanceSection[]
   referencedSources?: ReferencedSource[]
@@ -240,6 +247,13 @@ const activityProjection = `{
     _id, _type, number, marker, title, citation, body
   },
   documentationLeadIn,
+  documentationTemplates[]{
+    _key,
+    title,
+    columns,
+    exampleRows[]{ _key, cells },
+    footnote
+  },
   documentationItems[]{
     _key,
     number,

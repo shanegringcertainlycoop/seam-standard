@@ -7,13 +7,12 @@ interface Props {
   items?: Activity['documentationItems']
   sectionFootnote?: Activity['documentationSectionFootnote']
   leadIn?: Activity['documentationLeadIn']
+  templates?: Activity['documentationTemplates']
   lookup: FootnoteLookup
 }
 
-const { items, sectionFootnote, leadIn, lookup } = Astro.props
+const { items, sectionFootnote, leadIn, templates, lookup } = Astro.props
 if (!items || items.length === 0) return null
-
-import { renderPT } from '@/lib/renderPortableText'
 ---
 
 <section>
@@ -43,4 +42,39 @@ import { renderPT } from '@/lib/renderPortableText'
       ))
     }
   </ol>
+
+  {
+    templates && templates.length > 0 && (
+      <div class="mt-6 space-y-5">
+        {templates.map((t) => (
+          <div>
+            <p class="mb-1 text-sm text-warm-700">{t.title}</p>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-warm-300 bg-warm-100/60 text-left">
+                    {t.columns.map((c) => (
+                      <th class="px-2 py-1.5 font-medium text-warm-800">{c}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(t.exampleRows ?? []).map((row) => (
+                    <tr class="border-b border-warm-200">
+                      {row.cells.map((cell) => (
+                        <td class="px-2 py-1.5 text-warm-700">{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {t.footnote && (
+              <p class="mt-1 text-xs italic text-warm-600">{t.footnote}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
 </section>
