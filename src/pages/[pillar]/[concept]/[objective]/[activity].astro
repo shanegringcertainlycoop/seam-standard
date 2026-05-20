@@ -78,6 +78,7 @@ const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
       <Documentation
         items={activity.documentationItems}
         sectionFootnote={activity.documentationSectionFootnote}
+        leadIn={activity.documentationLeadIn}
         lookup={activityLookup}
       />
       <Definitions definitions={activity.definitions} lookup={activityLookup} />

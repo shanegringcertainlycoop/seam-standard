@@ -6,15 +6,21 @@ import type { FootnoteLookup, Activity } from '@/lib/sanity.queries'
 interface Props {
   items?: Activity['documentationItems']
   sectionFootnote?: Activity['documentationSectionFootnote']
+  leadIn?: Activity['documentationLeadIn']
   lookup: FootnoteLookup
 }
 
-const { items, sectionFootnote, lookup } = Astro.props
+const { items, sectionFootnote, leadIn, lookup } = Astro.props
 if (!items || items.length === 0) return null
+
+import { renderPT } from '@/lib/renderPortableText'
 ---
 
 <section>
   <SectionHeader label="Documentation" footnote={sectionFootnote} />
+  {leadIn && leadIn.length > 0 && (
+    <div class="mb-3" set:html={renderPT(leadIn, lookup)} />
+  )}
   <ol class="space-y-3">
     {
       items.map((item) => (

@@ -178,6 +178,7 @@ export interface Activity {
   indicators?: Indicators
   scoring?: Scoring
   documentationSectionFootnote?: FootnoteRef
+  documentationLeadIn?: PortableTextBlock[]
   documentationItems?: DocumentationItem[]
   definitions?: Definition[]
   guidance?: GuidanceSection[]
@@ -237,6 +238,7 @@ const activityProjection = `{
   "documentationSectionFootnote": documentationSectionFootnote->{
     _id, _type, number, marker, title, citation, body
   },
+  documentationLeadIn,
   documentationItems[]{
     _key,
     number,
@@ -338,6 +340,7 @@ export function collectEditorialNoteRefs(activity: Activity): Set<string> {
   visitBlocks(activity.scoring?.outcomeThreshold)
   visitBlocks(activity.scoring?.eligibility)
   visitBlocks(activity.scoring?.notes)
+  visitBlocks(activity.documentationLeadIn)
   activity.documentationItems?.forEach((it) => {
     visitBlocks(it.body)
     it.subItems?.forEach((s) => visitBlocks(s.body))
