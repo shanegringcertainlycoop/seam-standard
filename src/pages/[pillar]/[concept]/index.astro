@@ -2,7 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
-import { getConceptBySlug, getNavigationTree } from '@/lib/sanity.queries'
+import { getConceptBySlug, getNavigationTree, getFootnoteLookup } from '@/lib/sanity.queries'
 
 export const prerender = false
 
@@ -12,9 +12,10 @@ if (!pillarSlug || !conceptSlug) {
   return Astro.redirect('/')
 }
 
-const [concept, navTree] = await Promise.all([
+const [concept, navTree, lookup] = await Promise.all([
   getConceptBySlug(pillarSlug, conceptSlug),
   getNavigationTree(),
+  getFootnoteLookup(),
 ])
 
 if (!concept) {
@@ -22,7 +23,6 @@ if (!concept) {
 }
 
 const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities.length, 0)
-const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
 ---
 
 <StandardLayout title={`${concept.title} — The SEAM Standard`}>
@@ -54,6 +54,13 @@ const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
             Concept {concept.number} · {concept.code}
           </p>
           <h1 class="mt-1 text-3xl font-semibold text-warm-900">{concept.title}</h1>
+          {
+            concept.headlineGoal && (
+              <p class="mt-3 text-lg font-light leading-relaxed text-seam-800">
+                {concept.headlineGoal}
+              </p>
+            )
+          }
           <p class="mt-2 text-xs text-warm-500">
             {concept.objectives.length} objective{concept.objectives.length === 1 ? '' : 's'}
             {' · '}
@@ -65,7 +72,7 @@ const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
       {
         concept.summary && concept.summary.length > 0 && (
           <section class="mt-6 text-warm-800">
-            <div set:html={renderPT(concept.summary, emptyLookup)} />
+            <div set:html={renderPT(concept.summary, lookup)} />
           </section>
         )
       }

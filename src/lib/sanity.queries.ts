@@ -493,6 +493,7 @@ export interface ConceptDetail {
   slug: string
   code: string
   number: number
+  headlineGoal?: string
   summary?: PortableTextBlock[]
   pillar: { title: string; slug: string; number: number; iconUrl?: string }
   objectives: Array<{
@@ -514,6 +515,7 @@ export async function getConceptBySlug(pillarSlug: string, conceptSlug: string):
       "slug": slug.current,
       code,
       number,
+      headlineGoal,
       summary,
       "pillar": pillar->{ title, "slug": slug.current, number, iconUrl },
       "objectives": *[_type == "objective" && concept._ref == ^._id] | order(number asc) {

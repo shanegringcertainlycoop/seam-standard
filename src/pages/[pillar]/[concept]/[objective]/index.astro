@@ -2,7 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
-import { getObjectiveBySlug, getNavigationTree } from '@/lib/sanity.queries'
+import { getObjectiveBySlug, getNavigationTree, getFootnoteLookup } from '@/lib/sanity.queries'
 
 export const prerender = false
 
@@ -12,16 +12,15 @@ if (!pillarSlug || !conceptSlug || !objectiveSlug) {
   return Astro.redirect('/')
 }
 
-const [objective, navTree] = await Promise.all([
+const [objective, navTree, lookup] = await Promise.all([
   getObjectiveBySlug(pillarSlug, conceptSlug, objectiveSlug),
   getNavigationTree(),
+  getFootnoteLookup(),
 ])
 
 if (!objective) {
   return new Response('Objective not found', { status: 404 })
 }
-
-const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
 ---
 
 <StandardLayout title={`${objective.objectiveCode}. ${objective.title} — The SEAM Standard`}>
@@ -71,7 +70,7 @@ const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
       {
         objective.narrative && objective.narrative.length > 0 && (
           <section class="mt-6 text-warm-800">
-            <div set:html={renderPT(objective.narrative, emptyLookup)} />
+            <div set:html={renderPT(objective.narrative, lookup)} />
           </section>
         )
       }
@@ -101,7 +100,7 @@ const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
                     {a.scope && a.scope.length > 0 && (
                       <div
                         class="mt-1 ml-[4.75rem] line-clamp-2 text-sm text-warm-600 [&>p]:mb-0 [&>p]:leading-snug"
-                        set:html={renderPT(a.scope, emptyLookup)}
+                        set:html={renderPT(a.scope, lookup)}
                       />
                     )}
                   </a>
