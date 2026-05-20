@@ -399,6 +399,7 @@ export interface NavActivity {
   title: string
   slug: string
   activityType: 'Driver' | 'Impact'
+  ratingSystemApplication?: RatingSystemApplication
 }
 
 export interface NavObjective {
@@ -620,7 +621,8 @@ export async function getNavigationTree(): Promise<NavPillar[]> {
           activityId,
           title,
           "slug": slug.current,
-          activityType
+          activityType,
+          ratingSystemApplication
         }
       }
     }

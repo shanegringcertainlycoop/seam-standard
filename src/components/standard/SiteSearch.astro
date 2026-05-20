@@ -1,0 +1,210 @@
+---
+// Site-wide search. Fetches /api/search-index.json on first interaction,
+// then runs a token-based filter on title + subtitle + excerpt.
+---
+
+<div class="relative" data-seam-search>
+  <label class="sr-only" for="seam-search-input">Search the SEAM Standard</label>
+  <div class="relative">
+    <input
+      id="seam-search-input"
+      type="search"
+      placeholder="Search activities, terms…"
+      autocomplete="off"
+      spellcheck="false"
+      class="w-full rounded border border-warm-300 bg-white py-1.5 pl-7 pr-8 text-sm text-warm-800 placeholder-warm-400 focus:border-seam-500 focus:outline-none focus:ring-1 focus:ring-seam-500"
+      data-seam-search-input
+    />
+    <span
+      class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-warm-400"
+      aria-hidden="true"
+    >⌕</span>
+    <kbd
+      class="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-warm-200 bg-warm-50 px-1.5 py-0.5 font-mono text-[10px] text-warm-500 sm:inline-block"
+      data-seam-search-kbd
+    >⌘K</kbd>
+  </div>
+
+  <div
+    class="absolute left-0 right-0 top-full z-50 mt-1 hidden max-h-[60vh] overflow-y-auto rounded border border-warm-200 bg-white shadow-lg"
+    data-seam-search-results
+    role="listbox"
+  ></div>
+</div>
+
+<script>
+  type IndexEntry = {
+    type: 'activity' | 'intro' | 'glossary'
+    id: string
+    title: string
+    subtitle?: string
+    url: string
+    excerpt?: string
+  }
+
+  const containers = document.querySelectorAll<HTMLElement>('[data-seam-search]')
+  let cache: IndexEntry[] | null = null
+  let inFlight: Promise<IndexEntry[]> | null = null
+
+  async function getIndex(): Promise<IndexEntry[]> {
+    if (cache) return cache
+    if (inFlight) return inFlight
+    inFlight = fetch('/api/search-index.json')
+      .then((r) => r.json())
+      .then((j) => {
+        cache = j.entries ?? []
+        return cache!
+      })
+      .catch(() => {
+        cache = []
+        return cache!
+      })
+    return inFlight
+  }
+
+  function escapeHtml(s: string) {
+    return s.replace(/[&<>"']/g, (c) =>
+      c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;',
+    )
+  }
+
+  function score(entry: IndexEntry, tokens: string[]): number {
+    const title = entry.title.toLowerCase()
+    const id = entry.id.toLowerCase()
+    const subtitle = (entry.subtitle ?? '').toLowerCase()
+    const excerpt = (entry.excerpt ?? '').toLowerCase()
+    let s = 0
+    for (const t of tokens) {
+      if (!t) continue
+      if (title === t || id === t) s += 100
+      else if (title.startsWith(t) || id.startsWith(t)) s += 40
+      else if (title.includes(t) || id.includes(t)) s += 20
+      else if (subtitle.includes(t)) s += 5
+      else if (excerpt.includes(t)) s += 3
+      else return -1
+    }
+    return s
+  }
+
+  function highlight(text: string, tokens: string[]) {
+    if (!tokens.length) return escapeHtml(text)
+    const escaped = escapeHtml(text)
+    const pattern = tokens
+      .filter(Boolean)
+      .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('|')
+    if (!pattern) return escaped
+    return escaped.replace(new RegExp(`(${pattern})`, 'gi'), '<mark class="bg-gold-100 text-warm-900">$1</mark>')
+  }
+
+  function renderResults(host: HTMLElement, results: IndexEntry[], tokens: string[]) {
+    if (results.length === 0) {
+      host.innerHTML = '<div class="px-3 py-3 text-sm text-warm-500">No results</div>'
+      host.classList.remove('hidden')
+      return
+    }
+    const grouped: Record<string, IndexEntry[]> = { activity: [], intro: [], glossary: [] }
+    for (const r of results) grouped[r.type].push(r)
+    const groupLabels: Record<string, string> = {
+      activity: 'Activities',
+      intro: 'Introduction',
+      glossary: 'Definitions',
+    }
+    const parts: string[] = []
+    for (const key of ['activity', 'intro', 'glossary'] as const) {
+      const items = grouped[key]
+      if (!items.length) continue
+      parts.push(
+        `<div class="border-b border-warm-100 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-gold-500">${groupLabels[key]}</div>`,
+      )
+      for (const r of items.slice(0, 8)) {
+        parts.push(
+          `<a href="${r.url}" class="block border-b border-warm-100 px-3 py-2 hover:bg-warm-50" role="option">
+            <div class="text-sm font-medium text-warm-900">${highlight(r.title, tokens)}</div>
+            ${r.subtitle ? `<div class="font-mono text-[11px] text-warm-500">${escapeHtml(r.subtitle)}</div>` : ''}
+            ${r.excerpt ? `<div class="mt-0.5 line-clamp-2 text-xs text-warm-600">${highlight(r.excerpt, tokens)}</div>` : ''}
+          </a>`,
+        )
+      }
+    }
+    host.innerHTML = parts.join('')
+    host.classList.remove('hidden')
+  }
+
+  containers.forEach((container) => {
+    const input = container.querySelector<HTMLInputElement>('[data-seam-search-input]')!
+    const results = container.querySelector<HTMLElement>('[data-seam-search-results]')!
+
+    let warmed = false
+    const warm = () => {
+      if (!warmed) {
+        warmed = true
+        getIndex()
+      }
+    }
+    input.addEventListener('focus', warm)
+    input.addEventListener('mouseenter', warm)
+
+    let lastQuery = ''
+    const run = async () => {
+      const q = input.value.trim()
+      if (q === lastQuery) return
+      lastQuery = q
+      if (!q) {
+        results.classList.add('hidden')
+        results.innerHTML = ''
+        return
+      }
+      const entries = await getIndex()
+      const tokens = q.toLowerCase().split(/\s+/).filter(Boolean)
+      const scored: Array<[number, IndexEntry]> = []
+      for (const e of entries) {
+        const s = score(e, tokens)
+        if (s > 0) scored.push([s, e])
+      }
+      scored.sort((a, b) => b[0] - a[0])
+      renderResults(
+        results,
+        scored.slice(0, 24).map(([, e]) => e),
+        tokens,
+      )
+    }
+
+    input.addEventListener('input', run)
+    input.addEventListener('focus', () => {
+      if (input.value.trim()) results.classList.remove('hidden')
+    })
+
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target as Node)) results.classList.add('hidden')
+    })
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = ''
+        lastQuery = ''
+        results.classList.add('hidden')
+        input.blur()
+      }
+      if (e.key === 'Enter') {
+        const first = results.querySelector<HTMLAnchorElement>('a')
+        if (first) {
+          e.preventDefault()
+          first.click()
+        }
+      }
+    })
+  })
+
+  // Cmd/Ctrl-K to focus the first search input on the page.
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      const input = document.querySelector<HTMLInputElement>('[data-seam-search-input]')
+      if (input) {
+        e.preventDefault()
+        input.focus()
+        input.select()
+      }
+    }
+  })
+</script>
