@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
+
+  /* Neutral gray scale (mirrored from SEAM marketing site) */
+  --color-warm-50: #f7f7f6;
+  --color-warm-100: #eeeded;
+  --color-warm-200: #e2e1df;
+  --color-warm-300: #D9D9D6;
+  --color-warm-400: #b5b5b2;
+  --color-warm-500: #8e8e8b;
+  --color-warm-600: #6b6b68;
+  --color-warm-700: #4a4a48;
+  --color-warm-800: #2d2d2b;
+  --color-warm-900: #1a1a19;
+
+  /* Teal brand scale (mirrored from SEAM marketing site) */
+  --color-seam-50: #f0f5f7;
+  --color-seam-100: #d4e3e8;
+  --color-seam-200: #b0cdd5;
+  --color-seam-300: #8ab4c0;
+  --color-seam-400: #6B8F9C;
+  --color-seam-500: #4d7380;
+  --color-seam-600: #3a5c67;
+  --color-seam-700: #1e4550;
+  --color-seam-800: #0d3a44;
+  --color-seam-900: #00313C;
+
+  /* Gold/orange accent scale (mirrored from SEAM marketing site).
+     The PDF standard uses this for section sub-headings (e.g. "Act to Avoid Harm"). */
+  --color-gold-50: #fdf6eb;
+  --color-gold-100: #f9e5c8;
+  --color-gold-200: #f2ce96;
+  --color-gold-300: #e8b05e;
+  --color-gold-400: #D78825;
+  --color-gold-500: #bf7520;
+  --color-gold-600: #a0611a;
+  --color-gold-700: #7d4c15;
+  --color-gold-800: #5c3810;
+  --color-gold-900: #3d250b;
+
+  /* Sage utility */
+  --color-sage: #DFECE2;
+
+  /* Tinted callout (e.g. formula boxes in the standard) */
+  --color-callout: #fdf2e0;
+}
+
+h1, h2 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-seam-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

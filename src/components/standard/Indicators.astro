@@ -1,0 +1,98 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup, Activity } from '@/lib/sanity.queries'
+
+interface Props {
+  indicators?: Activity['indicators']
+  lookup: FootnoteLookup
+}
+
+const { indicators, lookup } = Astro.props
+if (!indicators) return null
+const calc = indicators.calculation
+---
+
+<section>
+  <SectionHeader label="Indicators" />
+  <div set:html={renderPT(indicators.performanceIndicator, lookup)} />
+
+  {
+    indicators.contextIndicators && indicators.contextIndicators.length > 0 && (
+      <div class="mt-3 space-y-2">
+        {indicators.contextIndicators.map((ci) => (
+          <div set:html={renderPT(ci.body, lookup)} />
+        ))}
+      </div>
+    )
+  }
+
+  {
+    calc && calc.mode === 'single' && calc.steps && calc.steps.length > 0 && (
+      <div class="mt-4">
+        <p class="font-medium text-warm-800">To calculate the performance indicator:</p>
+        {calc.steps.map((step) => (
+          <div class="mt-2">
+            {step.instructions && <div set:html={renderPT(step.instructions, lookup)} />}
+            {step.formula && (
+              <div class="my-3 rounded bg-[color:var(--color-callout)] px-6 py-4">
+                <p class="text-center font-mono text-lg text-gold-700">{step.formula}</p>
+                {step.variables && step.variables.length > 0 && (
+                  <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm text-warm-700">
+                    {step.variables.map((v) => (
+                      <>
+                        <dt class="font-mono font-medium">{v.symbol} =</dt>
+                        <dd>{v.meaning}</dd>
+                      </>
+                    ))}
+                  </dl>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    calc && calc.mode === 'multi-step' && calc.steps && (
+      <div class="mt-4 space-y-4">
+        {calc.steps.map((step, idx) => (
+          <div>
+            <p class="font-medium text-warm-800">{step.label ?? `Step ${idx + 1}`}</p>
+            {step.instructions && <div set:html={renderPT(step.instructions, lookup)} />}
+            {step.formula && (
+              <div class="my-3 rounded bg-[color:var(--color-callout)] px-6 py-4">
+                <p class="text-center font-mono text-lg text-gold-700">{step.formula}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    calc && calc.mode === 'multi-scenario' && calc.scenarios && (
+      <div class="mt-4 space-y-4">
+        {calc.scenarios.map((sc) => (
+          <div>
+            <p class="font-medium text-warm-800">{sc.label}</p>
+            {sc.description && <div set:html={renderPT(sc.description, lookup)} />}
+            {sc.steps?.map((step) => (
+              <div class="mt-2">
+                {step.instructions && <div set:html={renderPT(step.instructions, lookup)} />}
+                {step.formula && (
+                  <div class="my-3 rounded bg-[color:var(--color-callout)] px-6 py-4">
+                    <p class="text-center font-mono text-lg text-gold-700">{step.formula}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    )
+  }
+</section>

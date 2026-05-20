@@ -1,0 +1,70 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { sanity } from '@/lib/sanity'
+import { getNavigationTree, type FootnoteRef } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const navTree = await getNavigationTree()
+const entries: FootnoteRef[] = sanity
+  ? await sanity.fetch(`*[_type == "bibliographyEntry"] | order(number asc) {
+      _id, _type, number, title, citation, url, sourceType
+    }`)
+  : []
+---
+
+<StandardLayout title="Bibliography — The SEAM Standard" description="Numbered citations referenced throughout the SEAM Standard.">
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">Bibliography</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <h1 class="text-3xl font-semibold text-warm-900">Bibliography</h1>
+        <p class="mt-2 text-warm-700">
+          Numbered citations referenced throughout the SEAM Standard. Each entry
+          is linked from the activities that cite it.
+        </p>
+      </header>
+
+      {
+        entries.length === 0 ? (
+          <p class="mt-8 text-warm-500">No bibliography entries yet.</p>
+        ) : (
+          <ol class="mt-8 space-y-4">
+            {entries.map((e) => (
+              <li id={`bib-${e.number}`} class="scroll-mt-6 grid grid-cols-[3rem_1fr] gap-x-3">
+                <span class="font-mono text-sm text-warm-500">[{e.number}]</span>
+                <div>
+                  {e.url ? (
+                    <a
+                      href={e.url}
+                      class="text-warm-800 hover:text-seam-700 underline-offset-2 hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {e.citation}
+                    </a>
+                  ) : (
+                    <span class="text-warm-800">{e.citation}</span>
+                  )}
+                  {e.sourceType && (
+                    <p class="mt-0.5 text-xs uppercase tracking-wider text-warm-500">
+                      {e.sourceType}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </article>
+  </div>
+</StandardLayout>

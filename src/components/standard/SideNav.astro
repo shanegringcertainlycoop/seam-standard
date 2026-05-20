@@ -1,0 +1,106 @@
+---
+import type { NavPillar } from '@/lib/sanity.queries'
+
+interface Props {
+  tree: NavPillar[]
+  currentActivitySlug?: string
+}
+
+const { tree, currentActivitySlug } = Astro.props
+
+// Locate the current activity's branch so we can auto-expand it
+let openPillar = ''
+let openConcept = ''
+let openObjective = ''
+for (const p of tree) {
+  for (const c of p.concepts ?? []) {
+    for (const o of c.objectives ?? []) {
+      for (const a of o.activities ?? []) {
+        if (a.slug === currentActivitySlug) {
+          openPillar = p.slug
+          openConcept = c.slug
+          openObjective = o.slug
+        }
+      }
+    }
+  }
+}
+---
+
+<aside class="hidden lg:block lg:w-72 lg:shrink-0">
+  <nav class="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pb-8 text-sm">
+    <a
+      href="/"
+      class="mb-4 block text-xs font-semibold uppercase tracking-wider text-gold-500 hover:text-gold-600"
+    >
+      The SEAM Standard
+    </a>
+    <ul class="space-y-1">
+      {
+        tree.map((pillar) => (
+          <li>
+            <details open={pillar.slug === openPillar} class="group">
+              <summary class="cursor-pointer list-none py-1 font-semibold text-seam-800 marker:hidden hover:text-seam-700">
+                <span class="inline-block w-3 text-warm-400 group-open:rotate-90 transition-transform">›</span>
+                <span class="ml-1">{pillar.number}. {pillar.title}</span>
+              </summary>
+              <ul class="ml-4 mt-1 space-y-1 border-l border-warm-200 pl-3">
+                {(pillar.concepts ?? []).map((concept) => (
+                  <li>
+                    <details open={concept.slug === openConcept} class="group/concept">
+                      <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-800 marker:hidden hover:text-seam-700">
+                        <span class="inline-block w-3 text-warm-400 group-open/concept:rotate-90 transition-transform">›</span>
+                        <span class="ml-1">{concept.code}. {concept.title}</span>
+                      </summary>
+                      <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3">
+                        {(concept.objectives ?? []).map((objective) => (
+                          <li>
+                            <details open={objective.slug === openObjective} class="group/obj">
+                              <summary class="cursor-pointer list-none py-0.5 text-warm-700 marker:hidden hover:text-seam-700">
+                                <span class="inline-block w-3 text-warm-400 group-open/obj:rotate-90 transition-transform">›</span>
+                                <span class="ml-1">{objective.objectiveCode}. {objective.title}</span>
+                              </summary>
+                              {(objective.activities ?? []).length > 0 ? (
+                                <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3">
+                                  {(objective.activities ?? []).map((activity) => {
+                                    const isCurrent = activity.slug === currentActivitySlug
+                                    const href = `/${pillar.slug}/${concept.slug}/${objective.slug}/${activity.slug}`
+                                    return (
+                                      <li>
+                                        <a
+                                          href={href}
+                                          title={activity.title}
+                                          class:list={[
+                                            'block py-0.5 font-mono text-xs hover:text-seam-700',
+                                            isCurrent
+                                              ? 'font-semibold text-seam-700'
+                                              : 'text-warm-600',
+                                          ]}
+                                          aria-current={isCurrent ? 'page' : undefined}
+                                        >
+                                          {activity.activityId}
+                                        </a>
+                                      </li>
+                                    )
+                                  })}
+                                </ul>
+                              ) : (
+                                <p class="ml-4 mt-0.5 border-l border-warm-200 pl-3 py-0.5 text-xs italic text-warm-400">
+                                  No activities yet
+                                </p>
+                              )}
+                            </details>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</aside>

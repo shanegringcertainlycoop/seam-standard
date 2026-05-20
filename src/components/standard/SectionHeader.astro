@@ -1,0 +1,39 @@
+---
+import type { FootnoteRef } from '@/lib/sanity.queries'
+
+interface Props {
+  label: string
+  footnote?: FootnoteRef
+}
+
+const { label, footnote } = Astro.props
+
+const marker =
+  footnote?._type === 'bibliographyEntry'
+    ? footnote.number
+    : footnote?._type === 'editorialNote'
+      ? footnote.marker
+      : null
+
+const anchor =
+  footnote?._type === 'bibliographyEntry'
+    ? `/bibliography#bib-${footnote.number}`
+    : footnote?._type === 'editorialNote'
+      ? `#note-${footnote.marker}`
+      : null
+---
+
+<div class="mt-10 mb-3 border-b border-warm-300 pb-1">
+  <h2 class="text-xl font-medium text-seam-500">
+    {label}
+    {
+      marker && anchor && (
+        <sup>
+          <a href={anchor} class="text-sm text-seam-600 hover:text-seam-700">
+            {marker}
+          </a>
+        </sup>
+      )
+    }
+  </h2>
+</div>

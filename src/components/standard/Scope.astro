@@ -1,0 +1,19 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup, Activity } from '@/lib/sanity.queries'
+
+interface Props {
+  scope?: Activity['scope']
+  lookup: FootnoteLookup
+}
+
+const { scope, lookup } = Astro.props
+if (!scope || scope.length === 0) return null
+const html = renderPT(scope, lookup)
+---
+
+<section>
+  <SectionHeader label="Scope" />
+  <div set:html={html} />
+</section>

@@ -1,0 +1,60 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup, Activity } from '@/lib/sanity.queries'
+
+interface Props {
+  groups?: Activity['requirements']
+  sectionFootnote?: Activity['requirementsSectionFootnote']
+  notes?: Activity['requirementsNotes']
+  lookup: FootnoteLookup
+}
+
+const { groups, sectionFootnote, notes, lookup } = Astro.props
+if (!groups || groups.length === 0) return null
+---
+
+<section>
+  <SectionHeader label="Requirements" footnote={sectionFootnote} />
+  <div class="space-y-6">
+    {
+      groups.map((group) => (
+        <div>
+          {group.heading && (
+            <h3 class="mb-3 text-base font-medium text-gold-500">{group.heading}</h3>
+          )}
+          <ol class="space-y-3">
+            {group.items.map((item) => (
+              <li class="grid grid-cols-[2rem_1fr] gap-x-2">
+                <span class="font-medium text-warm-800">
+                  {String(item.number).padStart(2, '0')}.
+                </span>
+                <div>
+                  <div set:html={renderPT(item.body, lookup)} />
+                  {item.subItems && item.subItems.length > 0 && (
+                    <ol class="ml-2 mt-1 space-y-2">
+                      {item.subItems.map((sub) => (
+                        <li class="grid grid-cols-[1.25rem_1fr] gap-x-2">
+                          <span class="text-warm-700">{sub.letter}.</span>
+                          <div set:html={renderPT(sub.body, lookup)} />
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    notes && notes.length > 0 && (
+      <div class="mt-5 border-l-4 border-warm-300 bg-warm-100/40 p-4 text-sm">
+        <div class="italic text-warm-600" set:html={renderPT(notes, lookup)} />
+      </div>
+    )
+  }
+</section>

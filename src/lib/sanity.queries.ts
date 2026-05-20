@@ -1,0 +1,508 @@
+import { sanity } from './sanity'
+import type { PortableTextBlock } from '@portabletext/types'
+
+function requireClient() {
+  if (!sanity) return null
+  return sanity
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────
+
+export interface PillarRef {
+  title: string
+  slug: string
+  accentColor?: string
+  iconUrl?: string
+  number: number
+}
+
+export interface ConceptRef {
+  title: string
+  slug: string
+  code: string
+  number: number
+}
+
+export interface ObjectiveRef {
+  title: string
+  slug: string
+  objectiveCode: string
+  number: number
+  headlineGoal?: string
+}
+
+export interface FootnoteRef {
+  _id: string
+  _type: 'bibliographyEntry' | 'editorialNote'
+  number?: number
+  marker?: string
+  title?: string
+  citation?: string
+  body?: PortableTextBlock[]
+  url?: string
+}
+
+export interface SubItem {
+  _key: string
+  letter: string
+  body: PortableTextBlock[]
+}
+
+export interface RequirementItem {
+  _key: string
+  number: number
+  body: PortableTextBlock[]
+  subItems?: SubItem[]
+}
+
+export interface RequirementGroup {
+  _key: string
+  heading?: string
+  items: RequirementItem[]
+}
+
+export interface DocumentationItem {
+  _key: string
+  number: number
+  body: PortableTextBlock[]
+  subItems?: SubItem[]
+}
+
+export interface Definition {
+  _key: string
+  term: string
+  appearsInRequirement?: number
+  body: PortableTextBlock[]
+}
+
+export interface CalculationVariable {
+  symbol: string
+  meaning: string
+}
+
+export interface CalculationStep {
+  label?: string
+  instructions?: PortableTextBlock[]
+  formula?: string
+  variables?: CalculationVariable[]
+}
+
+export interface CalculationScenario {
+  label: string
+  description?: PortableTextBlock[]
+  steps?: CalculationStep[]
+}
+
+export interface Calculation {
+  mode: 'single' | 'multi-step' | 'multi-scenario'
+  steps?: CalculationStep[]
+  scenarios?: CalculationScenario[]
+}
+
+export interface Indicators {
+  performanceIndicator: PortableTextBlock[]
+  contextIndicators?: Array<{ body: PortableTextBlock[] }>
+  calculation?: Calculation
+}
+
+export interface ScoringBand {
+  _key: string
+  pointsLabel: string
+  criterion: string
+}
+
+export interface ScoringRubric {
+  criterionLabel: string
+  bands: ScoringBand[]
+}
+
+export interface ScoringScenario {
+  label: string
+  rubric: ScoringRubric
+}
+
+export interface Scoring {
+  outcomeThreshold?: PortableTextBlock[]
+  eligibility?: PortableTextBlock[]
+  mode: 'single' | 'multi-scenario'
+  pointsAssignment?: ScoringRubric
+  scenarios?: ScoringScenario[]
+  additionalPointsAssignment?: ScoringRubric
+  additionalPointsLogic?: 'sum' | 'or'
+}
+
+export type GuidanceSection =
+  | { _type: 'guidanceSubsection'; _key: string; heading: string; headingFootnote?: FootnoteRef; body: PortableTextBlock[] }
+  | { _type: 'guidanceSteps'; _key: string; heading: string; lead?: PortableTextBlock[]; steps: Array<{ label: string; body: PortableTextBlock[] }> }
+  | { _type: 'guidanceResources'; _key: string; heading: string; resources: Array<{ label: string; description?: PortableTextBlock[]; url?: string }> }
+  | { _type: 'guidanceExample'; _key: string; heading?: string; body: PortableTextBlock[] }
+  | { _type: 'guidanceNote'; _key: string; body: PortableTextBlock[] }
+  | { _type: 'guidanceImage'; _key: string; alt: string; caption?: string }
+
+export interface ReferencedSource {
+  _id: string
+  number?: number
+  title?: string
+  citation: string
+  url?: string
+  sourceType?: string
+}
+
+export interface RatingSystemApplication {
+  bi_developer?: boolean
+  bi_occupier?: boolean
+  om_developer?: boolean
+  om_occupier?: boolean
+  cd?: boolean
+}
+
+export interface Activity {
+  activityId: string
+  title: string
+  slug: string
+  activityType: 'Driver' | 'Impact'
+  ratingSystemApplication?: RatingSystemApplication
+  pillar: PillarRef
+  concept: ConceptRef
+  objective: ObjectiveRef
+  scope?: PortableTextBlock[]
+  requirementsSectionFootnote?: FootnoteRef
+  requirements?: RequirementGroup[]
+  requirementsNotes?: PortableTextBlock[]
+  indicators?: Indicators
+  scoring?: Scoring
+  documentationSectionFootnote?: FootnoteRef
+  documentationItems?: DocumentationItem[]
+  definitions?: Definition[]
+  guidance?: GuidanceSection[]
+  referencedSources?: ReferencedSource[]
+}
+
+// ─── Queries ──────────────────────────────────────────────────────────────
+
+const activityProjection = `{
+  activityId,
+  title,
+  "slug": slug.current,
+  activityType,
+  ratingSystemApplication,
+  "pillar": pillar->{
+    title,
+    "slug": slug.current,
+    accentColor,
+    iconUrl,
+    number
+  },
+  "concept": concept->{
+    title,
+    "slug": slug.current,
+    code,
+    number
+  },
+  "objective": objective->{
+    title,
+    "slug": slug.current,
+    objectiveCode,
+    number,
+    headlineGoal
+  },
+  scope,
+  "requirementsSectionFootnote": requirementsSectionFootnote->{
+    _id, _type, number, marker, title, citation, body
+  },
+  requirements[]{
+    _key,
+    heading,
+    items[]{
+      _key,
+      number,
+      body,
+      subItems[]{ _key, letter, body }
+    }
+  },
+  requirementsNotes,
+  indicators{
+    performanceIndicator,
+    contextIndicators[]{ body },
+    calculation
+  },
+  scoring,
+  "documentationSectionFootnote": documentationSectionFootnote->{
+    _id, _type, number, marker, title, citation, body
+  },
+  documentationItems[]{
+    _key,
+    number,
+    body,
+    subItems[]{ _key, letter, body }
+  },
+  definitions[]{ _key, term, appearsInRequirement, body },
+  guidance[]{
+    _key,
+    _type,
+    heading,
+    "headingFootnote": headingFootnote->{_id, _type, number, marker, title, citation, body},
+    body,
+    lead,
+    steps[]{ label, body },
+    resources[]{ label, description, url },
+    image,
+    alt,
+    caption
+  },
+  "referencedSources": referencedSources[]->{
+    _id, number, title, citation, url, sourceType
+  }
+}`
+
+export async function getActivityBySlug(slug: string): Promise<Activity | null> {
+  const client = requireClient()
+  if (!client) return null
+  const query = `*[_type == "activity" && slug.current == $slug][0]${activityProjection}`
+  return client.fetch(query, { slug })
+}
+
+// Fetches every bibliography entry + editorial note (we only have a handful).
+// Used as a lookup map for inline markdef _refs in Portable Text.
+export interface FootnoteLookup {
+  bibliographyEntries: Record<string, FootnoteRef>
+  editorialNotes: Record<string, FootnoteRef>
+}
+
+export async function getFootnoteLookup(): Promise<FootnoteLookup> {
+  const client = requireClient()
+  if (!client) return { bibliographyEntries: {}, editorialNotes: {} }
+
+  const [bibs, notes] = await Promise.all([
+    client.fetch<FootnoteRef[]>(`*[_type == "bibliographyEntry"]{ _id, _type, number, title, citation, url }`),
+    client.fetch<FootnoteRef[]>(`*[_type == "editorialNote"]{ _id, _type, marker, body }`),
+  ])
+
+  return {
+    bibliographyEntries: Object.fromEntries(bibs.map((b) => [b._id, b])),
+    editorialNotes: Object.fromEntries(notes.map((n) => [n._id, n])),
+  }
+}
+
+// Walks the activity tree and returns the set of editorial-note _ref strings
+// that are actually used (section footnotes + inline editorialNoteRef marks).
+export function collectEditorialNoteRefs(activity: Activity): Set<string> {
+  const refs = new Set<string>()
+
+  const collectFromFootnote = (fn?: FootnoteRef) => {
+    if (fn && fn._type === 'editorialNote' && fn._id) refs.add(fn._id)
+  }
+  collectFromFootnote(activity.requirementsSectionFootnote)
+  collectFromFootnote(activity.documentationSectionFootnote)
+
+  const visitBlocks = (blocks: PortableTextBlock[] | undefined) => {
+    if (!blocks) return
+    for (const block of blocks) {
+      const markDefs = (block as { markDefs?: Array<{ _type?: string; note?: { _ref?: string } }> }).markDefs
+      if (!markDefs) continue
+      for (const md of markDefs) {
+        if (md._type === 'editorialNoteRef' && md.note?._ref) {
+          refs.add(md.note._ref)
+        }
+      }
+    }
+  }
+
+  visitBlocks(activity.scope)
+  visitBlocks(activity.requirementsNotes)
+  activity.requirements?.forEach((g) =>
+    g.items.forEach((it) => {
+      visitBlocks(it.body)
+      it.subItems?.forEach((s) => visitBlocks(s.body))
+    }),
+  )
+  visitBlocks(activity.indicators?.performanceIndicator)
+  activity.indicators?.contextIndicators?.forEach((c) => visitBlocks(c.body))
+  activity.indicators?.calculation?.steps?.forEach((s) => {
+    visitBlocks(s.instructions)
+  })
+  activity.indicators?.calculation?.scenarios?.forEach((sc) => {
+    visitBlocks(sc.description)
+    sc.steps?.forEach((s) => visitBlocks(s.instructions))
+  })
+  visitBlocks(activity.scoring?.outcomeThreshold)
+  visitBlocks(activity.scoring?.eligibility)
+  activity.documentationItems?.forEach((it) => {
+    visitBlocks(it.body)
+    it.subItems?.forEach((s) => visitBlocks(s.body))
+  })
+  activity.definitions?.forEach((d) => visitBlocks(d.body))
+  activity.guidance?.forEach((sec) => {
+    if (sec._type === 'guidanceSubsection') {
+      collectFromFootnote(sec.headingFootnote)
+      visitBlocks(sec.body)
+    } else if (sec._type === 'guidanceSteps') {
+      visitBlocks(sec.lead)
+      sec.steps?.forEach((st) => visitBlocks(st.body))
+    } else if (sec._type === 'guidanceResources') {
+      sec.resources?.forEach((r) => visitBlocks(r.description))
+    } else if (sec._type === 'guidanceExample') visitBlocks(sec.body)
+    else if (sec._type === 'guidanceNote') visitBlocks(sec.body)
+  })
+
+  return refs
+}
+
+export async function listActivities(): Promise<Pick<Activity, 'activityId' | 'title' | 'slug'>[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "activity"]{
+    activityId,
+    title,
+    "slug": slug.current
+  } | order(activityId asc)`)
+}
+
+// ─── Navigation tree ──────────────────────────────────────────────────────
+
+export interface NavActivity {
+  activityId: string
+  title: string
+  slug: string
+  activityType: 'Driver' | 'Impact'
+}
+
+export interface NavObjective {
+  title: string
+  slug: string
+  objectiveCode: string
+  number: number
+  activities: NavActivity[]
+}
+
+export interface NavConcept {
+  title: string
+  slug: string
+  code: string
+  number: number
+  objectives: NavObjective[]
+}
+
+export interface NavPillar {
+  title: string
+  slug: string
+  number: number
+  concepts: NavConcept[]
+}
+
+// ─── Concept / Objective landing-page queries ─────────────────────────────
+
+export interface ConceptDetail {
+  title: string
+  slug: string
+  code: string
+  number: number
+  summary?: PortableTextBlock[]
+  pillar: { title: string; slug: string; number: number; iconUrl?: string }
+  objectives: Array<{
+    title: string
+    slug: string
+    objectiveCode: string
+    number: number
+    headlineGoal?: string
+    activities: NavActivity[]
+  }>
+}
+
+export async function getConceptBySlug(pillarSlug: string, conceptSlug: string): Promise<ConceptDetail | null> {
+  const client = requireClient()
+  if (!client) return null
+  return client.fetch(
+    `*[_type == "concept" && slug.current == $conceptSlug && pillar->slug.current == $pillarSlug][0]{
+      title,
+      "slug": slug.current,
+      code,
+      number,
+      summary,
+      "pillar": pillar->{ title, "slug": slug.current, number, iconUrl },
+      "objectives": *[_type == "objective" && concept._ref == ^._id] | order(number asc) {
+        title,
+        "slug": slug.current,
+        objectiveCode,
+        number,
+        headlineGoal,
+        "activities": *[_type == "activity" && objective._ref == ^._id] | order(activityId asc) {
+          activityId,
+          title,
+          "slug": slug.current,
+          activityType
+        }
+      }
+    }`,
+    { pillarSlug, conceptSlug },
+  )
+}
+
+export interface ObjectiveDetail {
+  title: string
+  slug: string
+  objectiveCode: string
+  number: number
+  headlineGoal?: string
+  narrative?: PortableTextBlock[]
+  pillar: { title: string; slug: string; number: number; iconUrl?: string }
+  concept: { title: string; slug: string; code: string; number: number }
+  activities: Array<NavActivity & { scope?: PortableTextBlock[] }>
+}
+
+export async function getObjectiveBySlug(
+  pillarSlug: string,
+  conceptSlug: string,
+  objectiveSlug: string,
+): Promise<ObjectiveDetail | null> {
+  const client = requireClient()
+  if (!client) return null
+  return client.fetch(
+    `*[_type == "objective" && slug.current == $objectiveSlug && concept->slug.current == $conceptSlug && concept->pillar->slug.current == $pillarSlug][0]{
+      title,
+      "slug": slug.current,
+      objectiveCode,
+      number,
+      headlineGoal,
+      narrative,
+      "pillar": concept->pillar->{ title, "slug": slug.current, number, iconUrl },
+      "concept": concept->{ title, "slug": slug.current, code, number },
+      "activities": *[_type == "activity" && objective._ref == ^._id] | order(activityId asc) {
+        activityId,
+        title,
+        "slug": slug.current,
+        activityType,
+        scope
+      }
+    }`,
+    { pillarSlug, conceptSlug, objectiveSlug },
+  )
+}
+
+export async function getNavigationTree(): Promise<NavPillar[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "pillar"] | order(number asc) {
+    title,
+    "slug": slug.current,
+    number,
+    "concepts": *[_type == "concept" && pillar._ref == ^._id] | order(number asc) {
+      title,
+      "slug": slug.current,
+      code,
+      number,
+      "objectives": *[_type == "objective" && concept._ref == ^._id] | order(number asc) {
+        title,
+        "slug": slug.current,
+        objectiveCode,
+        number,
+        "activities": *[_type == "activity" && objective._ref == ^._id] | order(activityId asc) {
+          activityId,
+          title,
+          "slug": slug.current,
+          activityType
+        }
+      }
+    }
+  }`)
+}

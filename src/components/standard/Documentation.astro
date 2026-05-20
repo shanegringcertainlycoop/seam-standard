@@ -1,0 +1,40 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup, Activity } from '@/lib/sanity.queries'
+
+interface Props {
+  items?: Activity['documentationItems']
+  sectionFootnote?: Activity['documentationSectionFootnote']
+  lookup: FootnoteLookup
+}
+
+const { items, sectionFootnote, lookup } = Astro.props
+if (!items || items.length === 0) return null
+---
+
+<section>
+  <SectionHeader label="Documentation" footnote={sectionFootnote} />
+  <ol class="space-y-3">
+    {
+      items.map((item) => (
+        <li class="grid grid-cols-[2rem_1fr] gap-x-2">
+          <span class="font-medium text-warm-800">{String(item.number).padStart(2, '0')}.</span>
+          <div>
+            <div set:html={renderPT(item.body, lookup)} />
+            {item.subItems && item.subItems.length > 0 && (
+              <ol class="ml-2 mt-1 space-y-2">
+                {item.subItems.map((sub) => (
+                  <li class="grid grid-cols-[1.25rem_1fr] gap-x-2">
+                    <span class="text-warm-700">{sub.letter}.</span>
+                    <div set:html={renderPT(sub.body, lookup)} />
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>

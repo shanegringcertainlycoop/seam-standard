@@ -1,0 +1,42 @@
+---
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup } from '@/lib/sanity.queries'
+
+interface Props {
+  lookup: FootnoteLookup
+}
+
+const { lookup } = Astro.props
+const editorialNotes = Object.values(lookup.editorialNotes).sort(
+  (a, b) => romanToInt(a.marker ?? '') - romanToInt(b.marker ?? ''),
+)
+
+function romanToInt(s: string): number {
+  const map: Record<string, number> = { i: 1, v: 5, x: 10, l: 50, c: 100, d: 500, m: 1000 }
+  let total = 0
+  let prev = 0
+  for (let i = s.length - 1; i >= 0; i--) {
+    const cur = map[s[i].toLowerCase()] ?? 0
+    if (cur < prev) total -= cur
+    else total += cur
+    prev = cur
+  }
+  return total
+}
+---
+
+{
+  editorialNotes.length > 0 && (
+    <aside class="mt-16 border-t border-warm-300 pt-6 text-sm">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-warm-500">Notes</p>
+      <dl class="space-y-2">
+        {editorialNotes.map((n) => (
+          <div class="flex gap-2 scroll-mt-6" id={`note-${n.marker}`}>
+            <dt class="font-medium text-warm-700">{n.marker}.</dt>
+            <dd class="text-warm-700" set:html={renderPT(n.body, { editorialNotes: {}, bibliographyEntries: {} })} />
+          </div>
+        ))}
+      </dl>
+    </aside>
+  )
+}

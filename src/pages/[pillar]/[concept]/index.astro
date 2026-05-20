@@ -1,0 +1,130 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import { getConceptBySlug, getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const { pillar: pillarSlug, concept: conceptSlug } = Astro.params
+
+if (!pillarSlug || !conceptSlug) {
+  return Astro.redirect('/')
+}
+
+const [concept, navTree] = await Promise.all([
+  getConceptBySlug(pillarSlug, conceptSlug),
+  getNavigationTree(),
+])
+
+if (!concept) {
+  return new Response('Concept not found', { status: 404 })
+}
+
+const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities.length, 0)
+const emptyLookup = { bibliographyEntries: {}, editorialNotes: {} }
+---
+
+<StandardLayout title={`${concept.title} — The SEAM Standard`}>
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <a href={`/${pillarSlug}`} class="hover:text-seam-700">{concept.pillar.title}</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">{concept.title}</span>
+      </nav>
+
+      <header class="flex items-start gap-5 border-b border-warm-300 pb-4">
+        {
+          concept.pillar.iconUrl && (
+            <img
+              src={concept.pillar.iconUrl}
+              alt={`${concept.pillar.title} icon`}
+              class="h-16 w-16 shrink-0 object-contain"
+              loading="lazy"
+            />
+          )
+        }
+        <div class="min-w-0 flex-1">
+          <p class="text-xs uppercase tracking-wider text-gold-500">
+            Concept {concept.number} · {concept.code}
+          </p>
+          <h1 class="mt-1 text-3xl font-semibold text-warm-900">{concept.title}</h1>
+          <p class="mt-2 text-xs text-warm-500">
+            {concept.objectives.length} objective{concept.objectives.length === 1 ? '' : 's'}
+            {' · '}
+            {totalActivities} activit{totalActivities === 1 ? 'y' : 'ies'}
+          </p>
+        </div>
+      </header>
+
+      {
+        concept.summary && concept.summary.length > 0 && (
+          <section class="mt-6 text-warm-800">
+            <div set:html={renderPT(concept.summary, emptyLookup)} />
+          </section>
+        )
+      }
+
+      <section class="mt-8 space-y-6">
+        {
+          concept.objectives.map((obj) => (
+            <div>
+              <div class="flex items-baseline justify-between border-b border-warm-200 pb-1">
+                <h2 class="text-base font-medium text-seam-700">
+                  <a
+                    href={`/${pillarSlug}/${concept.slug}/${obj.slug}`}
+                    class="hover:text-seam-500"
+                  >
+                    <span class="font-mono text-sm text-warm-500">{obj.objectiveCode}.</span>
+                    <span class="ml-2">{obj.title}</span>
+                  </a>
+                </h2>
+                <span class="text-xs text-warm-500">
+                  {obj.activities.length} activit{obj.activities.length === 1 ? 'y' : 'ies'}
+                </span>
+              </div>
+
+              {obj.headlineGoal && (
+                <p class="mt-2 text-sm text-warm-700">{obj.headlineGoal}</p>
+              )}
+
+              {obj.activities.length > 0 ? (
+                <ul class="mt-2 divide-y divide-warm-200">
+                  {obj.activities.map((a) => (
+                    <li>
+                      <a
+                        href={`/${pillarSlug}/${concept.slug}/${obj.slug}/${a.slug}`}
+                        class="group flex items-baseline gap-3 py-2 hover:text-seam-700"
+                      >
+                        <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
+                          {a.activityId}
+                        </span>
+                        <span class="flex-1 text-sm text-warm-800 group-hover:text-seam-800">
+                          {a.title}
+                        </span>
+                        <span class="shrink-0 text-xs text-warm-500">
+                          {a.activityType}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="mt-2 text-sm italic text-warm-400">No activities published yet.</p>
+              )}
+            </div>
+          ))
+        }
+      </section>
+
+      <footer class="mt-12 border-t border-warm-200 pt-6 text-xs uppercase tracking-wider text-gold-500">
+        {concept.pillar.title}
+      </footer>
+    </article>
+  </div>
+</StandardLayout>

@@ -1,0 +1,94 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import ActivityHeader from '@/components/standard/ActivityHeader.astro'
+import Scope from '@/components/standard/Scope.astro'
+import Requirements from '@/components/standard/Requirements.astro'
+import Indicators from '@/components/standard/Indicators.astro'
+import Scoring from '@/components/standard/Scoring.astro'
+import Documentation from '@/components/standard/Documentation.astro'
+import Definitions from '@/components/standard/Definitions.astro'
+import Guidance from '@/components/standard/Guidance.astro'
+import ReferencedSources from '@/components/standard/ReferencedSources.astro'
+import Footnotes from '@/components/standard/Footnotes.astro'
+import { getActivityBySlug, getFootnoteLookup, getNavigationTree, collectEditorialNoteRefs } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const { pillar, concept, objective, activity: activitySlug } = Astro.params
+
+if (!pillar || !concept || !objective || !activitySlug) {
+  return Astro.redirect('/')
+}
+
+const [activity, lookup, navTree] = await Promise.all([
+  getActivityBySlug(activitySlug),
+  getFootnoteLookup(),
+  getNavigationTree(),
+])
+
+if (!activity) {
+  return new Response('Activity not found', { status: 404 })
+}
+
+// Filter editorial notes to only those actually referenced from this activity.
+// Bibliography stays unfiltered — inline marks resolve numbers from the full lookup.
+const usedNoteIds = collectEditorialNoteRefs(activity)
+const activityLookup = {
+  bibliographyEntries: lookup.bibliographyEntries,
+  editorialNotes: Object.fromEntries(
+    Object.entries(lookup.editorialNotes).filter(([id]) => usedNoteIds.has(id)),
+  ),
+}
+
+const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
+---
+
+<StandardLayout
+  title={`Activity ${activity.activityId} — ${activity.title}`}
+  description={activity.title}
+>
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} currentActivitySlug={activity.slug} />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <a href={`/${pillar}`} class="hover:text-seam-700">{activity.pillar.title}</a>
+        <span class="mx-2">/</span>
+        <a href={`/${pillar}/${concept}`} class="hover:text-seam-700">{activity.concept.title}</a>
+        <span class="mx-2">/</span>
+        <a href={`/${pillar}/${concept}/${objective}`} class="hover:text-seam-700">
+          {activity.objective.objectiveCode}. {activity.objective.title}
+        </a>
+      </nav>
+
+      <ActivityHeader activity={activity} />
+
+      <Scope scope={activity.scope} lookup={activityLookup} />
+      <Requirements
+        groups={activity.requirements}
+        sectionFootnote={activity.requirementsSectionFootnote}
+        notes={activity.requirementsNotes}
+        lookup={activityLookup}
+      />
+      <Indicators indicators={activity.indicators} lookup={activityLookup} />
+      <Scoring scoring={activity.scoring} lookup={activityLookup} />
+      <Documentation
+        items={activity.documentationItems}
+        sectionFootnote={activity.documentationSectionFootnote}
+        lookup={activityLookup}
+      />
+      <Definitions definitions={activity.definitions} lookup={activityLookup} />
+      <Guidance guidance={activity.guidance} lookup={activityLookup} />
+      <ReferencedSources sources={activity.referencedSources} />
+
+      <Footnotes lookup={activityLookup} />
+
+      <footer class="mt-12 border-t border-warm-200 pt-6 text-xs uppercase tracking-wider text-gold-500">
+        {pillarLabel}
+      </footer>
+    </article>
+  </div>
+</StandardLayout>

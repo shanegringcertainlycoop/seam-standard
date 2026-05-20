@@ -1,0 +1,50 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import type { Activity } from '@/lib/sanity.queries'
+
+interface Props {
+  sources?: Activity['referencedSources']
+}
+
+const { sources } = Astro.props
+if (!sources || sources.length === 0) return null
+---
+
+<section>
+  <SectionHeader label="Referenced Source" />
+  <ul class="space-y-2 text-warm-800">
+    {
+      sources.map((s) => {
+        const inner = s.url ? (
+          <a
+            href={s.url}
+            class="text-seam-600 underline underline-offset-2 hover:text-seam-700"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {s.citation}
+          </a>
+        ) : (
+          <span>{s.citation}</span>
+        )
+        return (
+          <li>
+            {s.number !== undefined ? (
+              <a
+                href={`/bibliography#bib-${s.number}`}
+                class="group inline-flex items-baseline gap-2 hover:text-seam-700"
+              >
+                <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600">
+                  [{s.number}]
+                </span>
+                <span>{inner}</span>
+              </a>
+            ) : (
+              <span>{inner}</span>
+            )}
+          </li>
+        )
+      })
+    }
+  </ul>
+</section>

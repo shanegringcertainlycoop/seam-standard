@@ -1,0 +1,117 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup, Activity, ScoringRubric } from '@/lib/sanity.queries'
+
+interface Props {
+  scoring?: Activity['scoring']
+  lookup: FootnoteLookup
+}
+
+const { scoring, lookup } = Astro.props
+if (!scoring) return null
+
+function rubricRows(rubric: ScoringRubric) {
+  return rubric.bands
+}
+---
+
+<section>
+  <SectionHeader label="Scoring" />
+
+  {
+    scoring.outcomeThreshold && (
+      <div>
+        <h3 class="text-base font-medium text-gold-500">Outcome threshold</h3>
+        <div class="mt-1" set:html={renderPT(scoring.outcomeThreshold, lookup)} />
+      </div>
+    )
+  }
+
+  {
+    scoring.eligibility && (
+      <div class="mt-4">
+        <div class="font-medium text-warm-900" set:html={renderPT(scoring.eligibility, lookup)} />
+      </div>
+    )
+  }
+
+  {
+    scoring.mode === 'single' && scoring.pointsAssignment && (
+      <div class="mt-4">
+        <h3 class="text-base font-medium text-gold-500">Points assignment</h3>
+        <table class="mt-2 w-full border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-warm-300 text-left">
+              <th class="py-2 pr-4 font-medium text-warm-800">Points</th>
+              <th class="py-2 font-medium text-warm-800">{scoring.pointsAssignment.criterionLabel}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rubricRows(scoring.pointsAssignment).map((b) => (
+              <tr class="border-b border-warm-200">
+                <td class="py-2 pr-4 text-warm-800">{b.pointsLabel}</td>
+                <td class="py-2 text-warm-800">{b.criterion}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  {
+    scoring.mode === 'multi-scenario' && scoring.scenarios && (
+      <div class="mt-4 space-y-4">
+        {scoring.scenarios.map((sc) => (
+          <div>
+            <h3 class="text-base font-medium text-warm-900">{sc.label}</h3>
+            <table class="mt-2 w-full border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-warm-300 text-left">
+                  <th class="py-2 pr-4 font-medium text-warm-800">Points</th>
+                  <th class="py-2 font-medium text-warm-800">{sc.rubric.criterionLabel}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rubricRows(sc.rubric).map((b) => (
+                  <tr class="border-b border-warm-200">
+                    <td class="py-2 pr-4 text-warm-800">{b.pointsLabel}</td>
+                    <td class="py-2 text-warm-800">{b.criterion}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    scoring.additionalPointsAssignment && (
+      <div class="mt-4">
+        <h3 class="text-base font-medium text-gold-500">Additional points assignment</h3>
+        {scoring.additionalPointsLogic === 'or' && (
+          <p class="mt-1 text-sm italic text-warm-600">Choose one (OR semantics)</p>
+        )}
+        <table class="mt-2 w-full border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-warm-300 text-left">
+              <th class="py-2 pr-4 font-medium text-warm-800">Points</th>
+              <th class="py-2 font-medium text-warm-800">{scoring.additionalPointsAssignment.criterionLabel}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rubricRows(scoring.additionalPointsAssignment).map((b) => (
+              <tr class="border-b border-warm-200">
+                <td class="py-2 pr-4 text-warm-800">{b.pointsLabel}</td>
+                <td class="py-2 text-warm-800">{b.criterion}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+</section>

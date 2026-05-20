@@ -1,0 +1,36 @@
+---
+import SectionHeader from './SectionHeader.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import type { FootnoteLookup, Activity } from '@/lib/sanity.queries'
+
+interface Props {
+  definitions?: Activity['definitions']
+  lookup: FootnoteLookup
+}
+
+const { definitions, lookup } = Astro.props
+if (!definitions || definitions.length === 0) return null
+---
+
+<section>
+  <SectionHeader label="Definitions" />
+  <ul class="space-y-3">
+    {
+      definitions.map((d) => (
+        <li class="flex gap-3">
+          <span class="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-warm-500" aria-hidden="true" />
+          <div>
+            <p class="text-warm-800">
+              <span class="font-semibold">{d.term}</span>
+              {d.appearsInRequirement !== undefined && (
+                <span class="font-medium"> (appears in Requirement {d.appearsInRequirement})</span>
+              )}
+              <span> — </span>
+              <span class="inline" set:html={renderPT(d.body, lookup).replace(/^<p[^>]*>|<\/p>$/g, '')} />
+            </p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
