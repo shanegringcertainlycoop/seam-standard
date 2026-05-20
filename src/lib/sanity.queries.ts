@@ -293,6 +293,9 @@ export async function getActivityBySlug(slug: string): Promise<Activity | null> 
 export interface FootnoteLookup {
   bibliographyEntries: Record<string, FootnoteRef>
   editorialNotes: Record<string, FootnoteRef>
+  // Map of activityId (e.g. "SJa1.2") → canonical URL path. Optional so callers
+  // that don't need cross-activity linking can omit it.
+  activityUrls?: Record<string, string>
 }
 
 export async function getFootnoteLookup(): Promise<FootnoteLookup> {
@@ -622,4 +625,45 @@ export async function getNavigationTree(): Promise<NavPillar[]> {
       }
     }
   }`)
+}
+
+// Flat ordered list of every activity in the standard, with its canonical URL.
+// Used for prev/next navigation and cross-activity link resolution.
+export interface FlatActivity {
+  activityId: string
+  title: string
+  slug: string
+  url: string
+}
+
+export function flattenActivities(tree: NavPillar[]): FlatActivity[] {
+  const out: FlatActivity[] = []
+  for (const pillar of tree) {
+    for (const concept of pillar.concepts) {
+      for (const objective of concept.objectives) {
+        for (const activity of objective.activities) {
+          out.push({
+            activityId: activity.activityId,
+            title: activity.title,
+            slug: activity.slug,
+            url: `/${pillar.slug}/${concept.slug}/${objective.slug}/${activity.slug}`,
+          })
+        }
+      }
+    }
+  }
+  return out
+}
+
+export function buildActivityUrlMap(tree: NavPillar[]): Record<string, string> {
+  return Object.fromEntries(flattenActivities(tree).map((a) => [a.activityId, a.url]))
+}
+
+export function findPrevNext(
+  slug: string,
+  flat: FlatActivity[],
+): { prev?: FlatActivity; next?: FlatActivity } {
+  const i = flat.findIndex((a) => a.slug === slug)
+  if (i === -1) return {}
+  return { prev: i > 0 ? flat[i - 1] : undefined, next: i < flat.length - 1 ? flat[i + 1] : undefined }
 }

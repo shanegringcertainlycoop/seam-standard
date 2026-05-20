@@ -11,7 +11,16 @@ import Definitions from '@/components/standard/Definitions.astro'
 import Guidance from '@/components/standard/Guidance.astro'
 import ReferencedSources from '@/components/standard/ReferencedSources.astro'
 import Footnotes from '@/components/standard/Footnotes.astro'
-import { getActivityBySlug, getFootnoteLookup, getNavigationTree, collectEditorialNoteRefs } from '@/lib/sanity.queries'
+import PrevNextNav from '@/components/standard/PrevNextNav.astro'
+import {
+  getActivityBySlug,
+  getFootnoteLookup,
+  getNavigationTree,
+  collectEditorialNoteRefs,
+  flattenActivities,
+  buildActivityUrlMap,
+  findPrevNext,
+} from '@/lib/sanity.queries'
 
 export const prerender = false
 
@@ -34,12 +43,17 @@ if (!activity) {
 // Filter editorial notes to only those actually referenced from this activity.
 // Bibliography stays unfiltered — inline marks resolve numbers from the full lookup.
 const usedNoteIds = collectEditorialNoteRefs(activity)
+const activityUrls = buildActivityUrlMap(navTree)
 const activityLookup = {
   bibliographyEntries: lookup.bibliographyEntries,
   editorialNotes: Object.fromEntries(
     Object.entries(lookup.editorialNotes).filter(([id]) => usedNoteIds.has(id)),
   ),
+  activityUrls,
 }
+
+const flatActivities = flattenActivities(navTree)
+const { prev, next } = findPrevNext(activity.slug, flatActivities)
 
 const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
 ---
@@ -87,6 +101,8 @@ const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
       <ReferencedSources sources={activity.referencedSources} />
 
       <Footnotes lookup={activityLookup} />
+
+      <PrevNextNav prev={prev} next={next} />
 
       <footer class="mt-12 border-t border-warm-200 pt-6 text-xs uppercase tracking-wider text-gold-500">
         {pillarLabel}

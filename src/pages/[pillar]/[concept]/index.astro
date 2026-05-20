@@ -2,7 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
-import { getConceptBySlug, getNavigationTree, getFootnoteLookup } from '@/lib/sanity.queries'
+import { getConceptBySlug, getNavigationTree, getFootnoteLookup, buildActivityUrlMap } from '@/lib/sanity.queries'
 
 export const prerender = false
 
@@ -21,6 +21,8 @@ const [concept, navTree, lookup] = await Promise.all([
 if (!concept) {
   return new Response('Concept not found', { status: 404 })
 }
+
+lookup.activityUrls = buildActivityUrlMap(navTree)
 
 const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities.length, 0)
 ---

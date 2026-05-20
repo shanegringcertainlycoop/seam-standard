@@ -21,6 +21,8 @@ const [objective, navTree, lookup] = await Promise.all([
 if (!objective) {
   return new Response('Objective not found', { status: 404 })
 }
+
+lookup.activityUrls = buildActivityUrlMap(navTree)
 ---
 
 <StandardLayout title={`${objective.objectiveCode}. ${objective.title} — The SEAM Standard`}>

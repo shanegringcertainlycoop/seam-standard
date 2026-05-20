@@ -2,14 +2,6 @@ import { toHTML, type PortableTextHtmlComponents } from '@portabletext/to-html'
 import type { PortableTextBlock } from '@portabletext/types'
 import type { FootnoteLookup } from './sanity.queries'
 
-/**
- * Renders a Portable Text block array to HTML, with custom handling for:
- *  - bibliographyRef:  numbered superscript citation
- *  - editorialNoteRef: lowercase-roman superscript editorial note
- *  - activityRef:      cross-activity link (rendered as plain text for now)
- *  - requirementRef:   in-activity requirement cross-reference
- *  - link:             external URL
- */
 export function renderPT(blocks: PortableTextBlock[] | undefined, lookup: FootnoteLookup): string {
   if (!blocks || blocks.length === 0) return ''
 
@@ -20,19 +12,26 @@ export function renderPT(blocks: PortableTextBlock[] | undefined, lookup: Footno
         return `<a href="${escapeAttr(href)}" class="text-seam-600 underline underline-offset-2 hover:text-seam-700" target="_blank" rel="noopener noreferrer">${text}</a>`
       },
       bibliographyRef: ({ value, text }) => {
-        const ref = (value as { entry?: { _ref?: string } })?.entry?._ref
+        const ref = (value as { entry?: { _ref?: string }; note?: { _ref?: string } })?.entry?._ref
+          ?? (value as { note?: { _ref?: string } })?.note?._ref
         const entry = ref ? lookup.bibliographyEntries[ref] : undefined
         const n = entry?.number ?? '?'
         return `${text}<sup><a href="/bibliography#bib-${n}" class="text-seam-600 hover:text-seam-700">${n}</a></sup>`
       },
       editorialNoteRef: ({ value, text }) => {
+        // Accept either `note._ref` (schema-canonical) or `entry._ref` (used by some seed scripts).
         const ref = (value as { note?: { _ref?: string } })?.note?._ref
+          ?? (value as { entry?: { _ref?: string } })?.entry?._ref
         const note = ref ? lookup.editorialNotes[ref] : undefined
         const marker = note?.marker ?? '?'
         return `${text}<sup><a href="#note-${marker}" class="text-seam-600 hover:text-seam-700">${marker}</a></sup>`
       },
-      activityRef: ({ text }) => {
-        // For first pass: just render as plain text. URL resolution requires another query.
+      activityRef: ({ value, text }) => {
+        const id = (value as { activityId?: string })?.activityId
+        const url = id ? lookup.activityUrls?.[id] : undefined
+        if (url) {
+          return `<a href="${escapeAttr(url)}" class="font-medium text-seam-600 underline underline-offset-2 hover:text-seam-700">${text}</a>`
+        }
         return `<span class="font-medium">${text}</span>`
       },
       requirementRef: ({ value, text }) => {
@@ -57,7 +56,47 @@ export function renderPT(blocks: PortableTextBlock[] | undefined, lookup: Footno
     },
   }
 
-  return toHTML(blocks, { components })
+  const html = toHTML(blocks, { components })
+  return postProcess(html, lookup)
+}
+
+// Auto-linkifies bare URLs and "Activity XXa#.#" patterns, skipping content
+// inside existing <a> tags to avoid double-wrapping.
+const URL_RE = /(https?:\/\/[^\s<>()"]+[^\s<>()".,;:!?])/g
+const ACTIVITY_RE = /\bActivity\s+([A-Z]{2}a[0-9]+(?:\.[0-9]+)?)\b/g
+
+function postProcess(html: string, lookup: FootnoteLookup): string {
+  return splitOnAnchors(html)
+    .map((seg) => (seg.isAnchor ? seg.text : linkify(seg.text, lookup)))
+    .join('')
+}
+
+function linkify(s: string, lookup: FootnoteLookup): string {
+  let out = s.replace(URL_RE, (url) =>
+    `<a href="${escapeAttr(url)}" class="text-seam-600 underline underline-offset-2 hover:text-seam-700" target="_blank" rel="noopener noreferrer">${url}</a>`,
+  )
+  out = out.replace(ACTIVITY_RE, (match, id) => {
+    const url = lookup.activityUrls?.[id]
+    return url
+      ? `<a href="${escapeAttr(url)}" class="font-medium text-seam-600 hover:text-seam-700">${match}</a>`
+      : match
+  })
+  return out
+}
+
+// Splits HTML into anchor-segments (passthrough) and non-anchor text (linkifiable).
+function splitOnAnchors(html: string): Array<{ isAnchor: boolean; text: string }> {
+  const re = /<a\b[^>]*>[\s\S]*?<\/a>/gi
+  const parts: Array<{ isAnchor: boolean; text: string }> = []
+  let last = 0
+  let m: RegExpExecArray | null
+  while ((m = re.exec(html)) !== null) {
+    if (m.index > last) parts.push({ isAnchor: false, text: html.slice(last, m.index) })
+    parts.push({ isAnchor: true, text: m[0] })
+    last = m.index + m[0].length
+  }
+  if (last < html.length) parts.push({ isAnchor: false, text: html.slice(last) })
+  return parts
 }
 
 function escapeAttr(s: string): string {

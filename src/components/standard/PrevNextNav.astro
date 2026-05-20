@@ -1,0 +1,41 @@
+---
+import type { FlatActivity } from '@/lib/sanity.queries'
+
+interface Props {
+  prev?: FlatActivity
+  next?: FlatActivity
+}
+
+const { prev, next } = Astro.props
+---
+
+<nav class="mt-12 flex border-t border-warm-200 pt-6 text-sm" aria-label="Activity navigation">
+  <div class="flex-1">
+    {prev && (
+      <a
+        href={prev.url}
+        class="group inline-flex max-w-md flex-col rounded-lg border border-warm-200 px-4 py-3 hover:border-seam-400 hover:bg-warm-50"
+      >
+        <span class="text-xs uppercase tracking-wider text-warm-500">← Previous</span>
+        <span class="mt-1 font-medium text-seam-700 group-hover:text-seam-800">
+          Activity {prev.activityId}
+        </span>
+        <span class="text-warm-700 group-hover:text-warm-800">{prev.title}</span>
+      </a>
+    )}
+  </div>
+  <div class="flex-1 text-right">
+    {next && (
+      <a
+        href={next.url}
+        class="group inline-flex max-w-md flex-col rounded-lg border border-warm-200 px-4 py-3 text-left hover:border-seam-400 hover:bg-warm-50"
+      >
+        <span class="text-xs uppercase tracking-wider text-warm-500">Next →</span>
+        <span class="mt-1 font-medium text-seam-700 group-hover:text-seam-800">
+          Activity {next.activityId}
+        </span>
+        <span class="text-warm-700 group-hover:text-warm-800">{next.title}</span>
+      </a>
+    )}
+  </div>
+</nav>
