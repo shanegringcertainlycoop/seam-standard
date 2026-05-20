@@ -129,6 +129,7 @@ export interface Scoring {
   pointsAssignment?: ScoringRubric
   scenarios?: ScoringScenario[]
   additionalPointsAssignment?: ScoringRubric
+  additionalPointsEligibility?: PortableTextBlock[]
   additionalPointsLogic?: 'sum' | 'or'
   notes?: PortableTextBlock[]
 }
@@ -340,6 +341,7 @@ export function collectEditorialNoteRefs(activity: Activity): Set<string> {
   visitBlocks(activity.scoring?.outcomeThreshold)
   visitBlocks(activity.scoring?.eligibility)
   visitBlocks(activity.scoring?.notes)
+  visitBlocks(activity.scoring?.additionalPointsEligibility)
   visitBlocks(activity.documentationLeadIn)
   activity.documentationItems?.forEach((it) => {
     visitBlocks(it.body)

@@ -100,6 +100,9 @@ function rubricRows(rubric: ScoringRubric) {
     scoring.additionalPointsAssignment && (
       <div class="mt-4">
         <h3 class="text-base font-medium text-gold-500">Additional points assignment</h3>
+        {scoring.additionalPointsEligibility && scoring.additionalPointsEligibility.length > 0 && (
+          <div class="mt-1 text-sm italic text-warm-700" set:html={renderPT(scoring.additionalPointsEligibility, lookup)} />
+        )}
         {scoring.additionalPointsLogic === 'or' && (
           <p class="mt-1 text-sm italic text-warm-600">Choose one (OR semantics)</p>
         )}
