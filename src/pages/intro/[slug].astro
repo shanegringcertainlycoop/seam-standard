@@ -1,0 +1,108 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import {
+  getIntroSectionBySlug,
+  listIntroSections,
+  getFootnoteLookup,
+  getNavigationTree,
+  buildActivityUrlMap,
+} from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const { slug } = Astro.params
+if (!slug) return Astro.redirect('/intro')
+
+const [section, allSections, lookup, navTree] = await Promise.all([
+  getIntroSectionBySlug(slug),
+  listIntroSections(),
+  getFootnoteLookup(),
+  getNavigationTree(),
+])
+
+if (!section) {
+  return new Response('Section not found', { status: 404 })
+}
+
+lookup.activityUrls = buildActivityUrlMap(navTree)
+
+const ordered = allSections.sort((a, b) => a.order - b.order)
+const i = ordered.findIndex((s) => s.slug === section.slug)
+const prev = i > 0 ? ordered[i - 1] : undefined
+const next = i < ordered.length - 1 ? ordered[i + 1] : undefined
+---
+
+<StandardLayout title={`${section.title} — The SEAM Standard`}>
+  <article class="mx-auto max-w-4xl px-6 py-12">
+    <nav class="mb-6 text-sm text-warm-500">
+      <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+      <span class="mx-2">/</span>
+      <a href="/intro" class="hover:text-seam-700">Introduction</a>
+      <span class="mx-2">/</span>
+      <span class="text-warm-700">{section.title}</span>
+    </nav>
+
+    <header class="border-b border-warm-300 pb-4">
+      <p class="text-xs uppercase tracking-wider text-gold-500">
+        Section {section.order}
+      </p>
+      <h1 class="mt-1 text-3xl font-semibold text-warm-900">{section.title}</h1>
+      {section.summary && (
+        <p class="mt-3 text-base font-light leading-relaxed text-seam-800">
+          {section.summary}
+        </p>
+      )}
+    </header>
+
+    <section
+      class="mt-8 text-warm-800 [&_h3]:mt-10 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-seam-800 [&_h4]:mt-6 [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-seam-700 [&>p]:mt-4 [&>p]:leading-relaxed [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mt-1.5 [&_a]:text-seam-700 [&_a:hover]:text-seam-500 [&_a]:underline"
+      set:html={renderPT(section.body, lookup)}
+    />
+
+    <nav class="mt-16 flex flex-col gap-3 border-t border-warm-200 pt-6 sm:flex-row sm:justify-between">
+      {prev ? (
+        <a
+          href={`/intro/${prev.slug}`}
+          class="group flex flex-1 flex-col rounded border border-warm-200 p-4 hover:border-seam-400"
+        >
+          <span class="text-xs uppercase tracking-wider text-warm-500">← Previous</span>
+          <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+            {prev.title}
+          </span>
+        </a>
+      ) : (
+        <a
+          href="/intro"
+          class="group flex flex-1 flex-col rounded border border-warm-200 p-4 hover:border-seam-400"
+        >
+          <span class="text-xs uppercase tracking-wider text-warm-500">← Back</span>
+          <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+            Introduction index
+          </span>
+        </a>
+      )}
+      {next ? (
+        <a
+          href={`/intro/${next.slug}`}
+          class="group flex flex-1 flex-col rounded border border-warm-200 p-4 text-right hover:border-seam-400"
+        >
+          <span class="text-xs uppercase tracking-wider text-warm-500">Next →</span>
+          <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+            {next.title}
+          </span>
+        </a>
+      ) : (
+        <a
+          href="/glossary"
+          class="group flex flex-1 flex-col rounded border border-warm-200 p-4 text-right hover:border-seam-400"
+        >
+          <span class="text-xs uppercase tracking-wider text-warm-500">Next →</span>
+          <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+            Key terms + definitions
+          </span>
+        </a>
+      )}
+    </nav>
+  </article>
+</StandardLayout>

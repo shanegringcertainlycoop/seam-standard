@@ -667,3 +667,55 @@ export function findPrevNext(
   if (i === -1) return {}
   return { prev: i > 0 ? flat[i - 1] : undefined, next: i < flat.length - 1 ? flat[i + 1] : undefined }
 }
+
+// ─── Intro sections + glossary ────────────────────────────────────────────
+
+export interface IntroSection {
+  title: string
+  slug: string
+  order: number
+  summary?: string
+  body: PortableTextBlock[]
+}
+
+export async function listIntroSections(): Promise<IntroSection[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "introSection"] | order(order asc) {
+    title,
+    "slug": slug.current,
+    order,
+    summary
+  }`)
+}
+
+export async function getIntroSectionBySlug(slug: string): Promise<IntroSection | null> {
+  const client = requireClient()
+  if (!client) return null
+  return client.fetch(
+    `*[_type == "introSection" && slug.current == $slug][0]{
+      title,
+      "slug": slug.current,
+      order,
+      summary,
+      body
+    }`,
+    { slug },
+  )
+}
+
+export interface GlossaryEntry {
+  term: string
+  slug: string
+  body: PortableTextBlock[]
+}
+
+export async function listGlossaryTerms(): Promise<GlossaryEntry[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "glossaryTerm"] | order(term asc) {
+    term,
+    "slug": slug.current,
+    body
+  }`)
+}
