@@ -14,8 +14,12 @@ if (!sources || sources.length === 0) return null
   <SectionHeader label="Referenced Source" />
   <ul class="space-y-2 text-warm-800">
     {
-      sources.map((s) => {
-        const inner = s.url ? (
+      sources.map((rs) => {
+        const s = rs.source
+        const fn = rs.footnote
+        const fnMarker = fn?.marker
+        const fnHref = fn?.marker ? `#note-${fn.marker}` : null
+        const linkBody = s.url ? (
           <a
             href={s.url}
             class="text-seam-600 underline underline-offset-2 hover:text-seam-700"
@@ -29,7 +33,7 @@ if (!sources || sources.length === 0) return null
         )
         return (
           <li>
-            {s.number !== undefined ? (
+            {s.number != null ? (
               <a
                 href={`/bibliography#bib-${s.number}`}
                 class="group inline-flex items-baseline gap-2 hover:text-seam-700"
@@ -37,10 +41,17 @@ if (!sources || sources.length === 0) return null
                 <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600">
                   [{s.number}]
                 </span>
-                <span>{inner}</span>
+                <span>{linkBody}</span>
               </a>
             ) : (
-              <span>{inner}</span>
+              <span>{linkBody}</span>
+            )}
+            {fnMarker && fnHref && (
+              <sup>
+                <a href={fnHref} class="ml-0.5 text-xs text-seam-600 hover:text-seam-700">
+                  {fnMarker}
+                </a>
+              </sup>
             )}
           </li>
         )

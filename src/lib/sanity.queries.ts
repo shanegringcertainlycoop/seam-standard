@@ -142,12 +142,16 @@ export type GuidanceSection =
   | { _type: 'guidanceImage'; _key: string; alt: string; caption?: string }
 
 export interface ReferencedSource {
-  _id: string
-  number?: number
-  title?: string
-  citation: string
-  url?: string
-  sourceType?: string
+  _key: string
+  source: {
+    _id: string
+    number?: number
+    title?: string
+    citation: string
+    url?: string
+    sourceType?: string
+  }
+  footnote?: FootnoteRef
 }
 
 export interface RatingSystemApplication {
@@ -253,8 +257,10 @@ const activityProjection = `{
     alt,
     caption
   },
-  "referencedSources": referencedSources[]->{
-    _id, number, title, citation, url, sourceType
+"referencedSources": referencedSources[]{
+    _key,
+    "source": source->{_id, number, title, citation, url, sourceType},
+    "footnote": footnote->{_id, _type, number, marker, title, citation, body}
   }
 }`
 
@@ -337,6 +343,7 @@ export function collectEditorialNoteRefs(activity: Activity): Set<string> {
     it.subItems?.forEach((s) => visitBlocks(s.body))
   })
   activity.definitions?.forEach((d) => visitBlocks(d.body))
+  activity.referencedSources?.forEach((rs) => collectFromFootnote(rs.footnote))
   activity.guidance?.forEach((sec) => {
     if (sec._type === 'guidanceSubsection') {
       collectFromFootnote(sec.headingFootnote)
