@@ -1,0 +1,115 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { getPillarBySlug, getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const { pillar: pillarSlug } = Astro.params
+
+if (!pillarSlug) {
+  return Astro.redirect('/')
+}
+
+const [pillar, navTree] = await Promise.all([
+  getPillarBySlug(pillarSlug),
+  getNavigationTree(),
+])
+
+if (!pillar) {
+  return new Response('Pillar not found', { status: 404 })
+}
+
+const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount, 0)
+---
+
+<StandardLayout title={`${pillar.title} — The SEAM Standard`}>
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">{pillar.title}</span>
+      </nav>
+
+      <header class="flex items-start gap-5 border-b border-warm-300 pb-4">
+        {
+          pillar.iconUrl && (
+            <img src={pillar.iconUrl} alt={`${pillar.title} icon`} class="h-20 w-20 shrink-0 object-contain" loading="lazy" />
+          )
+        }
+        <div class="min-w-0 flex-1">
+          <p class="text-xs uppercase tracking-wider text-gold-500">
+            Pillar {pillar.number}
+          </p>
+          <h1 class="mt-1 text-4xl font-semibold text-warm-900">{pillar.title}</h1>
+          <p class="mt-2 text-xs text-warm-500">
+            {pillar.concepts.length} concept{pillar.concepts.length === 1 ? '' : 's'}
+            {' · '}
+            {totalActivities} activit{totalActivities === 1 ? 'y' : 'ies'}
+          </p>
+        </div>
+      </header>
+
+      {
+        pillar.summary && (
+          <section class="mt-6 text-warm-800">
+            <p>{pillar.summary}</p>
+          </section>
+        )
+      }
+
+      <section class="mt-8 space-y-8">
+        {
+          pillar.concepts.map((concept) => (
+            <div>
+              <div class="flex items-baseline justify-between border-b border-warm-200 pb-1">
+                <h2 class="text-lg font-medium text-seam-700">
+                  <a
+                    href={`/${pillar.slug}/${concept.slug}`}
+                    class="hover:text-seam-500"
+                  >
+                    <span class="font-mono text-base text-warm-500">{concept.code}.</span>
+                    <span class="ml-2">{concept.title}</span>
+                  </a>
+                </h2>
+                <span class="text-xs text-warm-500">
+                  {concept.activityCount} activit{concept.activityCount === 1 ? 'y' : 'ies'}
+                </span>
+              </div>
+
+              {concept.objectives.length > 0 && (
+                <ul class="mt-2 divide-y divide-warm-200">
+                  {concept.objectives.map((obj) => (
+                    <li>
+                      <a
+                        href={`/${pillar.slug}/${concept.slug}/${obj.slug}`}
+                        class="group flex items-baseline gap-3 py-2 hover:text-seam-700"
+                      >
+                        <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
+                          {obj.objectiveCode}
+                        </span>
+                        <span class="flex-1 text-sm text-warm-800 group-hover:text-seam-800">
+                          {obj.title}
+                        </span>
+                        <span class="shrink-0 text-xs text-warm-500">
+                          {obj.activityCount} activit{obj.activityCount === 1 ? 'y' : 'ies'}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))
+        }
+      </section>
+
+      <footer class="mt-12 border-t border-warm-200 pt-6 text-xs uppercase tracking-wider text-gold-500">
+        {pillar.title}
+      </footer>
+    </article>
+  </div>
+</StandardLayout>

@@ -390,6 +390,90 @@ export interface NavPillar {
   concepts: NavConcept[]
 }
 
+// ─── Pillar landing-page query ────────────────────────────────────────────
+
+export interface PillarDetail {
+  title: string
+  slug: string
+  number: number
+  iconUrl?: string
+  accentColor?: string
+  summary?: string
+  concepts: Array<{
+    title: string
+    slug: string
+    code: string
+    number: number
+    summary?: PortableTextBlock[]
+    objectives: Array<{
+      title: string
+      slug: string
+      objectiveCode: string
+      number: number
+      activityCount: number
+    }>
+    activityCount: number
+  }>
+}
+
+export async function listPillars(): Promise<PillarDetail[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "pillar"] | order(number asc) {
+    title,
+    "slug": slug.current,
+    number,
+    iconUrl,
+    accentColor,
+    summary,
+    "concepts": *[_type == "concept" && pillar._ref == ^._id] | order(number asc) {
+      title,
+      "slug": slug.current,
+      code,
+      number,
+      "objectives": *[_type == "objective" && concept._ref == ^._id] | order(number asc) {
+        title,
+        "slug": slug.current,
+        objectiveCode,
+        number,
+        "activityCount": count(*[_type == "activity" && objective._ref == ^._id])
+      },
+      "activityCount": count(*[_type == "activity" && objective._ref in *[_type == "objective" && concept._ref == ^._id]._id])
+    }
+  }`)
+}
+
+export async function getPillarBySlug(pillarSlug: string): Promise<PillarDetail | null> {
+  const client = requireClient()
+  if (!client) return null
+  return client.fetch(
+    `*[_type == "pillar" && slug.current == $pillarSlug][0]{
+      title,
+      "slug": slug.current,
+      number,
+      iconUrl,
+      accentColor,
+      summary,
+      "concepts": *[_type == "concept" && pillar._ref == ^._id] | order(number asc) {
+        title,
+        "slug": slug.current,
+        code,
+        number,
+        summary,
+        "objectives": *[_type == "objective" && concept._ref == ^._id] | order(number asc) {
+          title,
+          "slug": slug.current,
+          objectiveCode,
+          number,
+          "activityCount": count(*[_type == "activity" && objective._ref == ^._id])
+        },
+        "activityCount": count(*[_type == "activity" && objective._ref in *[_type == "objective" && concept._ref == ^._id]._id])
+      }
+    }`,
+    { pillarSlug },
+  )
+}
+
 // ─── Concept / Objective landing-page queries ─────────────────────────────
 
 export interface ConceptDetail {
