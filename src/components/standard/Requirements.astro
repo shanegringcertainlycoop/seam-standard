@@ -18,10 +18,33 @@ if (!groups || groups.length === 0) return null
   <SectionHeader label="Requirements" footnote={sectionFootnote} />
   <div class="space-y-6">
     {
-      groups.map((group) => (
+      groups.map((group) => {
+        const fn = group.headingFootnote
+        const fnMarker =
+          fn?._type === 'bibliographyEntry'
+            ? fn.number
+            : fn?._type === 'editorialNote'
+              ? fn.marker
+              : null
+        const fnHref =
+          fn?._type === 'bibliographyEntry'
+            ? `/bibliography#bib-${fn.number}`
+            : fn?._type === 'editorialNote'
+              ? `#note-${fn.marker}`
+              : null
+        return (
         <div>
           {group.heading && (
-            <h3 class="mb-3 text-base font-medium text-gold-500">{group.heading}</h3>
+            <h3 class="mb-3 text-base font-medium text-gold-500">
+              {group.heading}
+              {fnMarker && fnHref && (
+                <sup>
+                  <a href={fnHref} class="ml-0.5 text-sm text-seam-600 hover:text-seam-700">
+                    {fnMarker}
+                  </a>
+                </sup>
+              )}
+            </h3>
           )}
           <ol class="space-y-3">
             {group.items.map((item) => (
@@ -46,7 +69,8 @@ if (!groups || groups.length === 0) return null
             ))}
           </ol>
         </div>
-      ))
+        )
+      })
     }
   </div>
 

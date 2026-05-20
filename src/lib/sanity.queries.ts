@@ -58,6 +58,7 @@ export interface RequirementItem {
 export interface RequirementGroup {
   _key: string
   heading?: string
+  headingFootnote?: FootnoteRef
   items: RequirementItem[]
 }
 
@@ -213,6 +214,7 @@ const activityProjection = `{
   requirements[]{
     _key,
     heading,
+    "headingFootnote": headingFootnote->{_id, _type, number, marker, title, citation, body},
     items[]{
       _key,
       number,
@@ -310,12 +312,13 @@ export function collectEditorialNoteRefs(activity: Activity): Set<string> {
 
   visitBlocks(activity.scope)
   visitBlocks(activity.requirementsNotes)
-  activity.requirements?.forEach((g) =>
+  activity.requirements?.forEach((g) => {
+    collectFromFootnote(g.headingFootnote)
     g.items.forEach((it) => {
       visitBlocks(it.body)
       it.subItems?.forEach((s) => visitBlocks(s.body))
-    }),
-  )
+    })
+  })
   visitBlocks(activity.indicators?.performanceIndicator)
   activity.indicators?.contextIndicators?.forEach((c) => visitBlocks(c.body))
   activity.indicators?.calculation?.steps?.forEach((s) => {
