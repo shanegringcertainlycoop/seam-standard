@@ -1,9 +1,11 @@
 ---
 import {
   listIntroSections,
+  listSeals,
   type NavPillar,
   type RatingSystemApplication,
   type IntroSection,
+  type SealSummary,
 } from '@/lib/sanity.queries'
 
 interface Props {
@@ -15,7 +17,10 @@ interface Props {
 
 const { tree, currentActivitySlug, current } = Astro.props
 
-const introSections: IntroSection[] = await listIntroSections()
+const [introSections, seals] = await Promise.all([
+  listIntroSections() as Promise<IntroSection[]>,
+  listSeals() as Promise<SealSummary[]>,
+])
 
 // Locate the current activity's branch so we can auto-expand it
 let openPillar = ''
@@ -37,6 +42,15 @@ for (const p of tree) {
 
 const isIntroOpen = current === 'intro' || (current?.startsWith('intro:') ?? false)
 const activeIntroSlug = current?.startsWith('intro:') ? current.slice('intro:'.length) : undefined
+const isSealsOpen = current === 'seals' || (current?.startsWith('seals:') ?? false)
+const activeSealSlug = current?.startsWith('seals:') ? current.slice('seals:'.length) : undefined
+
+const RS_OPTIONS = [
+  { key: 'bid', label: 'B+I:D', title: 'Buildings + Interiors: Developer' },
+  { key: 'bio', label: 'B+I:O', title: 'Buildings + Interiors: Occupier' },
+  { key: 'omd', label: 'O+M:D', title: 'Operations + Maintenance: Developer' },
+  { key: 'omo', label: 'O+M:O', title: 'Operations + Maintenance: Occupier' },
+] as const
 
 // data-rs-* aggregator: returns the union of applicable rating systems across activities.
 const RS_KEYS = ['bid', 'bio', 'omd', 'omo'] as const
@@ -225,24 +239,130 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
     </ul>
 
-    <ul class="mt-4 space-y-0.5 border-b border-warm-200 pb-4 text-sm">
+    <ul class="mt-4 space-y-1 border-b border-warm-200 pb-4 text-sm">
       <li>
-        <a
-          href="/seals"
-          class:list={['block py-0.5', current === 'seals' || current?.startsWith('seals:') ? activeClass : idleClass]}
-          aria-current={current === 'seals' ? 'page' : undefined}
-        >
-          SEALs
-        </a>
+        <details open class="group/cert">
+          <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
+            <span class="inline-block w-3 text-warm-400 group-open/cert:rotate-90 transition-transform">›</span>
+            <span class="ml-1">Certification</span>
+          </summary>
+          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+            {
+              RS_OPTIONS.map((rs) => (
+                <li>
+                  <button
+                    type="button"
+                    data-seam-rs-toggle={rs.key}
+                    title={rs.title}
+                    class="group/btn flex w-full items-center gap-1.5 py-0.5 text-left text-warm-600 hover:text-seam-700"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
+                      data-seam-rs-dot={rs.key}
+                    />
+                    <span class="font-mono">{rs.label}</span>
+                    <span class="ml-1 text-[10px] text-warm-400 group-hover/btn:text-warm-600">
+                      {rs.title.replace(/^(Buildings|Operations).*: /, '')}
+                    </span>
+                  </button>
+                </li>
+              ))
+            }
+            <li>
+              <button
+                type="button"
+                data-seam-rs-clear-side
+                class="mt-0.5 text-[11px] text-warm-500 underline hover:text-seam-700"
+              >
+                Show all rating systems
+              </button>
+            </li>
+          </ul>
+        </details>
       </li>
+
       <li>
+        <details open={isSealsOpen} class="group/seals">
+          <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
+            <span class="inline-block w-3 text-warm-400 group-open/seals:rotate-90 transition-transform">›</span>
+            <a
+              href="/seals"
+              class:list={['ml-1', current === 'seals' ? activeClass : '']}
+              aria-current={current === 'seals' ? 'page' : undefined}
+            >
+              SEALs
+            </a>
+          </summary>
+          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+            {seals.length === 0 ? (
+              <li class="py-0.5 italic text-warm-400">No SEALs yet</li>
+            ) : (
+              seals.map((s) => {
+                const isActive = activeSealSlug === s.slug
+                return (
+                  <li class="flex items-center gap-1">
+                    <a
+                      href={`/seals/${s.slug}`}
+                      class:list={['flex-1 truncate py-0.5', isActive ? activeClass : idleClass]}
+                      aria-current={isActive ? 'page' : undefined}
+                      title={s.name}
+                    >
+                      {s.name.replace(/\s+SEAL$/, '')}
+                    </a>
+                    <button
+                      type="button"
+                      data-seam-seal-toggle={s.slug}
+                      title={`Filter the side nav to activities in ${s.name}`}
+                      class="shrink-0 text-warm-400 hover:text-seam-700"
+                      aria-label={`Filter by ${s.name}`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="inline-block h-2 w-2 rounded-full border border-warm-400"
+                        data-seam-seal-dot={s.slug}
+                      />
+                    </button>
+                  </li>
+                )
+              })
+            )}
+            {seals.length > 0 && (
+              <li>
+                <button
+                  type="button"
+                  data-seam-seal-clear-side
+                  class="mt-0.5 text-[11px] text-warm-500 underline hover:text-seam-700"
+                >
+                  Show all SEALs
+                </button>
+              </li>
+            )}
+          </ul>
+        </details>
+      </li>
+
+      <li class="flex items-center gap-1">
         <a
           href="/marks"
-          class:list={['block py-0.5', current === 'marks' ? activeClass : idleClass]}
+          class:list={['flex-1 py-0.5 font-medium', current === 'marks' ? activeClass : idleClass]}
           aria-current={current === 'marks' ? 'page' : undefined}
         >
           Marks
         </a>
+        <button
+          type="button"
+          data-seam-mark-toggle
+          title="Filter the side nav to Mark-eligible activities"
+          class="shrink-0 text-warm-400 hover:text-seam-700"
+          aria-label="Filter by Marks"
+        >
+          <span
+            aria-hidden="true"
+            class="inline-block h-2 w-2 rounded-full border border-warm-400"
+            data-seam-mark-dot
+          />
+        </button>
       </li>
     </ul>
 
@@ -285,35 +405,116 @@ const PILLAR_GLYPHS: Record<string, string> = {
   [data-seam-sidenav][data-seam-seal-active] [data-seam-tree] li:not([data-seals]) { opacity: 0.35; }
 </style>
 
-<script is:inline>
-  // For seal filtering we need a per-seal CSS rule because the slug is dynamic.
-  // Inject (and re-inject on change) a stylesheet that targets the active seal.
-  (function () {
-    const STYLE_ID = 'seam-seal-dim-style'
-    const sidenav = document.querySelector('[data-seam-sidenav]')
-    if (!sidenav) return
+<script>
+  // Single-source filter state. One of: rs-bid | rs-bio | rs-omd | rs-omo |
+  // seal:<slug> | mark | (null = no filter). Persisted in localStorage and
+  // applied as data attributes on the sidenav.
+  const STORAGE = 'seam:filter'
 
-    function applySealStyle() {
-      const slug = sidenav.getAttribute('data-seam-seal-active')
-      let style = document.getElementById(STYLE_ID)
-      if (!slug) {
-        if (style) style.remove()
-        return
-      }
+  const sidenav = document.querySelector<HTMLElement>('[data-seam-sidenav]')
+  if (sidenav) {
+    const rsButtons = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-rs-toggle]')
+    const rsDots = sidenav.querySelectorAll<HTMLElement>('[data-seam-rs-dot]')
+    const rsClearBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-rs-clear-side]')
+    const sealButtons = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-seal-toggle]')
+    const sealDots = sidenav.querySelectorAll<HTMLElement>('[data-seam-seal-dot]')
+    const sealClearBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-seal-clear-side]')
+    const markBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-mark-toggle]')
+    const markDot = sidenav.querySelector<HTMLElement>('[data-seam-mark-dot]')
+
+    const SEAL_STYLE_ID = 'seam-seal-dim-style'
+
+    function read(): string | null {
+      try { return localStorage.getItem(STORAGE) } catch { return null }
+    }
+    function write(v: string | null) {
+      try {
+        if (v) localStorage.setItem(STORAGE, v)
+        else localStorage.removeItem(STORAGE)
+      } catch {}
+    }
+
+    function paintActiveDot(dot: HTMLElement, on: boolean) {
+      dot.classList.toggle('bg-seam-600', on)
+      dot.classList.toggle('border-seam-600', on)
+      dot.classList.toggle('border-warm-400', !on)
+    }
+
+    function ensureSealStyle(slug: string | null) {
+      let style = document.getElementById(SEAL_STYLE_ID)
+      if (!slug) { if (style) style.remove(); return }
       if (!style) {
         style = document.createElement('style')
-        style.id = STYLE_ID
+        style.id = SEAL_STYLE_ID
         document.head.appendChild(style)
       }
-      // Escape the slug for CSS attribute matching.
       const safe = slug.replace(/["\\]/g, '\\$&')
       style.textContent =
         `[data-seam-sidenav] [data-seam-tree] li:not([data-seals~="${safe}"]) { opacity: 0.35; }`
     }
 
-    const observer = new MutationObserver(applySealStyle)
-    observer.observe(sidenav, { attributes: true, attributeFilter: ['data-seam-seal-active'] })
-    applySealStyle()
-  })()
+    function apply(filter: string | null) {
+      sidenav.removeAttribute('data-seam-rs-active')
+      sidenav.removeAttribute('data-seam-seal-active')
+      sidenav.removeAttribute('data-seam-mark-active')
+
+      rsDots.forEach((d) => paintActiveDot(d, false))
+      sealDots.forEach((d) => paintActiveDot(d, false))
+      if (markDot) paintActiveDot(markDot, false)
+
+      if (filter?.startsWith('rs-')) {
+        const k = filter.slice(3)
+        sidenav.setAttribute('data-seam-rs-active', k)
+        const dot = sidenav.querySelector<HTMLElement>(`[data-seam-rs-dot="${k}"]`)
+        if (dot) paintActiveDot(dot, true)
+        ensureSealStyle(null)
+      } else if (filter?.startsWith('seal:')) {
+        const slug = filter.slice('seal:'.length)
+        sidenav.setAttribute('data-seam-seal-active', slug)
+        const dot = sidenav.querySelector<HTMLElement>(`[data-seam-seal-dot="${slug}"]`)
+        if (dot) paintActiveDot(dot, true)
+        ensureSealStyle(slug)
+      } else if (filter === 'mark') {
+        sidenav.setAttribute('data-seam-mark-active', '1')
+        if (markDot) paintActiveDot(markDot, true)
+        ensureSealStyle(null)
+      } else {
+        ensureSealStyle(null)
+      }
+    }
+
+    function set(filter: string | null) {
+      const current = read()
+      const next = current === filter ? null : filter
+      write(next)
+      apply(next)
+    }
+
+    rsButtons.forEach((b) => {
+      b.addEventListener('click', () => set(`rs-${b.dataset.seamRsToggle}`))
+    })
+    rsClearBtn?.addEventListener('click', () => {
+      const cur = read()
+      if (cur?.startsWith('rs-')) { write(null); apply(null) }
+    })
+
+    sealButtons.forEach((b) => {
+      b.addEventListener('click', (e) => {
+        e.preventDefault()
+        set(`seal:${b.dataset.seamSealToggle}`)
+      })
+    })
+    sealClearBtn?.addEventListener('click', () => {
+      const cur = read()
+      if (cur?.startsWith('seal:')) { write(null); apply(null) }
+    })
+
+    markBtn?.addEventListener('click', (e) => {
+      e.preventDefault()
+      set('mark')
+    })
+
+    apply(read())
+  }
 </script>
 

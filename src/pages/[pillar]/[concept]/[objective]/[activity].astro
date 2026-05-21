@@ -149,12 +149,7 @@ if (activity.seals && activity.seals.length > 0) {
   </div>
 
   <script>
-    type ProductKey = 'certification' | 'seals' | 'marks'
-
-    const STORAGE_PRODUCT = 'seam:product'
-    const STORAGE_RS = 'seam:rs-filter'
-    const STORAGE_SEAL = 'seam:seal-filter'
-
+    const STORAGE = 'seam:filter'
     const RS_LABELS: Record<string, string> = {
       bid: 'B+I:D (Buildings + Interiors: Developer)',
       bio: 'B+I:O (Buildings + Interiors: Occupier)',
@@ -165,28 +160,27 @@ if (activity.seals && activity.seals.length > 0) {
     const article = document.querySelector<HTMLElement>('[data-seam-activity]')
     const banner = document.querySelector<HTMLElement>('[data-seam-product-mismatch]')
     if (article && banner) {
-      const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
-      const product = (read(STORAGE_PRODUCT) as ProductKey) || 'certification'
+      const filter = (() => {
+        try { return localStorage.getItem(STORAGE) } catch { return null }
+      })()
 
       let mismatch = false
       let html = ''
 
-      if (product === 'certification') {
-        const rs = read(STORAGE_RS)
-        if (rs && !article.hasAttribute(`data-rs-${rs}`)) {
+      if (filter?.startsWith('rs-')) {
+        const rs = filter.slice(3)
+        if (!article.hasAttribute(`data-rs-${rs}`)) {
           mismatch = true
           html = `<strong>Heads up:</strong> this activity does not apply to your selected rating system (<span class="font-mono">${RS_LABELS[rs] ?? rs}</span>).`
         }
-      } else if (product === 'seals') {
-        const seal = read(STORAGE_SEAL)
-        if (seal) {
-          const seals = (article.getAttribute('data-seals') ?? '').split(/\s+/).filter(Boolean)
-          if (!seals.includes(seal)) {
-            mismatch = true
-            html = `<strong>Heads up:</strong> this activity is not part of the <span class="font-mono">${seal}</span> SEAL.`
-          }
+      } else if (filter?.startsWith('seal:')) {
+        const slug = filter.slice('seal:'.length)
+        const seals = (article.getAttribute('data-seals') ?? '').split(/\s+/).filter(Boolean)
+        if (!seals.includes(slug)) {
+          mismatch = true
+          html = `<strong>Heads up:</strong> this activity is not part of the <span class="font-mono">${slug}</span> SEAL.`
         }
-      } else if (product === 'marks') {
+      } else if (filter === 'mark') {
         if (!article.hasAttribute('data-mark')) {
           mismatch = true
           html = `<strong>Heads up:</strong> this activity is not Mark-eligible. Marks include only a curated subset of activities.`
