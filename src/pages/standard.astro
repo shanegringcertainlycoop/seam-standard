@@ -56,11 +56,11 @@ const stats = pillars.reduce(
 ---
 
 <StandardLayout
-  title="The Standard — full tree view"
-  description="The full SEAM Standard tree — pillars, concepts, objectives, and activities, browseable in one view."
+  title="The SEAM Standard v1.1"
+  description="The SEAM Standard v1.1 — every Pillar, Concept, Objective, and Activity."
 >
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
-    <SideNav tree={navTree} />
+    <SideNav tree={navTree} current="standard" />
 
     <article class="min-w-0 flex-1">
       <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
@@ -70,12 +70,9 @@ const stats = pillars.reduce(
       </nav>
 
       <header class="border-b border-warm-300 pb-4">
-        <p class="text-xs uppercase tracking-wider text-gold-500">Browse the framework</p>
-        <h1 class="mt-1 text-3xl font-semibold text-warm-900 sm:text-4xl">The Standard</h1>
+        <h1 class="text-3xl font-semibold text-warm-900 sm:text-4xl">The SEAM Standard, v1.1</h1>
         <p class="mt-3 max-w-3xl text-base text-warm-700">
-          Every Pillar, Concept, Objective, and Activity in the SEAM Standard.
-          Click any chevron to expand its contents; click any title to open
-          its dedicated page.
+          Every Pillar, Concept, Objective, and Activity.
         </p>
         <dl class="mt-6 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
           <div>
@@ -188,7 +185,7 @@ const stats = pillars.reduce(
                           </span>
                         </summary>
                         {c.headlineGoal && (
-                          <p class="border-t border-warm-100 px-4 py-2 text-sm leading-relaxed text-warm-600">
+                          <p class="px-4 pb-3 -mt-1 text-sm leading-relaxed text-warm-600">
                             {c.headlineGoal}
                           </p>
                         )}
@@ -216,7 +213,7 @@ const stats = pillars.reduce(
                                   </span>
                                 </summary>
                                 {o.headlineGoal && (
-                                  <p class="px-4 pb-2 pl-[3.25rem] text-xs leading-relaxed text-warm-500">
+                                  <p class="pr-4 pb-2 pl-[6.75rem] text-xs leading-relaxed text-warm-500">
                                     {o.headlineGoal}
                                   </p>
                                 )}
