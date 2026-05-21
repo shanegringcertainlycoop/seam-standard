@@ -673,6 +673,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
       write(next)
       writeToUrl(next)
       apply(next)
+      window.dispatchEvent(new CustomEvent('seam:filter-change', { detail: { filter: next } }))
     }
 
     rsButtons.forEach((b) => {
