@@ -3,7 +3,7 @@ import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
 import ConceptBadge from '@/components/standard/ConceptBadge.astro'
-import { getObjectiveBySlug, getNavigationTree, getFootnoteLookup } from '@/lib/sanity.queries'
+import { getObjectiveBySlug, getNavigationTree, getFootnoteLookup, buildActivityUrlMap } from '@/lib/sanity.queries'
 
 export const prerender = false
 
