@@ -56,6 +56,16 @@ const flatActivities = flattenActivities(navTree)
 const { prev, next } = findPrevNext(activity.slug, flatActivities)
 
 const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
+
+// Data attributes describing which rating systems this activity applies to —
+// used by an inline script to show a "not applicable" banner when the visitor's
+// active rating-system filter doesn't match.
+const rs = activity.ratingSystemApplication
+const rsAttrs: Record<string, string> = {}
+if (rs?.bi_developer) rsAttrs['data-rs-bid'] = '1'
+if (rs?.bi_occupier) rsAttrs['data-rs-bio'] = '1'
+if (rs?.om_developer) rsAttrs['data-rs-omd'] = '1'
+if (rs?.om_occupier) rsAttrs['data-rs-omo'] = '1'
 ---
 
 <StandardLayout
@@ -65,7 +75,31 @@ const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
   <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
     <SideNav tree={navTree} currentActivitySlug={activity.slug} />
 
-    <article class="min-w-0 flex-1 max-w-4xl">
+    <article class="min-w-0 flex-1 max-w-4xl" data-seam-activity {...rsAttrs}>
+      <div
+        hidden
+        data-seam-rs-mismatch
+        class="mb-6 flex items-start gap-3 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+      >
+        <span aria-hidden="true" class="mt-0.5 shrink-0">⚠</span>
+        <div class="flex-1">
+          <p>
+            <strong>Heads up:</strong> this activity does not apply to your
+            selected rating system (<span data-seam-rs-name class="font-mono"></span>).
+          </p>
+          <p class="mt-1 text-xs">
+            It still appears here so you can read it — change or clear the
+            rating system from the filter in the top bar.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-seam-rs-mismatch-dismiss
+          class="ml-2 shrink-0 text-amber-700 hover:text-amber-900"
+          aria-label="Dismiss"
+        >×</button>
+      </div>
+
       <nav class="mb-6 text-sm text-warm-500">
         <a href="/" class="hover:text-seam-700">SEAM Standard</a>
         <span class="mx-2">/</span>
@@ -109,4 +143,34 @@ const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
       </footer>
     </article>
   </div>
+
+  <script>
+    const STORAGE_KEY = 'seam:rs-filter'
+    const RS_LABELS: Record<string, string> = {
+      bid: 'B+I:D (Buildings + Interiors: Developer)',
+      bio: 'B+I:O (Buildings + Interiors: Occupier)',
+      omd: 'O+M:D (Operations + Maintenance: Developer)',
+      omo: 'O+M:O (Operations + Maintenance: Occupier)',
+    }
+
+    const article = document.querySelector<HTMLElement>('[data-seam-activity]')
+    const banner = document.querySelector<HTMLElement>('[data-seam-rs-mismatch]')
+    if (article && banner) {
+      const filter = (() => {
+        try { return localStorage.getItem(STORAGE_KEY) } catch { return null }
+      })()
+
+      const applies = filter ? article.hasAttribute(`data-rs-${filter}`) : true
+      if (filter && !applies) {
+        const nameEl = banner.querySelector<HTMLElement>('[data-seam-rs-name]')
+        if (nameEl) nameEl.textContent = RS_LABELS[filter] ?? filter
+        banner.hidden = false
+      }
+
+      banner.querySelector<HTMLButtonElement>('[data-seam-rs-mismatch-dismiss]')
+        ?.addEventListener('click', () => {
+          banner.hidden = true
+        })
+    }
+  </script>
 </StandardLayout>
