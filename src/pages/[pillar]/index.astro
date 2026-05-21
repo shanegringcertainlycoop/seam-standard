@@ -22,6 +22,83 @@ if (!pillar) {
 }
 
 const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount, 0)
+
+// Editorial copy mirrored from the SEAM marketing pillar pages at
+// seamcertification.org/standard/<slug>. Pillar-level only — concept
+// and objective copy lives on those documents in Sanity.
+type PillarCopy = {
+  tagline: string
+  whatIs: { title: string; lead: string; body: string }
+  focusAreasTitle: string
+  whyItMatters: { title: string; body: string }
+}
+const MARKETING: Record<string, PillarCopy> = {
+  'social-impact': {
+    tagline:
+      "Measurable outcomes for people and communities. Social Impact in SEAM builds the evidence behind your project's wide-ranging effect on the people and communities it reaches.",
+    whatIs: {
+      title: 'Outcomes that can be measured and verified',
+      lead: 'Most projects make assumptions about who they affect and how.',
+      body:
+        "Social Impact in SEAM replaces those assumptions with a structured process: understand the social context of your project before you build, engage the people most likely to be affected, and put monitoring systems in place to track whether your efforts are actually working. The result is a project that can demonstrate its social value with real evidence, not just good intentions.",
+    },
+    focusAreasTitle: 'Three ways to demonstrate impact',
+    whyItMatters: {
+      title: 'Buildings shape lives. Impact proves it.',
+      body:
+        "Without a structured way to measure what's happening, social equity commitments are just that: commitments. Social Impact gives your project the process and the proof to show that your work is making a real difference for the people it reaches.",
+    },
+  },
+  'social-responsibility': {
+    tagline:
+      'How an organization operates says as much as what it builds. Social Responsibility in SEAM focuses on governance practices, community engagement, and social investments that turn values into documented action.',
+    whatIs: {
+      title: 'Building equity from the inside out',
+      lead: 'Any organization can say they have responsible business practices.',
+      body:
+        "But SEAM asks how that commitment shows up in practice: in the governance structures that hold your organization accountable, in the community programs that go beyond a donation, and in the social investments that create positive impact. This pillar is about matching your organization's actions to its values.",
+    },
+    focusAreasTitle: 'Ways to take responsible action',
+    whyItMatters: {
+      title: 'Process is product. How you build matters.',
+      body:
+        'A certified building reflects the way it was created. Social Responsibility holds your organization to documented commitments — at the team, project, and community level — so that values become verifiable behavior, not statements.',
+    },
+  },
+  'social-justice': {
+    tagline:
+      "Real estate influences who has access to opportunity, and who doesn't. Social Justice in SEAM addresses issues that historically impact how we build, zone, invest, and support impacted parties.",
+    whatIs: {
+      title: 'Elevating just decision-making through the built environment',
+      lead: "Buildings don't exist in a vacuum.",
+      body:
+        'Every project makes choices about who gets hired, who can afford to be there, how the surrounding community is affected, and how far that impact actually reaches. Social Justice within the SEAM Standard helps projects make those decisions with intention, using a structured framework that addresses procurement, the workplace, the community, and access to capital.',
+    },
+    focusAreasTitle: 'Ways to make just improvements',
+    whyItMatters: {
+      title: "Our decisions today shape tomorrow's impact",
+      body:
+        "The built environment has historically been shaped by choices that weren't just or fair to all people. The Social Justice pillar gives certified projects a structured framework to make different decisions through design, investment, and governance that expand access and opportunity for everyone.",
+    },
+  },
+  'social-accountability': {
+    tagline:
+      'Every building is connected to people far beyond its walls. Social Accountability in SEAM addresses the full reach of that connection, from the materials sourced and the suppliers hired to the health and safety of the people it impacts.',
+    whatIs: {
+      title: 'Accountability goes beyond the building',
+      lead: "A building's impact doesn't begin at the job site and it doesn't end at the property line.",
+      body:
+        'Social Accountability in SEAM addresses the people who are often furthest from the conversation: the workers in the supply chain whose labor produced the materials inside the building, the contractors on site whose safety depends on clear standards, and the occupants and community members whose health is shaped by how the project is managed.',
+    },
+    focusAreasTitle: 'Ways to act accountably',
+    whyItMatters: {
+      title: 'Trust requires proof. Accountability provides it.',
+      body:
+        'Commitments to human rights and worker safety are only as strong as the systems behind them. Social Accountability gives projects the framework to identify risks, document corrective action, and verify the conditions inside the people-side of every project.',
+    },
+  },
+}
+const copy = MARKETING[pillar.slug]
 ---
 
 <StandardLayout title={`${pillar.title} — The SEAM Standard`}>
@@ -35,7 +112,7 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
         <span class="text-warm-700">{pillar.title}</span>
       </nav>
 
-      <header class="flex items-start gap-5 border-b border-warm-300 pb-4">
+      <header class="flex items-start gap-5 border-b border-warm-300 pb-6">
         {
           pillar.iconUrl && (
             <img src={pillar.iconUrl} alt={`${pillar.title} icon`} class="h-20 w-20 shrink-0 object-contain" loading="lazy" />
@@ -43,10 +120,15 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
         }
         <div class="min-w-0 flex-1">
           <p class="text-xs uppercase tracking-wider text-gold-500">
-            Pillar
+            SEAM Standard Pillar
           </p>
           <h1 class="mt-1 text-4xl font-semibold text-warm-900">{pillar.title}</h1>
-          <p class="mt-2 text-xs text-warm-500">
+          {copy?.tagline && (
+            <p class="mt-3 max-w-2xl text-lg font-light leading-relaxed text-seam-800">
+              {copy.tagline}
+            </p>
+          )}
+          <p class="mt-3 text-xs text-warm-500">
             {pillar.concepts.length} concept{pillar.concepts.length === 1 ? '' : 's'}
             {' · '}
             {totalActivities} activit{totalActivities === 1 ? 'y' : 'ies'}
@@ -54,15 +136,41 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
         </div>
       </header>
 
-      {
-        pillar.summary && (
-          <section class="mt-6 text-warm-800">
-            <p>{pillar.summary}</p>
-          </section>
-        )
-      }
+      {copy?.whatIs && (
+        <section class="mt-10">
+          <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
+            What is {pillar.title}
+          </p>
+          <h2 class="mt-1 text-2xl font-semibold text-warm-900">
+            {copy.whatIs.title}
+          </h2>
+          <p class="mt-3 text-base font-light leading-relaxed text-warm-700">
+            {copy.whatIs.lead}
+          </p>
+          <p class="mt-2 text-base leading-relaxed text-warm-700">
+            {copy.whatIs.body}
+          </p>
+        </section>
+      )}
 
-      <section class="mt-8 space-y-4">
+      {pillar.summary && !copy && (
+        <section class="mt-6 text-warm-800">
+          <p>{pillar.summary}</p>
+        </section>
+      )}
+
+      {copy?.focusAreasTitle && (
+        <div class="mt-12">
+          <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">Focus areas</p>
+          <h2 class="mt-1 text-2xl font-semibold text-warm-900">{copy.focusAreasTitle}</h2>
+          <p class="mt-2 text-sm text-warm-600">
+            {pillar.title} in SEAM is achieved across {pillar.concepts.length} concept{pillar.concepts.length === 1 ? '' : 's'},
+            spanning {totalActivities} activit{totalActivities === 1 ? 'y' : 'ies'}.
+          </p>
+        </div>
+      )}
+
+      <section class:list={[copy?.focusAreasTitle ? 'mt-6' : 'mt-8', 'space-y-4']}>
         {
           pillar.concepts.map((concept) => (
             <div class="overflow-hidden rounded-lg border border-warm-200 bg-white">
@@ -133,6 +241,36 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
             </div>
           ))
         }
+      </section>
+
+      {copy?.whyItMatters && (
+        <section class="mt-12 rounded-lg border border-warm-200 bg-white px-6 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
+            Why it matters
+          </p>
+          <h2 class="mt-1 text-2xl font-semibold text-warm-900">
+            {copy.whyItMatters.title}
+          </h2>
+          <p class="mt-3 text-base leading-relaxed text-warm-700">
+            {copy.whyItMatters.body}
+          </p>
+        </section>
+      )}
+
+      <section class="mt-10 flex flex-wrap gap-3 border-t border-warm-200 pt-6 text-sm">
+        <a
+          href="/standard"
+          class="rounded bg-seam-700 px-4 py-2 font-medium text-white hover:bg-seam-800"
+        >
+          Browse the full Standard →
+        </a>
+        <a
+          href="https://seamcertification.org/standard"
+          class="rounded border border-warm-300 px-4 py-2 text-warm-700 hover:border-seam-400 hover:text-seam-700"
+          rel="noopener"
+        >
+          Marketing site ↗
+        </a>
       </section>
 
       <footer class="mt-12 border-t border-warm-200 pt-6 text-xs uppercase tracking-wider text-gold-500">
