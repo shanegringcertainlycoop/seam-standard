@@ -119,8 +119,28 @@ const PILLAR_GLYPHS: Record<string, string> = {
 }
 ---
 
-<aside class="hidden lg:block lg:w-80 lg:shrink-0">
-  <nav class="sticky top-16 max-h-[calc(100vh-5rem)] overflow-y-auto pb-8 text-sm" data-seam-sidenav>
+<div
+  class="fixed inset-0 z-40 hidden bg-black/40 lg:hidden"
+  data-seam-mobile-nav-backdrop
+  aria-hidden="true"
+></div>
+
+<aside
+  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:max-h-[calc(100vh-5rem)] lg:w-80 lg:shrink-0 lg:translate-x-0 lg:overflow-y-auto lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
+  data-seam-mobile-nav-panel
+>
+  <button
+    type="button"
+    class="mb-3 inline-flex items-center gap-1 rounded border border-warm-200 px-2 py-1 text-xs text-warm-600 hover:bg-warm-50 lg:hidden"
+    aria-label="Close navigation"
+    data-seam-mobile-nav-close
+  >
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </svg>
+    Close
+  </button>
+  <nav class="pb-8 text-sm lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" data-seam-sidenav>
     <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
       Overview
     </p>
@@ -445,6 +465,40 @@ const PILLAR_GLYPHS: Record<string, string> = {
     </ul>
   </nav>
 </aside>
+
+<script>
+  // Mobile nav drawer toggle (off-canvas on < lg)
+  const panel = document.querySelector<HTMLElement>('[data-seam-mobile-nav-panel]')
+  const backdrop = document.querySelector<HTMLElement>('[data-seam-mobile-nav-backdrop]')
+  const openBtns = document.querySelectorAll<HTMLButtonElement>('[data-seam-mobile-nav-toggle]')
+  const closeBtn = document.querySelector<HTMLButtonElement>('[data-seam-mobile-nav-close]')
+  function open() {
+    panel?.classList.remove('-translate-x-full')
+    backdrop?.classList.remove('hidden')
+    document.body.classList.add('overflow-hidden', 'lg:overflow-auto')
+  }
+  function close() {
+    panel?.classList.add('-translate-x-full')
+    backdrop?.classList.add('hidden')
+    document.body.classList.remove('overflow-hidden')
+  }
+  openBtns.forEach((b) => b.addEventListener('click', open))
+  closeBtn?.addEventListener('click', close)
+  backdrop?.addEventListener('click', close)
+  // Close drawer when a link inside it is clicked (mobile only).
+  panel?.addEventListener('click', (e) => {
+    if (window.matchMedia('(min-width: 1024px)').matches) return
+    const target = e.target as HTMLElement
+    if (target.closest('a[href]')) close()
+  })
+  // Reset drawer state on resize back up to desktop.
+  window.addEventListener('resize', () => {
+    if (window.matchMedia('(min-width: 1024px)').matches) {
+      backdrop?.classList.add('hidden')
+      document.body.classList.remove('overflow-hidden')
+    }
+  })
+</script>
 
 <style>
   /* Default mode (dim): non-applicable items fade to opacity 0.35. */

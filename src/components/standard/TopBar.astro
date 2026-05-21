@@ -3,10 +3,21 @@ import SiteSearch from './SiteSearch.astro'
 ---
 
 <header class="sticky top-0 z-40 border-b border-warm-200 bg-white/95 backdrop-blur">
-  <div class="mx-auto flex max-w-7xl items-center gap-4 px-6 py-2">
+  <div class="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2 sm:gap-4 sm:px-6">
+    <button
+      type="button"
+      class="-ml-1 inline-flex shrink-0 items-center justify-center rounded p-1.5 text-warm-700 hover:bg-warm-100 lg:hidden"
+      aria-label="Open navigation"
+      data-seam-mobile-nav-toggle
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+
     <a
       href="/"
-      class="flex items-center gap-2 hover:opacity-80"
+      class="flex shrink-0 items-center gap-2 hover:opacity-80"
       aria-label="SEAM Standard home"
     >
       <img src="/seam-wordmark.svg" alt="SEAM" class="h-6 w-auto" />
@@ -15,7 +26,7 @@ import SiteSearch from './SiteSearch.astro'
       </span>
     </a>
 
-    <div class="ml-auto w-64 sm:w-80">
+    <div class="ml-auto w-40 sm:w-64 lg:w-80">
       <SiteSearch />
     </div>
   </div>

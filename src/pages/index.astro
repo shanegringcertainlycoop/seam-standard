@@ -45,7 +45,7 @@ const allActivities = pillars.flatMap((p) =>
   title="The SEAM Standard"
   description="The digital reference for the SEAM Standard — pillars, concepts, objectives, and activities for advancing social equity in commercial real estate."
 >
-  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+  <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} current="home" />
 
     <div class="min-w-0 flex-1">
@@ -55,7 +55,7 @@ const allActivities = pillars.flatMap((p) =>
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         v1.1 with Implementation Guidance
       </p>
-      <h1 class="mt-3 max-w-3xl text-5xl font-semibold leading-tight text-seam-900 sm:text-6xl">
+      <h1 class="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-seam-900 sm:text-5xl lg:text-6xl">
         The SEAM Standard
       </h1>
       <p class="mt-5 max-w-2xl text-lg leading-relaxed text-warm-700">
@@ -102,7 +102,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Products -->
   <section class="border-b border-warm-200 bg-warm-50/30">
-    <div class="px-2 py-12 sm:px-6">
+    <div class="px-0 py-10 sm:px-6 sm:py-12">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">Products</p>
       <h2 class="mt-2 text-3xl font-semibold text-warm-900">Three ways to use the SEAM Standard</h2>
       <p class="mt-3 max-w-3xl text-base text-warm-700">
@@ -247,7 +247,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Pillars -->
   <section id="pillars" class="border-b border-warm-200 bg-warm-50/30 scroll-mt-4">
-    <div class="px-2 py-12 sm:px-6">
+    <div class="px-0 py-10 sm:px-6 sm:py-12">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         The framework
       </p>
@@ -310,7 +310,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Concepts -->
   <section id="concepts" class="border-b border-warm-200 scroll-mt-4">
-    <div class="px-2 py-12 sm:px-6">
+    <div class="px-0 py-10 sm:px-6 sm:py-12">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         Themes
       </p>
@@ -362,7 +362,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Objectives -->
   <section id="objectives" class="border-b border-warm-200 bg-warm-50/30 scroll-mt-4">
-    <div class="px-2 py-12 sm:px-6">
+    <div class="px-0 py-10 sm:px-6 sm:py-12">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         Goals
       </p>
@@ -428,7 +428,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Activities -->
   <section id="activities" class="scroll-mt-4">
-    <div class="px-2 py-12 sm:px-6">
+    <div class="px-0 py-10 sm:px-6 sm:py-12">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         Actions
       </p>
@@ -444,10 +444,10 @@ const allActivities = pillars.flatMap((p) =>
         <table class="w-full text-sm">
           <thead class="border-b border-warm-200 bg-warm-50 text-xs uppercase tracking-wider text-warm-500">
             <tr>
-              <th class="px-3 py-2 text-left font-medium w-28">Activity</th>
+              <th class="px-3 py-2 text-left font-medium w-24 sm:w-28">Activity</th>
               <th class="px-3 py-2 text-left font-medium">Title</th>
-              <th class="px-3 py-2 text-left font-medium w-32">Pillar</th>
-              <th class="px-3 py-2 text-left font-medium w-20">Type</th>
+              <th class="hidden px-3 py-2 text-left font-medium md:table-cell md:w-32">Pillar</th>
+              <th class="hidden px-3 py-2 text-left font-medium sm:table-cell sm:w-20">Type</th>
             </tr>
           </thead>
           <tbody>
@@ -470,10 +470,10 @@ const allActivities = pillars.flatMap((p) =>
                       {a.title}
                     </a>
                   </td>
-                  <td class="px-3 py-2 align-top text-xs text-warm-500">
+                  <td class="hidden px-3 py-2 align-top text-xs text-warm-500 md:table-cell">
                     {a.pillar.title}
                   </td>
-                  <td class="px-3 py-2 align-top text-xs text-warm-500">
+                  <td class="hidden px-3 py-2 align-top text-xs text-warm-500 sm:table-cell">
                     {a.activityType}
                   </td>
                 </tr>

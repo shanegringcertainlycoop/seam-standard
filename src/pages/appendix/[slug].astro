@@ -32,15 +32,15 @@ const next = i < allAppendices.length - 1 ? allAppendices[i + 1] : undefined
 ---
 
 <StandardLayout title={`Appendix ${appendix.code}: ${appendix.title} — The SEAM Standard`}>
-  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+  <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} current={`appendix:${appendix.slug}`} />
 
     <article class="min-w-0 flex-1 max-w-4xl">
-      <nav class="mb-6 text-sm text-warm-500">
+      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
         <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span class="mx-2">/</span>
+        <span aria-hidden="true">/</span>
         <a href="/appendix" class="hover:text-seam-700">Appendices</a>
-        <span class="mx-2">/</span>
+        <span aria-hidden="true">/</span>
         <span class="text-warm-700">Appendix {appendix.code}</span>
       </nav>
 
