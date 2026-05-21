@@ -145,9 +145,18 @@ const PILLAR_GLYPHS: Record<string, string> = {
 ></div>
 
 <aside
-  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:max-h-[calc(100vh-5rem)] lg:w-96 lg:shrink-0 lg:translate-x-0 lg:overflow-y-auto lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
+  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:max-h-[calc(100vh-5rem)] lg:w-[var(--seam-sidenav-w,24rem)] lg:shrink-0 lg:translate-x-0 lg:overflow-y-visible lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
   data-seam-mobile-nav-panel
+  data-seam-sidenav-aside
 >
+  <!-- Resize handle (desktop only) -->
+  <div
+    class="absolute inset-y-0 right-[-6px] hidden w-3 cursor-col-resize select-none lg:block"
+    data-seam-sidenav-resize
+    aria-hidden="true"
+  >
+    <div class="mx-auto h-full w-px bg-transparent transition-colors hover:bg-seam-400 group-active:bg-seam-600"></div>
+  </div>
   <button
     type="button"
     class="mb-3 inline-flex items-center gap-1 rounded border border-warm-200 px-2 py-1 text-xs text-warm-600 hover:bg-warm-50 lg:hidden"
@@ -531,6 +540,70 @@ const PILLAR_GLYPHS: Record<string, string> = {
   document.querySelectorAll<HTMLAnchorElement>('[data-seam-sidenav] summary a[href]').forEach((a) => {
     a.addEventListener('click', (e) => e.stopPropagation())
   })
+
+  // Drag-to-resize the SideNav (desktop only). The width is stored on the
+  // <html> element as a custom property and persisted in localStorage so
+  // it sticks across navigation.
+  (function () {
+    const STORAGE = 'seam:sidenav-w'
+    const MIN = 224
+    const MAX = 640
+
+    const root = document.documentElement
+    const aside = document.querySelector<HTMLElement>('[data-seam-sidenav-aside]')
+    const handle = document.querySelector<HTMLElement>('[data-seam-sidenav-resize]')
+    if (!aside || !handle) return
+
+    function apply(px: number) {
+      const clamped = Math.max(MIN, Math.min(MAX, px))
+      root.style.setProperty('--seam-sidenav-w', `${clamped}px`)
+    }
+
+    // Hydrate from storage
+    try {
+      const v = parseInt(localStorage.getItem(STORAGE) || '', 10)
+      if (Number.isFinite(v)) apply(v)
+    } catch {}
+
+    let dragging = false
+    let startX = 0
+    let startW = 0
+
+    function onMove(e: PointerEvent) {
+      if (!dragging) return
+      const w = startW + (e.clientX - startX)
+      apply(w)
+    }
+    function onUp() {
+      if (!dragging) return
+      dragging = false
+      handle?.classList.remove('group', 'active')
+      document.body.classList.remove('select-none', 'cursor-col-resize')
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      const cur = parseInt(getComputedStyle(aside!).width, 10)
+      if (Number.isFinite(cur)) {
+        try { localStorage.setItem(STORAGE, String(cur)) } catch {}
+      }
+    }
+
+    handle.addEventListener('pointerdown', (e) => {
+      if (!window.matchMedia('(min-width: 1024px)').matches) return
+      dragging = true
+      startX = e.clientX
+      startW = aside!.getBoundingClientRect().width
+      document.body.classList.add('select-none', 'cursor-col-resize')
+      window.addEventListener('pointermove', onMove)
+      window.addEventListener('pointerup', onUp, { once: true })
+      e.preventDefault()
+    })
+
+    // Double-click resets to default
+    handle.addEventListener('dblclick', () => {
+      try { localStorage.removeItem(STORAGE) } catch {}
+      root.style.removeProperty('--seam-sidenav-w')
+    })
+  })()
 </script>
 
 <script>
