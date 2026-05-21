@@ -148,28 +148,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
   class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:h-[calc(100vh-5rem)] lg:w-96 lg:shrink-0 lg:translate-x-0 lg:overflow-visible lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
   data-seam-mobile-nav-panel
   data-seam-sidenav-aside
-  style="position: var(--seam-aside-pos, sticky);"
 >
-  <!-- Resize handle (desktop only) -->
-  <button
-    type="button"
-    class="group absolute right-[-10px] top-0 z-20 hidden h-full w-5 cursor-col-resize touch-none select-none items-center justify-center bg-transparent lg:flex"
-    data-seam-sidenav-resize
-    aria-label="Drag to resize navigation"
-    title="Drag to resize · double-click to reset"
-  >
-    <span class="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded bg-warm-200 transition-colors group-hover:bg-seam-500" aria-hidden="true"></span>
-    <span class="relative flex h-10 w-5 items-center justify-center rounded-full border border-warm-300 bg-white text-warm-500 shadow-sm transition-colors group-hover:border-seam-500 group-hover:text-seam-700">
-      <svg viewBox="0 0 12 16" width="10" height="14" fill="currentColor" aria-hidden="true">
-        <circle cx="4" cy="4" r="1"/>
-        <circle cx="8" cy="4" r="1"/>
-        <circle cx="4" cy="8" r="1"/>
-        <circle cx="8" cy="8" r="1"/>
-        <circle cx="4" cy="12" r="1"/>
-        <circle cx="8" cy="12" r="1"/>
-      </svg>
-    </span>
-  </button>
   <button
     type="button"
     class="mb-3 inline-flex items-center gap-1 rounded border border-warm-200 px-2 py-1 text-xs text-warm-600 hover:bg-warm-50 lg:hidden"
@@ -545,6 +524,28 @@ const PILLAR_GLYPHS: Record<string, string> = {
     </ul>
   </nav>
 </aside>
+
+<!-- Resize handle — sibling flex item next to the aside on desktop -->
+<div
+  class="group hidden cursor-col-resize touch-none select-none lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-5rem)] lg:w-3 lg:shrink-0 lg:items-center lg:justify-center lg:-mx-3"
+  data-seam-sidenav-resize
+  role="separator"
+  aria-orientation="vertical"
+  aria-label="Resize navigation. Drag horizontally."
+  title="Drag to resize · double-click to reset"
+>
+  <span class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-warm-300 transition-colors group-hover:w-0.5 group-hover:bg-seam-500" aria-hidden="true"></span>
+  <span class="relative flex h-12 w-5 items-center justify-center rounded-full border border-warm-300 bg-white text-warm-500 shadow-sm transition-colors group-hover:border-seam-500 group-hover:text-seam-700">
+    <svg viewBox="0 0 12 16" width="10" height="14" fill="currentColor" aria-hidden="true">
+      <circle cx="4" cy="4" r="1"/>
+      <circle cx="8" cy="4" r="1"/>
+      <circle cx="4" cy="8" r="1"/>
+      <circle cx="8" cy="8" r="1"/>
+      <circle cx="4" cy="12" r="1"/>
+      <circle cx="8" cy="12" r="1"/>
+    </svg>
+  </span>
+</div>
 
 <script>
   // Stop link clicks inside <summary> from bubbling — that way the link
