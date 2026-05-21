@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import { sanity } from '@/lib/sanity'
 import { getNavigationTree, type FootnoteRef } from '@/lib/sanity.queries'
 
@@ -33,11 +34,7 @@ const placeholderCount = numbered.filter(isPlaceholder).length
     <SideNav tree={navTree} current="bibliography" />
 
     <article class="min-w-0 flex-1 max-w-4xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">Bibliography</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'Bibliography' }]} />
 
       <header class="border-b border-warm-300 pb-4">
         <h1 class="text-3xl font-semibold text-warm-900">Bibliography</h1>

@@ -1,9 +1,8 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import ActivityHeader from '@/components/standard/ActivityHeader.astro'
-import ConceptBadge from '@/components/standard/ConceptBadge.astro'
-import PillarGlyph from '@/components/standard/PillarGlyph.astro'
 import Scope from '@/components/standard/Scope.astro'
 import Requirements from '@/components/standard/Requirements.astro'
 import Indicators from '@/components/standard/Indicators.astro'
@@ -106,23 +105,11 @@ if (activity.seals && activity.seals.length > 0) {
         >×</button>
       </div>
 
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <a href={`/${pillar}`} class="inline-flex items-center gap-1.5 hover:text-seam-700">
-          <PillarGlyph slug={activity.pillar.slug} size="xs" />
-          <span>{activity.pillar.title}</span>
-        </a>
-        <span aria-hidden="true">/</span>
-        <a href={`/${pillar}/${concept}`} class="inline-flex items-center gap-1.5 hover:text-seam-700">
-          <ConceptBadge code={activity.concept.code} size="xs" />
-          <span>{activity.concept.title}</span>
-        </a>
-        <span aria-hidden="true">/</span>
-        <a href={`/${pillar}/${concept}/${objective}`} class="hover:text-seam-700">
-          {activity.objective.objectiveCode}. {activity.objective.title}
-        </a>
-      </nav>
+      <Breadcrumb items={[
+        { href: `/${pillar}`, label: activity.pillar.title, glyph: { type: 'pillar', slug: activity.pillar.slug } },
+        { href: `/${pillar}/${concept}`, label: activity.concept.title, glyph: { type: 'concept', code: activity.concept.code } },
+        { href: `/${pillar}/${concept}/${objective}`, label: `${activity.objective.objectiveCode}. ${activity.objective.title}` },
+      ]} />
 
       <ActivityHeader activity={activity} />
 

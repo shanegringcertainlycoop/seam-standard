@@ -1,0 +1,73 @@
+---
+import PillarGlyph from './PillarGlyph.astro'
+import ConceptBadge from './ConceptBadge.astro'
+import ProductGlyph from './ProductGlyph.astro'
+
+type Glyph =
+  | { type: 'pillar'; slug: string }
+  | { type: 'concept'; code: string }
+  | { type: 'product'; product: 'certification' | 'seals' | 'marks' }
+
+export interface Crumb {
+  /** Omit on the final/current crumb to render as plain text. */
+  href?: string
+  label: string
+  glyph?: Glyph
+}
+
+interface Props {
+  items: Crumb[]
+  /** Override the leading "SEAM Standard" home label/link if needed. */
+  rootHref?: string
+  rootLabel?: string
+}
+
+const { items, rootHref = '/', rootLabel = 'SEAM Standard' } = Astro.props
+---
+
+<nav
+  class="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-warm-500"
+  aria-label="Breadcrumb"
+>
+  <a href={rootHref} class="hover:text-seam-700">{rootLabel}</a>
+  {
+    items.map((item) => (
+      <Fragment>
+        <span aria-hidden="true">/</span>
+        {item.href ? (
+          <a
+            href={item.href}
+            class="inline-flex items-center gap-1.5 hover:text-seam-700"
+          >
+            {item.glyph?.type === 'pillar' && (
+              <PillarGlyph slug={item.glyph.slug} size="xs" />
+            )}
+            {item.glyph?.type === 'concept' && (
+              <ConceptBadge code={item.glyph.code} size="xs" />
+            )}
+            {item.glyph?.type === 'product' && (
+              <ProductGlyph product={item.glyph.product} size="xs" />
+            )}
+            <span>{item.label}</span>
+          </a>
+        ) : (
+          <span
+            class="inline-flex items-center gap-1.5 text-warm-700"
+            aria-current="page"
+          >
+            {item.glyph?.type === 'pillar' && (
+              <PillarGlyph slug={item.glyph.slug} size="xs" />
+            )}
+            {item.glyph?.type === 'concept' && (
+              <ConceptBadge code={item.glyph.code} size="xs" />
+            )}
+            {item.glyph?.type === 'product' && (
+              <ProductGlyph product={item.glyph.product} size="xs" />
+            )}
+            <span>{item.label}</span>
+          </span>
+        )}
+      </Fragment>
+    ))
+  }
+</nav>

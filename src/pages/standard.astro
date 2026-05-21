@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import ConceptBadge from '@/components/standard/ConceptBadge.astro'
 import PillarGlyph from '@/components/standard/PillarGlyph.astro'
 import { getLandingData, getNavigationTree } from '@/lib/sanity.queries'
@@ -63,11 +64,7 @@ const stats = pillars.reduce(
     <SideNav tree={navTree} current="standard" />
 
     <article class="min-w-0 flex-1">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">The Standard</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'The Standard' }]} />
 
       <header class="border-b border-warm-300 pb-4">
         <h1 class="text-3xl font-semibold text-warm-900 sm:text-4xl">The SEAM Standard, v1.1</h1>

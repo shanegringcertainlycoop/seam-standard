@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import { listIntroSections, getNavigationTree } from '@/lib/sanity.queries'
 
 export const prerender = false
@@ -16,11 +17,7 @@ const [sections, navTree] = await Promise.all([
     <SideNav tree={navTree} current="intro" />
 
     <article class="min-w-0 flex-1 max-w-4xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">Introduction</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'Introduction' }]} />
 
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">Front matter</p>
       <h1 class="mt-3 text-4xl font-semibold text-seam-900">About the SEAM Standard</h1>

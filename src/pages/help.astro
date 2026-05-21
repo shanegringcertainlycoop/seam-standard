@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import ProductGlyph from '@/components/standard/ProductGlyph.astro'
 import { getNavigationTree } from '@/lib/sanity.queries'
 
@@ -17,11 +18,7 @@ const navTree = await getNavigationTree()
     <SideNav tree={navTree} current="help" />
 
     <article class="min-w-0 flex-1 max-w-3xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">How to use</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'How to use' }]} />
 
       <header class="border-b border-warm-300 pb-4">
         <p class="text-xs uppercase tracking-wider text-gold-500">Reference</p>

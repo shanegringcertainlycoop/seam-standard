@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import { renderPT } from '@/lib/renderPortableText'
 import {
   getSealBySlug,
@@ -30,13 +31,10 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
     <SideNav tree={navTree} current={`seals:${seal.slug}`} />
 
     <article class="min-w-0 flex-1 max-w-4xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <a href="/seals" class="hover:text-seam-700">SEALs</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">{seal.name}</span>
-      </nav>
+      <Breadcrumb items={[
+        { href: '/seals', label: 'SEALs', glyph: { type: 'product', product: 'seals' } },
+        { label: seal.name },
+      ]} />
 
       <header class="border-b border-warm-300 pb-4">
         <p class="text-xs uppercase tracking-wider text-gold-500">SEAL</p>

@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import { renderPT } from '@/lib/renderPortableText'
 import ConceptBadge from '@/components/standard/ConceptBadge.astro'
 import { getObjectiveBySlug, getNavigationTree, getFootnoteLookup, buildActivityUrlMap } from '@/lib/sanity.queries'
@@ -31,15 +32,11 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
     <SideNav tree={navTree} currentObjectiveSlug={objective.slug} currentConceptSlug={objective.concept.slug} currentPillarSlug={objective.pillar.slug} />
 
     <article class="min-w-0 flex-1 max-w-4xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <a href={`/${pillarSlug}`} class="hover:text-seam-700">{objective.pillar.title}</a>
-        <span aria-hidden="true">/</span>
-        <a href={`/${pillarSlug}/${conceptSlug}`} class="hover:text-seam-700">{objective.concept.title}</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">{objective.objectiveCode}. {objective.title}</span>
-      </nav>
+      <Breadcrumb items={[
+        { href: `/${pillarSlug}`, label: objective.pillar.title, glyph: { type: 'pillar', slug: objective.pillar.slug } },
+        { href: `/${pillarSlug}/${conceptSlug}`, label: objective.concept.title, glyph: { type: 'concept', code: objective.concept.code } },
+        { label: `${objective.objectiveCode}. ${objective.title}` },
+      ]} />
 
       <header class="border-b border-warm-300 pb-4">
         <div class="min-w-0 flex-1">

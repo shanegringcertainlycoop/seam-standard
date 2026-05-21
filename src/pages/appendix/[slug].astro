@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import Breadcrumb from '@/components/standard/Breadcrumb.astro'
 import { renderPT } from '@/lib/renderPortableText'
 import {
   getAppendixBySlug,
@@ -36,13 +37,10 @@ const next = i < allAppendices.length - 1 ? allAppendices[i + 1] : undefined
     <SideNav tree={navTree} current={`appendix:${appendix.slug}`} />
 
     <article class="min-w-0 flex-1 max-w-4xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
-        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
-        <span aria-hidden="true">/</span>
-        <a href="/appendix" class="hover:text-seam-700">Appendices</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-warm-700">Appendix {appendix.code}</span>
-      </nav>
+      <Breadcrumb items={[
+        { href: '/appendix', label: 'Appendices' },
+        { label: `Appendix ${appendix.code}` },
+      ]} />
 
       <header class="border-b border-warm-300 pb-4">
         <p class="font-mono text-xs uppercase tracking-wider text-gold-500">Appendix {appendix.code}</p>
