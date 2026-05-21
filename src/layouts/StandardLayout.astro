@@ -84,6 +84,39 @@ const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
     <main id="main">
       <slot />
     </main>
+
+    <section class="border-t border-warm-200 bg-seam-900 text-white">
+      <div class="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-6 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:py-16">
+        <div class="max-w-2xl">
+          <p class="text-xs font-semibold uppercase tracking-[0.15em] text-seam-300">
+            SEAM Standard v1.1
+          </p>
+          <h2 class="mt-2 text-2xl font-semibold leading-tight sm:text-3xl">
+            Download the full SEAM Standard.
+          </h2>
+          <p class="mt-3 text-[15px] leading-relaxed text-seam-100">
+            The complete framework — every Pillar, Concept, Objective, and
+            Activity — with implementation guidance. Free and open.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a
+            href="https://seamcertification.org/resources/standard"
+            class="rounded-full bg-white px-6 py-3 text-sm font-medium text-warm-900 transition-colors hover:bg-warm-100"
+            rel="noopener"
+          >
+            Download the Standard ↓
+          </a>
+          <a
+            href="/standard"
+            class="rounded-full border border-white/30 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/5"
+          >
+            Browse online
+          </a>
+        </div>
+      </div>
+    </section>
+
     <Footer />
   </body>
 </html>
