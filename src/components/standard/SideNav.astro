@@ -552,7 +552,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
   // chevron (outside the link) still toggles.
   document.querySelectorAll<HTMLAnchorElement>('[data-seam-sidenav] summary a[href]').forEach((a) => {
     a.addEventListener('click', (e) => e.stopPropagation())
-  })
+  });
 
   // Drag-to-resize the SideNav (desktop only). Width is applied directly
   // to the aside via inline style and persisted in localStorage.
