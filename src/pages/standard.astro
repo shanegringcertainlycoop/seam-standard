@@ -69,20 +69,34 @@ const stats = pillars.reduce(
         </dl>
       </header>
 
-      <aside class="mt-6 flex items-start gap-3 rounded border border-seam-200 bg-seam-50/60 px-4 py-3 text-sm text-seam-900">
+      <aside class="mt-6 flex flex-wrap items-center gap-3 rounded border border-seam-200 bg-seam-50/60 px-4 py-3 text-sm text-seam-900 sm:flex-nowrap">
         <span aria-hidden="true" class="mt-0.5 shrink-0 text-seam-700">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 5h18M6 12h12M10 19h4"/>
           </svg>
         </span>
-        <div class="flex-1">
-          <p>
-            <strong>Tip:</strong> use the
-            <span class="font-semibold">Product filter</span>
-            in the side nav to focus this view on a Rating System,
-            a SEAL, or Mark-eligible activities. Filtered-out
-            activities will dim (or hide, depending on your setting).
-          </p>
+        <p class="flex-1">
+          <strong>Tip:</strong> use the
+          <span class="font-semibold">Product filter</span>
+          in the side nav to focus this view on a Rating System,
+          a SEAL, or Mark-eligible activities.
+        </p>
+        <div class="flex shrink-0 items-center gap-2 text-xs text-seam-900">
+          <span>Hide non-applicable</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked="false"
+            data-seam-mode-switch
+            class="relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-warm-300 bg-warm-100 transition-colors hover:border-seam-400 aria-checked:border-seam-600 aria-checked:bg-seam-600"
+          >
+            <span class="sr-only">Hide non-applicable activities</span>
+            <span
+              aria-hidden="true"
+              data-seam-mode-thumb
+              class="inline-block h-3 w-3 translate-x-0.5 transform rounded-full bg-white shadow-sm transition-transform"
+            />
+          </button>
         </div>
       </aside>
 
@@ -101,7 +115,7 @@ const stats = pillars.reduce(
         }
       </nav>
 
-      <div class="mt-8 space-y-10">
+      <div class="mt-8 space-y-10" data-seam-filterable>
         {
           pillars.map((p) => {
             const pillarActivities = p.concepts.reduce(
@@ -177,24 +191,34 @@ const stats = pillars.reduce(
                                 )}
                                 {o.activities.length > 0 && (
                                   <ul class="divide-y divide-warm-100 border-t border-warm-100 bg-white">
-                                    {o.activities.map((a) => (
-                                      <li>
-                                        <a
-                                          href={`/${p.slug}/${c.slug}/${o.slug}/${a.slug}`}
-                                          class="group flex items-baseline gap-3 px-4 py-2 pl-[3.25rem] hover:bg-warm-50 hover:text-seam-700"
-                                        >
-                                          <span class="w-16 shrink-0 font-mono text-[11px] text-warm-500 group-hover:text-seam-600">
-                                            {a.activityId}
-                                          </span>
-                                          <span class="flex-1 text-sm text-warm-700 group-hover:text-seam-800">
-                                            {a.title}
-                                          </span>
-                                          <span class="shrink-0 text-[10px] uppercase tracking-wider text-warm-500">
-                                            {a.activityType}
-                                          </span>
-                                        </a>
-                                      </li>
-                                    ))}
+                                    {o.activities.map((a) => {
+                                      const rs = a.ratingSystemApplication
+                                      const attrs: Record<string, string> = { 'data-filter-item': '' }
+                                      if (rs?.bi_developer) attrs['data-rs-bid'] = '1'
+                                      if (rs?.bi_occupier) attrs['data-rs-bio'] = '1'
+                                      if (rs?.om_developer) attrs['data-rs-omd'] = '1'
+                                      if (rs?.om_occupier) attrs['data-rs-omo'] = '1'
+                                      if (a.markEligible) attrs['data-mark'] = '1'
+                                      if (a.sealSlugs && a.sealSlugs.length) attrs['data-seals'] = a.sealSlugs.join(' ')
+                                      return (
+                                        <li {...attrs}>
+                                          <a
+                                            href={`/${p.slug}/${c.slug}/${o.slug}/${a.slug}`}
+                                            class="group flex items-baseline gap-3 px-4 py-2 pl-[3.25rem] hover:bg-warm-50 hover:text-seam-700"
+                                          >
+                                            <span class="w-16 shrink-0 font-mono text-[11px] text-warm-500 group-hover:text-seam-600">
+                                              {a.activityId}
+                                            </span>
+                                            <span class="flex-1 text-sm text-warm-700 group-hover:text-seam-800">
+                                              {a.title}
+                                            </span>
+                                            <span class="shrink-0 text-[10px] uppercase tracking-wider text-warm-500">
+                                              {a.activityType}
+                                            </span>
+                                          </a>
+                                        </li>
+                                      )
+                                    })}
                                   </ul>
                                 )}
                               </details>

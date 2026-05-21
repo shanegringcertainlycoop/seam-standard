@@ -781,6 +781,8 @@ export interface LandingActivity {
   slug: string
   activityType: 'Driver' | 'Impact'
   ratingSystemApplication?: RatingSystemApplication
+  markEligible?: boolean
+  sealSlugs?: string[]
 }
 
 export interface LandingObjective {
@@ -836,7 +838,9 @@ export async function getLandingData(): Promise<LandingPillar[]> {
           title,
           "slug": slug.current,
           activityType,
-          ratingSystemApplication
+          ratingSystemApplication,
+          markEligible,
+          "sealSlugs": *[_type == "seal" && references(^._id)].slug.current
         }
       }
     }

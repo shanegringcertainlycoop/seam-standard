@@ -90,7 +90,7 @@ function rsAttrsForActivity(rs?: RatingSystemApplication) {
 }
 
 function activityAttrs(a: { ratingSystemApplication?: RatingSystemApplication; markEligible?: boolean; sealSlugs?: string[] }) {
-  const out: Record<string, string> = { ...rsAttrsForActivity(a.ratingSystemApplication) }
+  const out: Record<string, string> = { ...rsAttrsForActivity(a.ratingSystemApplication), 'data-filter-item': '' }
   if (a.markEligible) out['data-mark'] = '1'
   if (a.sealSlugs && a.sealSlugs.length) {
     out['data-seals'] = a.sealSlugs.join(' ')
@@ -115,7 +115,7 @@ function unionAttrs(...activities: ActivityFacts[]) {
     if (a.markEligible) anyMark = true
     a.sealSlugs?.forEach((s) => seals.add(s))
   }
-  const out: Record<string, string> = { ...rsAttrsForActivity(rs) }
+  const out: Record<string, string> = { ...rsAttrsForActivity(rs), 'data-filter-item': '' }
   if (anyMark) out['data-mark'] = '1'
   if (seals.size) out['data-seals'] = Array.from(seals).join(' ')
   return out
@@ -247,7 +247,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
         don't match. <strong>Off</strong> keeps them visible but dimmed.
       </p>
     </div>
-    <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree>
+    <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree data-seam-filterable>
       {
         tree.map((pillar) => {
           const allActs = (pillar.concepts ?? []).flatMap((c) =>
@@ -670,22 +670,20 @@ const PILLAR_GLYPHS: Record<string, string> = {
   })
 </script>
 
-<style>
-  /* Default mode (dim): non-applicable items fade to opacity 0.35. */
-  [data-seam-sidenav][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { opacity: 0.35; }
-  [data-seam-sidenav][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { opacity: 0.35; }
-  [data-seam-sidenav][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { opacity: 0.35; }
-  [data-seam-sidenav][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { opacity: 0.35; }
-  [data-seam-sidenav][data-seam-mark-active] [data-seam-tree] li:not([data-mark]) { opacity: 0.35; }
-  [data-seam-sidenav][data-seam-seal-active] [data-seam-tree] li:not([data-seals]) { opacity: 0.35; }
+<style is:global>
+  /* Filter state lives on <html> so any [data-seam-filterable] container
+     (side-nav tree, /standard page tree) responds to the same toggles. */
+  html[data-seam-rs-active='bid'] [data-seam-filterable] [data-filter-item]:not([data-rs-bid]) { opacity: 0.35; }
+  html[data-seam-rs-active='bio'] [data-seam-filterable] [data-filter-item]:not([data-rs-bio]) { opacity: 0.35; }
+  html[data-seam-rs-active='omd'] [data-seam-filterable] [data-filter-item]:not([data-rs-omd]) { opacity: 0.35; }
+  html[data-seam-rs-active='omo'] [data-seam-filterable] [data-filter-item]:not([data-rs-omo]) { opacity: 0.35; }
+  html[data-seam-mark-active]    [data-seam-filterable] [data-filter-item]:not([data-mark])   { opacity: 0.35; }
 
-  /* Hide mode: non-applicable items are removed from the tree. */
-  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { display: none; }
-  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { display: none; }
-  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { display: none; }
-  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { display: none; }
-  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-mark-active] [data-seam-tree] li:not([data-mark]) { display: none; }
-  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-seal-active] [data-seam-tree] li:not([data-seals]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='bid'] [data-seam-filterable] [data-filter-item]:not([data-rs-bid]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='bio'] [data-seam-filterable] [data-filter-item]:not([data-rs-bio]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='omd'] [data-seam-filterable] [data-filter-item]:not([data-rs-omd]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='omo'] [data-seam-filterable] [data-filter-item]:not([data-rs-omo]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-mark-active]    [data-seam-filterable] [data-filter-item]:not([data-mark])   { display: none; }
 </style>
 
 <script>
@@ -753,23 +751,25 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
       const safe = slug.replace(/["\\]/g, '\\$&')
       style.textContent =
-        `[data-seam-sidenav] [data-seam-tree] li:not([data-seals~="${safe}"]) { opacity: 0.35; }
-         [data-seam-sidenav][data-seam-filter-mode='hide'] [data-seam-tree] li:not([data-seals~="${safe}"]) { display: none; }`
+        `html[data-seam-seal-active='${safe}'] [data-seam-filterable] [data-filter-item]:not([data-seals~="${safe}"]) { opacity: 0.35; }
+         html[data-seam-filter-mode='hide'][data-seam-seal-active='${safe}'] [data-seam-filterable] [data-filter-item]:not([data-seals~="${safe}"]) { display: none; }`
     }
 
-    // Mode switch (dim ↔ hide)
+    // Mode switch (dim ↔ hide) — finds every [data-seam-mode-switch] on the
+    // page (the side nav's and any other instance, e.g. on /standard) and
+    // keeps them all in sync.
     const MODE_KEY = 'seam:filter-mode'
-    const modeSwitch = sidenav.querySelector<HTMLButtonElement>('[data-seam-mode-switch]')
-    const modeThumb = sidenav.querySelector<HTMLElement>('[data-seam-mode-thumb]')
+    const modeSwitches = document.querySelectorAll<HTMLButtonElement>('[data-seam-mode-switch]')
+    const modeThumbs = document.querySelectorAll<HTMLElement>('[data-seam-mode-thumb]')
 
     function applyMode(mode: 'dim' | 'hide') {
-      sidenav.setAttribute('data-seam-filter-mode', mode)
+      document.documentElement.setAttribute('data-seam-filter-mode', mode)
       const on = mode === 'hide'
-      if (modeSwitch) modeSwitch.setAttribute('aria-checked', String(on))
-      if (modeThumb) {
-        modeThumb.classList.toggle('translate-x-3', on)
-        modeThumb.classList.toggle('translate-x-0.5', !on)
-      }
+      modeSwitches.forEach((s) => s.setAttribute('aria-checked', String(on)))
+      modeThumbs.forEach((t) => {
+        t.classList.toggle('translate-x-3', on)
+        t.classList.toggle('translate-x-0.5', !on)
+      })
     }
 
     function readMode(): 'dim' | 'hide' {
@@ -779,10 +779,18 @@ const PILLAR_GLYPHS: Record<string, string> = {
       } catch { return 'dim' }
     }
 
-    modeSwitch?.addEventListener('click', () => {
-      const next = readMode() === 'hide' ? 'dim' : 'hide'
-      try { localStorage.setItem(MODE_KEY, next) } catch {}
-      applyMode(next)
+    modeSwitches.forEach((s) => {
+      s.addEventListener('click', () => {
+        const next = readMode() === 'hide' ? 'dim' : 'hide'
+        try { localStorage.setItem(MODE_KEY, next) } catch {}
+        applyMode(next)
+        window.dispatchEvent(new CustomEvent('seam:mode-change', { detail: { mode: next } }))
+      })
+    })
+
+    window.addEventListener('seam:mode-change', (e: Event) => {
+      const detail = (e as CustomEvent<{ mode: 'dim' | 'hide' }>).detail
+      if (detail?.mode) applyMode(detail.mode)
     })
 
     applyMode(readMode())
@@ -800,9 +808,10 @@ const PILLAR_GLYPHS: Record<string, string> = {
     }
 
     function apply(filter: string | null) {
-      sidenav.removeAttribute('data-seam-rs-active')
-      sidenav.removeAttribute('data-seam-seal-active')
-      sidenav.removeAttribute('data-seam-mark-active')
+      const root = document.documentElement
+      root.removeAttribute('data-seam-rs-active')
+      root.removeAttribute('data-seam-seal-active')
+      root.removeAttribute('data-seam-mark-active')
 
       rsDots.forEach((d) => {
         const label = sidenav.querySelector<HTMLElement>(`[data-seam-rs-label="${d.dataset.seamRsDot}"]`)
@@ -816,20 +825,20 @@ const PILLAR_GLYPHS: Record<string, string> = {
 
       if (filter?.startsWith('rs-')) {
         const k = filter.slice(3)
-        sidenav.setAttribute('data-seam-rs-active', k)
+        root.setAttribute('data-seam-rs-active', k)
         const dot = sidenav.querySelector<HTMLElement>(`[data-seam-rs-dot="${k}"]`)
         const label = sidenav.querySelector<HTMLElement>(`[data-seam-rs-label="${k}"]`)
         paintActive(dot, label, true)
         ensureSealStyle(null)
       } else if (filter?.startsWith('seal:')) {
         const slug = filter.slice('seal:'.length)
-        sidenav.setAttribute('data-seam-seal-active', slug)
+        root.setAttribute('data-seam-seal-active', slug)
         const dot = sidenav.querySelector<HTMLElement>(`[data-seam-seal-dot="${slug}"]`)
         const label = sidenav.querySelector<HTMLElement>(`[data-seam-seal-label="${slug}"]`)
         paintActive(dot, label, true)
         ensureSealStyle(slug)
       } else if (filter === 'mark') {
-        sidenav.setAttribute('data-seam-mark-active', '1')
+        root.setAttribute('data-seam-mark-active', '1')
         paintActive(markDot, markLabel, true)
         ensureSealStyle(null)
       } else {
