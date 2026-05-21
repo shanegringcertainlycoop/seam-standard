@@ -168,45 +168,48 @@ const PILLAR_GLYPHS: Record<string, string> = {
       </li>
     </ul>
 
-    <div class="mb-2 flex items-center justify-between gap-2">
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-        Framework
-      </p>
-      <div class="flex items-center gap-1.5 text-[10px] text-warm-500">
-        <span class="relative inline-flex">
+    <div class="mb-2">
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+          Framework
+        </p>
+        <div class="flex items-center gap-1.5 text-[10px] text-warm-500">
           <button
             type="button"
             data-seam-info
-            aria-label="What does this do?"
+            aria-expanded="false"
+            aria-controls="seam-mode-info"
+            aria-label="What does the Hide non-applicable toggle do?"
             class="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-warm-300 text-[9px] font-semibold text-warm-500 hover:border-seam-500 hover:text-seam-700"
           >
             ?
           </button>
-          <span
-            data-seam-info-tip
-            class="absolute right-0 top-full z-40 mt-1 hidden w-56 rounded border border-warm-200 bg-white p-2 text-left text-[11px] font-normal normal-case leading-snug text-warm-700 shadow-lg"
-            role="tooltip"
+          <span>Hide non-applicable</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked="false"
+            data-seam-mode-switch
+            class="relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-warm-300 bg-warm-100 transition-colors hover:border-seam-400 aria-checked:border-seam-600 aria-checked:bg-seam-600"
           >
-            When a Product filter is active, this hides activities that don't
-            match it. Off, non-matching activities stay visible but dimmed.
-          </span>
-        </span>
-        <span>Hide non-applicable</span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked="false"
-          data-seam-mode-switch
-          class="relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-warm-300 bg-warm-100 transition-colors hover:border-seam-400 aria-checked:border-seam-600 aria-checked:bg-seam-600"
-        >
-          <span class="sr-only">Hide non-applicable activities</span>
-          <span
-            aria-hidden="true"
-            data-seam-mode-thumb
-            class="inline-block h-3 w-3 translate-x-0.5 transform rounded-full bg-white shadow-sm transition-transform"
-          />
-        </button>
+            <span class="sr-only">Hide non-applicable activities</span>
+            <span
+              aria-hidden="true"
+              data-seam-mode-thumb
+              class="inline-block h-3 w-3 translate-x-0.5 transform rounded-full bg-white shadow-sm transition-transform"
+            />
+          </button>
+        </div>
       </div>
+      <p
+        id="seam-mode-info"
+        data-seam-info-tip
+        class="mt-1.5 hidden rounded border border-warm-200 bg-warm-50 px-2 py-1.5 text-[11px] leading-snug text-warm-700"
+        role="note"
+      >
+        With a Product filter active, <strong>on</strong> hides activities that
+        don't match. <strong>Off</strong> keeps them visible but dimmed.
+      </p>
     </div>
     <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree>
       {
@@ -532,19 +535,15 @@ const PILLAR_GLYPHS: Record<string, string> = {
 
     applyMode(readMode())
 
-    // Info tooltip (click toggles, since hover-on-mobile is awkward)
+    // Info note (click toggles a sibling note that lives in normal flow,
+    // so it can't be clipped or pushed off-screen)
     const infoBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-info]')
     const infoTip = sidenav.querySelector<HTMLElement>('[data-seam-info-tip]')
     if (infoBtn && infoTip) {
-      const show = () => infoTip.classList.remove('hidden')
-      const hide = () => infoTip.classList.add('hidden')
-      infoBtn.addEventListener('mouseenter', show)
-      infoBtn.addEventListener('mouseleave', hide)
-      infoBtn.addEventListener('focus', show)
-      infoBtn.addEventListener('blur', hide)
       infoBtn.addEventListener('click', (e) => {
         e.preventDefault()
-        infoTip.classList.toggle('hidden')
+        const showing = !infoTip.classList.toggle('hidden')
+        infoBtn.setAttribute('aria-expanded', String(showing))
       })
     }
 
