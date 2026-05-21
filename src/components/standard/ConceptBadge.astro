@@ -1,0 +1,39 @@
+---
+interface Props {
+  code: string
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  /** Tailwind class for an outline-only variant (subtle for inline use). */
+  outline?: boolean
+}
+
+const { code, size = 'sm', outline = false } = Astro.props
+
+// Consistent color per concept code. The hues echo the SEAM palette.
+const COLORS: Record<string, { bg: string; text: string; ring: string }> = {
+  IA: { bg: 'bg-seam-700',  text: 'text-white',     ring: 'ring-seam-700' },
+  TG: { bg: 'bg-gold-500',  text: 'text-white',     ring: 'ring-gold-500' },
+  CI: { bg: 'bg-warm-700',  text: 'text-white',     ring: 'ring-warm-700' },
+  SJ: { bg: 'bg-amber-600', text: 'text-white',     ring: 'ring-amber-600' },
+  IN: { bg: 'bg-emerald-700', text: 'text-white',   ring: 'ring-emerald-700' },
+  HR: { bg: 'bg-rose-700',  text: 'text-white',     ring: 'ring-rose-700' },
+  HS: { bg: 'bg-sky-700',   text: 'text-white',     ring: 'ring-sky-700' },
+}
+
+const FALLBACK = { bg: 'bg-warm-500', text: 'text-white', ring: 'ring-warm-500' }
+const c = COLORS[code.toUpperCase()] ?? FALLBACK
+
+const sizeMap: Record<string, string> = {
+  xs: 'h-4 w-4 text-[8px]',
+  sm: 'h-5 w-5 text-[9px]',
+  md: 'h-7 w-7 text-[11px]',
+  lg: 'h-9 w-9 text-xs',
+}
+const sz = sizeMap[size]
+
+const classes = outline
+  ? `inline-flex shrink-0 items-center justify-center rounded-full font-mono font-semibold uppercase ring-1 ${c.ring} ${c.text.replace('text-white', '')} ${sz}`
+  : `inline-flex shrink-0 items-center justify-center rounded-full font-mono font-semibold uppercase ${c.bg} ${c.text} ${sz}`
+---
+
+<span class={classes} title={code} aria-hidden="true">{code}</span>
+<span class="sr-only">Concept {code}</span>

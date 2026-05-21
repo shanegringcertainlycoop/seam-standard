@@ -1,4 +1,5 @@
 ---
+import ConceptBadge from './ConceptBadge.astro'
 import {
   listIntroSections,
   listSeals,
@@ -240,9 +241,10 @@ const PILLAR_GLYPHS: Record<string, string> = {
                     return (
                       <li {...conceptAttrs}>
                         <details open={concept.slug === openConcept} class="group/concept">
-                          <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-800 marker:hidden hover:text-seam-700">
-                            <span class="inline-block w-3 text-warm-400 group-open/concept:rotate-90 transition-transform">›</span>
-                            <span class="ml-1">{concept.code}. {concept.title}</span>
+                          <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 font-medium text-warm-800 marker:hidden hover:text-seam-700">
+                            <span class="inline-block w-3 shrink-0 text-warm-400 group-open/concept:rotate-90 transition-transform">›</span>
+                            <ConceptBadge code={concept.code} size="xs" />
+                            <span>{concept.title}</span>
                           </summary>
                           <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3">
                             {(concept.objectives ?? []).map((objective) => {

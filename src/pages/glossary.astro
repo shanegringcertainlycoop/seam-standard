@@ -8,6 +8,7 @@ import {
   getNavigationTree,
   buildActivityUrlMap,
 } from '@/lib/sanity.queries'
+import { definedTermSet, breadcrumbs } from '@/lib/seo'
 
 export const prerender = false
 
@@ -27,9 +28,38 @@ for (const t of terms) {
   groups.get(letter)!.push(t)
 }
 const letters = Array.from(groups.keys()).sort()
+
+function plain(blocks: typeof terms[number]['body']): string {
+  const out: string[] = []
+  for (const b of blocks ?? []) {
+    const children = (b as { children?: Array<{ text?: string }> }).children
+    if (children) out.push(children.map((c) => c.text ?? '').join(''))
+  }
+  return out.join(' ').replace(/\s+/g, ' ').trim()
+}
+
+const jsonLd = [
+  breadcrumbs([
+    { name: 'SEAM Standard', path: '/' },
+    { name: 'Key terms + definitions', path: '/glossary' },
+  ]),
+  definedTermSet({
+    name: 'SEAM Standard Key Terms + Definitions',
+    path: '/glossary',
+    terms: terms.map((t) => ({
+      name: t.term,
+      description: plain(t.body).slice(0, 500),
+      path: `/glossary#${t.slug}`,
+    })),
+  }),
+]
 ---
 
-<StandardLayout title="Key terms + definitions — The SEAM Standard">
+<StandardLayout
+  title="Key terms + definitions — The SEAM Standard"
+  description="Terminology used throughout the SEAM Standard — definitions for every term referenced by an Activity."
+  jsonLd={jsonLd}
+>
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} current="glossary" />
 

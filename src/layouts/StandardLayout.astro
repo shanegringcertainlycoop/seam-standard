@@ -5,9 +5,34 @@ import TopBar from '@/components/standard/TopBar.astro'
 interface Props {
   title: string
   description?: string
+  /** OG image absolute URL (defaults to /og-default.png). */
+  image?: string
+  /** Override canonical URL. Defaults to the current request URL with no query/hash. */
+  canonical?: string
+  /** Set true on /search-like internal-tool pages to noindex them. */
+  noindex?: boolean
+  /** Schema.org JSON-LD object(s) to embed in <head>. */
+  jsonLd?: object | object[]
 }
 
-const { title, description } = Astro.props
+const {
+  title,
+  description,
+  image,
+  canonical,
+  noindex = false,
+  jsonLd,
+} = Astro.props
+
+const siteName = 'The SEAM Standard'
+const siteUrl = 'https://standard.seamcertification.org'
+
+const canonicalUrl =
+  canonical ?? (new URL(Astro.url.pathname, siteUrl).toString().replace(/\/+$/, '') || siteUrl)
+
+const ogImage = image ?? `${siteUrl}/og-default.png`
+
+const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
 ---
 
 <!doctype html>
@@ -16,8 +41,41 @@ const { title, description } = Astro.props
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    <link rel="canonical" href={canonicalUrl} />
+
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Publisher / author -->
+    <meta name="author" content="SEAM, Inc." />
+    <meta name="publisher" content="SEAM, Inc." />
+
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+    {
+      jsonLdList.map((doc) => (
+        <script type="application/ld+json" set:html={JSON.stringify(doc)} />
+      ))
+    }
   </head>
   <body class="bg-warm-50 text-warm-900 font-sans antialiased">
     <a href="#main" class="sr-only">Skip to content</a>

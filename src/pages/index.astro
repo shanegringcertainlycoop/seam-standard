@@ -1,7 +1,9 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import ConceptBadge from '@/components/standard/ConceptBadge.astro'
 import { getLandingData, getNavigationTree } from '@/lib/sanity.queries'
+import { website, organization } from '@/lib/seo'
 
 export const prerender = false
 
@@ -44,6 +46,7 @@ const allActivities = pillars.flatMap((p) =>
 <StandardLayout
   title="The SEAM Standard"
   description="The digital reference for the SEAM Standard — pillars, concepts, objectives, and activities for advancing social equity in commercial real estate."
+  jsonLd={[website(), organization()]}
 >
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} current="home" />
@@ -336,8 +339,8 @@ const allActivities = pillars.flatMap((p) =>
                     href={`/${p.slug}/${c.slug}`}
                     class="group flex flex-col gap-1 rounded border border-warm-200 bg-white p-4 hover:border-seam-400 hover:shadow-sm"
                   >
-                    <div class="flex items-baseline gap-2">
-                      <span class="font-mono text-xs text-warm-500">{c.code}</span>
+                    <div class="flex items-center gap-2">
+                      <ConceptBadge code={c.code} size="md" />
                       <h4 class="text-base font-medium text-warm-900 group-hover:text-seam-700">
                         {c.title}
                       </h4>
@@ -385,9 +388,9 @@ const allActivities = pillars.flatMap((p) =>
               {p.concepts.map((c) => (
                 <div class="mt-4">
                   <h4 class="text-sm font-semibold text-seam-700">
-                    <a href={`/${p.slug}/${c.slug}`} class="hover:text-seam-500">
-                      <span class="font-mono text-xs text-warm-500">{c.code}.</span>
-                      <span class="ml-2">{c.title}</span>
+                    <a href={`/${p.slug}/${c.slug}`} class="inline-flex items-center gap-2 hover:text-seam-500">
+                      <ConceptBadge code={c.code} size="sm" />
+                      <span>{c.title}</span>
                     </a>
                   </h4>
                   <ul class="mt-2 divide-y divide-warm-200 overflow-hidden rounded border border-warm-200 bg-white">

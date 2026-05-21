@@ -2,6 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
+import ConceptBadge from '@/components/standard/ConceptBadge.astro'
 import { getConceptBySlug, getNavigationTree, getFootnoteLookup, buildActivityUrlMap } from '@/lib/sanity.queries'
 
 export const prerender = false
@@ -53,9 +54,12 @@ const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities
         }
         <div class="min-w-0 flex-1">
           <p class="text-xs uppercase tracking-wider text-gold-500">
-            Concept {concept.number} · {concept.code}
+            Concept {concept.number}
           </p>
-          <h1 class="mt-1 text-3xl font-semibold text-warm-900">{concept.title}</h1>
+          <h1 class="mt-1 flex items-center gap-3 text-3xl font-semibold text-warm-900">
+            <ConceptBadge code={concept.code} size="lg" />
+            <span>{concept.title}</span>
+          </h1>
           {
             concept.headlineGoal && (
               <p class="mt-3 text-lg font-light leading-relaxed text-seam-800">
