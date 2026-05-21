@@ -243,109 +243,97 @@ const PILLAR_GLYPHS: Record<string, string> = {
       <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
         Product filter
       </p>
-      <ul class="space-y-1 text-sm">
-        <li>
-          <details open class="group/cert">
-            <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
-              <span class="inline-block w-3 text-warm-400 group-open/cert:rotate-90 transition-transform">›</span>
-              <span class="ml-1">Certification</span>
-            </summary>
-            <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
-              {
-                RS_OPTIONS.map((rs) => (
-                  <li>
-                    <button
-                      type="button"
-                      data-seam-rs-toggle={rs.key}
-                      data-seam-filter-row
-                      title={rs.title}
-                      class="group/btn flex w-full items-center gap-1.5 py-0.5 text-left text-warm-600 hover:text-seam-700"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
-                        data-seam-rs-dot={rs.key}
-                      />
-                      <span class="font-mono" data-seam-rs-label={rs.key}>{rs.label}</span>
-                    </button>
-                  </li>
-                ))
-              }
-            </ul>
-          </details>
-        </li>
 
-        <li>
-          <details open={isSealsOpen} class="group/seals">
-            <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
-              <span class="inline-block w-3 text-warm-400 group-open/seals:rotate-90 transition-transform">›</span>
-              <a
-                href="/seals"
-                class:list={['ml-1', current === 'seals' ? activeClass : '']}
-                aria-current={current === 'seals' ? 'page' : undefined}
+      <p class="mt-1 text-[11px] font-semibold uppercase tracking-wider text-warm-500">
+        Certification
+      </p>
+      <ul class="ml-1 mt-1 space-y-0.5 text-xs">
+        {
+          RS_OPTIONS.map((rs) => (
+            <li>
+              <button
+                type="button"
+                data-seam-rs-toggle={rs.key}
+                title={rs.title}
+                class="group/btn flex w-full items-center gap-2 rounded px-1 py-1 text-left text-warm-700 hover:bg-warm-50"
               >
-                SEALs
-              </a>
-            </summary>
-            <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
-              {seals.length === 0 ? (
-                <li class="py-0.5 italic text-warm-400">No SEALs yet</li>
-              ) : (
-                seals.map((s) => {
-                  const isActive = activeSealSlug === s.slug
-                  return (
-                    <li class="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        data-seam-seal-toggle={s.slug}
-                        title={`Filter the side nav to activities in ${s.name}`}
-                        class="shrink-0"
-                        aria-label={`Filter by ${s.name}`}
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="inline-block h-2 w-2 rounded-full border border-warm-400"
-                          data-seam-seal-dot={s.slug}
-                        />
-                      </button>
-                      <a
-                        href={`/seals/${s.slug}`}
-                        class:list={['flex-1 truncate py-0.5', isActive ? activeClass : idleClass]}
-                        aria-current={isActive ? 'page' : undefined}
-                        title={s.name}
-                        data-seam-seal-label={s.slug}
-                      >
-                        {s.name.replace(/\s+SEAL$/, '')}
-                      </a>
-                    </li>
-                  )
-                })
-              )}
-            </ul>
-          </details>
-        </li>
+                <span
+                  aria-hidden="true"
+                  class="inline-block h-2.5 w-2.5 shrink-0 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
+                  data-seam-rs-dot={rs.key}
+                />
+                <span class="font-mono" data-seam-rs-label={rs.key}>{rs.label}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
 
-        <li class="flex items-center gap-1.5 pl-3 text-sm">
+      <p class="mt-3 flex items-baseline justify-between text-[11px] font-semibold uppercase tracking-wider text-warm-500">
+        <a href="/seals" class="hover:text-seam-700">SEALs</a>
+        <a href="/seals" class="text-[10px] font-normal normal-case text-warm-400 hover:text-seam-700">
+          all →
+        </a>
+      </p>
+      <ul class="ml-1 mt-1 space-y-0.5 text-xs">
+        {seals.length === 0 ? (
+          <li class="px-1 py-1 italic text-warm-400">No SEALs yet</li>
+        ) : (
+          seals.map((s) => {
+            const isPageActive = activeSealSlug === s.slug
+            return (
+              <li class="flex items-center gap-2 rounded px-1 py-1 hover:bg-warm-50">
+                <button
+                  type="button"
+                  data-seam-seal-toggle={s.slug}
+                  title={`Filter to activities in ${s.name}`}
+                  class="group/btn shrink-0"
+                  aria-label={`Filter by ${s.name}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    class="inline-block h-2.5 w-2.5 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
+                    data-seam-seal-dot={s.slug}
+                  />
+                </button>
+                <a
+                  href={`/seals/${s.slug}`}
+                  class:list={['flex-1 truncate', isPageActive ? 'font-semibold text-seam-700' : 'text-warm-700 hover:text-seam-700']}
+                  aria-current={isPageActive ? 'page' : undefined}
+                  title={s.name}
+                  data-seam-seal-label={s.slug}
+                >
+                  {s.name.replace(/\s+SEAL$/, '')}
+                </a>
+              </li>
+            )
+          })
+        )}
+      </ul>
+
+      <p class="mt-3 text-[11px] font-semibold uppercase tracking-wider text-warm-500">Marks</p>
+      <ul class="ml-1 mt-1 text-xs">
+        <li class="flex items-center gap-2 rounded px-1 py-1 hover:bg-warm-50">
           <button
             type="button"
             data-seam-mark-toggle
-            title="Filter the side nav to Mark-eligible activities"
-            class="shrink-0"
+            title="Filter to Mark-eligible activities"
+            class="group/btn shrink-0"
             aria-label="Filter by Marks"
           >
             <span
               aria-hidden="true"
-              class="inline-block h-2 w-2 rounded-full border border-warm-400"
+              class="inline-block h-2.5 w-2.5 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
               data-seam-mark-dot
             />
           </button>
           <a
             href="/marks"
-            class:list={['flex-1 py-0.5 font-medium', current === 'marks' ? activeClass : idleClass]}
+            class:list={['flex-1', current === 'marks' ? 'font-semibold text-seam-700' : 'text-warm-700 hover:text-seam-700']}
             aria-current={current === 'marks' ? 'page' : undefined}
             data-seam-mark-label
           >
-            Marks
+            Mark-eligible activities
           </a>
         </li>
       </ul>
