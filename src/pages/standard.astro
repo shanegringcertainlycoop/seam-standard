@@ -12,6 +12,34 @@ const [pillars, navTree] = await Promise.all([
   getNavigationTree(),
 ])
 
+// Aggregate filter attributes from a set of activities — used to dim/hide
+// objectives and concepts when nothing under them matches the active filter.
+function aggregate(activities: Array<{
+  ratingSystemApplication?: { bi_developer?: boolean; bi_occupier?: boolean; om_developer?: boolean; om_occupier?: boolean }
+  markEligible?: boolean
+  sealSlugs?: string[]
+}>) {
+  const out: any = { 'data-filter-item': '' }
+  let bid = false, bio = false, omd = false, omo = false, mark = false
+  const seals = new Set<string>()
+  for (const a of activities) {
+    const rs = a.ratingSystemApplication
+    if (rs?.bi_developer) bid = true
+    if (rs?.bi_occupier) bio = true
+    if (rs?.om_developer) omd = true
+    if (rs?.om_occupier) omo = true
+    if (a.markEligible) mark = true
+    a.sealSlugs?.forEach((s) => seals.add(s))
+  }
+  if (bid) out['data-rs-bid'] = '1'
+  if (bio) out['data-rs-bio'] = '1'
+  if (omd) out['data-rs-omd'] = '1'
+  if (omo) out['data-rs-omo'] = '1'
+  if (mark) out['data-mark'] = '1'
+  if (seals.size) out['data-seals'] = Array.from(seals).join(' ')
+  return out
+}
+
 const stats = pillars.reduce(
   (s, p) => {
     s.concepts += p.concepts.length
@@ -143,8 +171,9 @@ const stats = pillars.reduce(
                       (s, o) => s + o.activities.length,
                       0,
                     )
+                    const conceptAttrs = aggregate(c.objectives.flatMap((o) => o.activities))
                     return (
-                      <details open class="group/concept overflow-hidden rounded-lg border border-warm-200 bg-white">
+                      <details open {...conceptAttrs} class="group/concept overflow-hidden rounded-lg border border-warm-200 bg-white">
                         <summary class="flex cursor-pointer list-none items-center gap-3 px-4 py-3 marker:hidden hover:bg-warm-50">
                           <span class="inline-block w-3 shrink-0 text-warm-400 group-open/concept:rotate-90 transition-transform">›</span>
                           <a
@@ -164,8 +193,10 @@ const stats = pillars.reduce(
                           </p>
                         )}
                         <ul class="divide-y divide-warm-100 border-t border-warm-100 bg-warm-50/40">
-                          {c.objectives.map((o) => (
-                            <li>
+                          {c.objectives.map((o) => {
+                            const objAttrs = aggregate(o.activities)
+                            return (
+                            <li {...objAttrs}>
                               <details class="group/obj">
                                 <summary class="flex cursor-pointer list-none items-baseline gap-3 px-4 py-2.5 marker:hidden hover:bg-warm-100">
                                   <span class="inline-block w-3 shrink-0 text-warm-400 group-open/obj:rotate-90 transition-transform">›</span>
@@ -223,7 +254,8 @@ const stats = pillars.reduce(
                                 )}
                               </details>
                             </li>
-                          ))}
+                            )
+                          })}
                         </ul>
                       </details>
                     )
