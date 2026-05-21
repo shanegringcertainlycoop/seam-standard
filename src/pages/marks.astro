@@ -37,12 +37,12 @@ const [marks, navTree] = await Promise.all([
       {marks.length === 0 ? (
         <p class="mt-10 text-sm italic text-warm-500">No Mark-eligible activities yet.</p>
       ) : (
-        <ul class="mt-8 divide-y divide-warm-200 border-y border-warm-200">
+        <ul class="mt-8 divide-y divide-warm-200 overflow-hidden rounded border border-warm-200 bg-white">
           {marks.map((a) => (
             <li>
               <a
                 href={`/${a.pillarSlug}/${a.conceptSlug}/${a.objectiveSlug}/${a.slug}`}
-                class="group flex items-baseline gap-3 py-3 hover:text-seam-700"
+                class="group flex items-baseline gap-3 px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
               >
                 <span class="w-20 shrink-0 font-mono text-xs text-warm-500 group-hover:text-seam-600">
                   {a.activityId}

@@ -34,12 +34,12 @@ const [seals, navTree] = await Promise.all([
       {seals.length === 0 ? (
         <p class="mt-10 text-sm italic text-warm-500">No SEALs published yet.</p>
       ) : (
-        <ul class="mt-8 divide-y divide-warm-200 border-y border-warm-200">
+        <ul class="mt-8 divide-y divide-warm-200 overflow-hidden rounded border border-warm-200 bg-white">
           {seals.map((s) => (
             <li>
               <a
                 href={`/seals/${s.slug}`}
-                class="group block py-4 hover:text-seam-700"
+                class="group block px-4 py-4 hover:bg-warm-50 hover:text-seam-700"
               >
                 <div class="flex items-baseline gap-3">
                   <h2 class="flex-1 text-base font-medium text-warm-900 group-hover:text-seam-800">
