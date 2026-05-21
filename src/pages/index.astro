@@ -277,7 +277,7 @@ const allActivities = pillars.flatMap((p) =>
               (s, c) => s + c.objectives.reduce((s2, o) => s2 + o.activities.length, 0),
               0,
             )
-            const PILLAR_BLURBS: Record<string, string> = {
+            const PILLAR_BLURBS: any = {
               'social-impact': 'Know who your project affects — and whether it is working. Measurable outcomes for people and communities, backed by evidence.',
               'social-responsibility': 'Walk the talk on governance, community, and investment. Match your organization’s actions to its values.',
               'social-justice': 'Equity across procurement, the workplace, and capital access. Decisions that expand opportunity for everyone.',
