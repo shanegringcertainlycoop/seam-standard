@@ -77,12 +77,12 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
         </h2>
         {
           objective.activities.length > 0 ? (
-            <ul class="divide-y divide-warm-200 border-y border-warm-200">
+            <ul class="divide-y divide-warm-200 overflow-hidden rounded border border-warm-200 bg-white">
               {objective.activities.map((a) => (
                 <li>
                   <a
                     href={`/${pillarSlug}/${conceptSlug}/${objective.slug}/${a.slug}`}
-                    class="group block py-3 hover:text-seam-700"
+                    class="group block px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
                   >
                     <div class="flex items-baseline gap-3">
                       <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
