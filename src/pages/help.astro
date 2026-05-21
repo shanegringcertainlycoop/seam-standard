@@ -1,0 +1,187 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import ProductGlyph from '@/components/standard/ProductGlyph.astro'
+import { getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const navTree = await getNavigationTree()
+---
+
+<StandardLayout
+  title="How to use this site — The SEAM Standard"
+  description="Search, Product filters, dim vs hide, share view, and what a SEAL is and isn't."
+>
+  <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
+    <SideNav tree={navTree} current="help" />
+
+    <article class="min-w-0 flex-1 max-w-3xl">
+      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span aria-hidden="true">/</span>
+        <span class="text-warm-700">How to use</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="text-xs uppercase tracking-wider text-gold-500">Reference</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900">How to use this site</h1>
+        <p class="mt-3 text-base text-warm-700">
+          The SEAM Standard reference has a few interactive controls that
+          aren't obvious at first glance. Here's how to use them.
+        </p>
+      </header>
+
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold text-warm-900">Search</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          The search input at the top right of the page searches every
+          activity, intro section, and glossary term. Press
+          <kbd class="rounded border border-warm-300 bg-warm-50 px-1.5 py-0.5 font-mono text-[11px]">⌘K</kbd>
+          (or <kbd class="rounded border border-warm-300 bg-warm-50 px-1.5 py-0.5 font-mono text-[11px]">Ctrl-K</kbd>)
+          from anywhere on the site to jump to it.
+        </p>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          Results are grouped by Activities, Introduction sections, and
+          Definitions. Press
+          <kbd class="rounded border border-warm-300 bg-warm-50 px-1.5 py-0.5 font-mono text-[11px]">Enter</kbd>
+          to open the first match.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold text-warm-900">Product filter</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          The Standard organizes the same set of Activities into three
+          Products. Open the
+          <span class="font-semibold">Product filter</span>
+          group in the side nav and click any dot to filter the framework
+          to that product. Click the same dot again to clear it.
+        </p>
+        <ul class="mt-4 space-y-3 text-sm text-warm-700">
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 shrink-0 text-seam-700"><ProductGlyph product="certification" size="md" /></span>
+            <div>
+              <p><strong>Certification.</strong> Filter by one of the four
+              Rating Systems (<span class="font-mono">B+I:D</span>,
+              <span class="font-mono">B+I:O</span>,
+              <span class="font-mono">O+M:D</span>,
+              <span class="font-mono">O+M:O</span>) to focus on the
+              activities that apply to that project type + owner role.</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 shrink-0 text-seam-700"><ProductGlyph product="seals" size="md" /></span>
+            <div>
+              <p><strong>SEALs.</strong> Each SEAL is a curated pathway of
+              activities reviewed against a defined Assessment Scope.
+              Selecting a SEAL focuses the tree to its members.</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 shrink-0 text-seam-700"><ProductGlyph product="marks" size="md" /></span>
+            <div>
+              <p><strong>Marks.</strong> Activities that can be earned as
+              standalone SEAM Marks — a curated subset. The Marks toggle
+              focuses the tree to just those activities.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold text-warm-900">Dim or hide non-applicable activities</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          When a Product filter is active, non-matching activities can
+          either dim (the default) or be removed from view. Flip the
+          <span class="font-semibold">Hide non-applicable</span> toggle —
+          available next to the FRAMEWORK header in the side nav and on
+          the <a href="/standard" class="text-seam-700 underline">/standard</a> page — to switch between modes.
+        </p>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          The two toggles are linked: flipping either updates the other,
+          and your preference persists across pages.
+        </p>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          The activity page also surfaces an amber banner when you land
+          on an activity that isn't part of the currently active filter,
+          so it's clear why you're seeing it.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold text-warm-900">Share a filtered view</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          The active Product filter is reflected in the URL as
+          <span class="font-mono text-xs">?filter=…</span>. Click
+          <span class="font-semibold">share view</span>
+          (in the side nav next to "Certification") to copy the current URL
+          with the filter encoded — anyone who opens that link will land
+          on the page with the same filter pre-applied.
+        </p>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          The URL also acts as the source of truth on page load, so
+          bookmarks and shared links override any filter you'd previously
+          set on your own device.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold text-warm-900">Resize the side nav</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          On desktop, drag the grip handle on the right edge of the side
+          nav to set its width. Double-click the handle to reset to the
+          default.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold text-warm-900">What a SEAL is, and is not</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-700">
+          Every SEAL is a limited-scope credential. Across all SEALs, the
+          following holds:
+        </p>
+        <ul class="mt-3 space-y-2 text-sm text-warm-700">
+          <li class="flex items-start gap-2">
+            <span class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-seam-600"></span>
+            <span>A SEAL is a verified designation for a defined scope,
+              not full SEAM Certification.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-seam-600"></span>
+            <span>A SEAL applies only to the initiative or assessed party
+              reviewed — not to the owner, organization, portfolio, or any
+              other activity outside the Assessment Scope.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-seam-600"></span>
+            <span>Public claims should identify the assessed party, the
+              reviewed initiative or scope, and the review period.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-seam-600"></span>
+            <span>A SEAL is not a legal opinion, regulatory filing, or a
+              guarantee that the harm a SEAL addresses is absent.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-seam-600"></span>
+            <span>Activities completed for a SEAL may count toward a
+              future full SEAM Certification when the project, phase,
+              reporting period, evidence, and applicable rating system
+              remain aligned.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="mt-10 border-t border-warm-200 pt-6 text-sm text-warm-600">
+        <p>
+          Governing materials: the
+          <a href="/intro/framework" class="text-seam-700 underline">SEAM Standard framework</a>,
+          its <a href="/intro/principles" class="text-seam-700 underline">design principles</a>,
+          the <a href="/glossary" class="text-seam-700 underline">key terms</a>,
+          and <a href="/bibliography" class="text-seam-700 underline">bibliography</a>.
+        </p>
+      </section>
+    </article>
+  </div>
+</StandardLayout>

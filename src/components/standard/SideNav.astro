@@ -514,6 +514,15 @@ const PILLAR_GLYPHS: Record<string, string> = {
       </li>
       <li>
         <a
+          href="/help"
+          class:list={['block py-0.5', current === 'help' ? activeClass : idleClass]}
+          aria-current={current === 'help' ? 'page' : undefined}
+        >
+          How to use
+        </a>
+      </li>
+      <li>
+        <a
           href="/intro/acknowledgments"
           class:list={['block py-0.5', activeIntroSlug === 'acknowledgments' ? activeClass : idleClass]}
           aria-current={activeIntroSlug === 'acknowledgments' ? 'page' : undefined}
