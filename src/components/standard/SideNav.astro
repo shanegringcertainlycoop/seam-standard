@@ -145,20 +145,21 @@ const PILLAR_GLYPHS: Record<string, string> = {
 ></div>
 
 <aside
-  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:relative lg:z-auto lg:block lg:w-[var(--seam-sidenav-w,24rem)] lg:shrink-0 lg:translate-x-0 lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
+  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:h-[calc(100vh-5rem)] lg:w-96 lg:shrink-0 lg:translate-x-0 lg:overflow-visible lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
   data-seam-mobile-nav-panel
   data-seam-sidenav-aside
+  style="position: var(--seam-aside-pos, sticky);"
 >
   <!-- Resize handle (desktop only) -->
   <button
     type="button"
-    class="group absolute inset-y-0 right-[-8px] z-10 hidden w-4 cursor-col-resize touch-none select-none items-center justify-center lg:flex"
+    class="group absolute right-[-10px] top-0 z-20 hidden h-full w-5 cursor-col-resize touch-none select-none items-center justify-center bg-transparent lg:flex"
     data-seam-sidenav-resize
     aria-label="Drag to resize navigation"
     title="Drag to resize · double-click to reset"
   >
-    <span class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-warm-300 transition-colors group-hover:w-0.5 group-hover:bg-seam-500" aria-hidden="true"></span>
-    <span class="relative flex h-8 w-4 items-center justify-center rounded-full border border-warm-300 bg-white text-warm-500 shadow-sm transition-colors group-hover:border-seam-500 group-hover:text-seam-700">
+    <span class="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded bg-warm-200 transition-colors group-hover:bg-seam-500" aria-hidden="true"></span>
+    <span class="relative flex h-10 w-5 items-center justify-center rounded-full border border-warm-300 bg-white text-warm-500 shadow-sm transition-colors group-hover:border-seam-500 group-hover:text-seam-700">
       <svg viewBox="0 0 12 16" width="10" height="14" fill="currentColor" aria-hidden="true">
         <circle cx="4" cy="4" r="1"/>
         <circle cx="8" cy="4" r="1"/>
@@ -180,7 +181,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
     </svg>
     Close
   </button>
-  <nav class="pb-8 text-[15px] leading-snug lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" data-seam-sidenav>
+  <nav class="pb-8 text-[15px] leading-snug lg:h-full lg:overflow-y-auto lg:pr-3" data-seam-sidenav>
     <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
       Overview
     </p>
@@ -553,25 +554,29 @@ const PILLAR_GLYPHS: Record<string, string> = {
     a.addEventListener('click', (e) => e.stopPropagation())
   })
 
-  // Drag-to-resize the SideNav (desktop only). The width is stored on the
-  // <html> element as a custom property and persisted in localStorage so
-  // it sticks across navigation.
+  // Drag-to-resize the SideNav (desktop only). Width is applied directly
+  // to the aside via inline style and persisted in localStorage.
   (function () {
     const STORAGE = 'seam:sidenav-w'
     const MIN = 224
     const MAX = 640
 
-    const root = document.documentElement
     const aside = document.querySelector<HTMLElement>('[data-seam-sidenav-aside]')
     const handle = document.querySelector<HTMLElement>('[data-seam-sidenav-resize]')
     if (!aside || !handle) return
 
-    function apply(px: number) {
-      const clamped = Math.max(MIN, Math.min(MAX, px))
-      root.style.setProperty('--seam-sidenav-w', `${clamped}px`)
+    function isDesktop() {
+      return window.matchMedia('(min-width: 1024px)').matches
     }
 
-    // Hydrate from storage
+    function apply(px: number) {
+      if (!isDesktop()) return
+      const clamped = Math.max(MIN, Math.min(MAX, px))
+      aside!.style.setProperty('width', `${clamped}px`)
+      aside!.style.setProperty('flex-basis', `${clamped}px`)
+    }
+
+    // Hydrate from storage on desktop
     try {
       const v = parseInt(localStorage.getItem(STORAGE) || '', 10)
       if (Number.isFinite(v)) apply(v)
@@ -583,24 +588,22 @@ const PILLAR_GLYPHS: Record<string, string> = {
 
     function onMove(e: PointerEvent) {
       if (!dragging) return
-      const w = startW + (e.clientX - startX)
-      apply(w)
+      apply(startW + (e.clientX - startX))
     }
     function onUp() {
       if (!dragging) return
       dragging = false
-      handle?.classList.remove('group', 'active')
       document.body.classList.remove('select-none', 'cursor-col-resize')
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
-      const cur = parseInt(getComputedStyle(aside!).width, 10)
+      const cur = aside!.getBoundingClientRect().width
       if (Number.isFinite(cur)) {
-        try { localStorage.setItem(STORAGE, String(cur)) } catch {}
+        try { localStorage.setItem(STORAGE, String(Math.round(cur))) } catch {}
       }
     }
 
     handle.addEventListener('pointerdown', (e) => {
-      if (!window.matchMedia('(min-width: 1024px)').matches) return
+      if (!isDesktop()) return
       dragging = true
       startX = e.clientX
       startW = aside!.getBoundingClientRect().width
@@ -610,10 +613,25 @@ const PILLAR_GLYPHS: Record<string, string> = {
       e.preventDefault()
     })
 
-    // Double-click resets to default
-    handle.addEventListener('dblclick', () => {
+    handle.addEventListener('dblclick', (e) => {
+      e.preventDefault()
       try { localStorage.removeItem(STORAGE) } catch {}
-      root.style.removeProperty('--seam-sidenav-w')
+      aside!.style.removeProperty('width')
+      aside!.style.removeProperty('flex-basis')
+    })
+
+    // Reset inline width on resize back below desktop so the mobile
+    // drawer width isn't accidentally pinned.
+    window.addEventListener('resize', () => {
+      if (!isDesktop()) {
+        aside!.style.removeProperty('width')
+        aside!.style.removeProperty('flex-basis')
+      } else {
+        try {
+          const v = parseInt(localStorage.getItem(STORAGE) || '', 10)
+          if (Number.isFinite(v)) apply(v)
+        } catch {}
+      }
     })
   })()
 </script>
