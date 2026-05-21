@@ -57,15 +57,19 @@ const { prev, next } = findPrevNext(activity.slug, flatActivities)
 
 const pillarLabel = activity.pillar?.title?.toUpperCase() ?? ''
 
-// Data attributes describing which rating systems this activity applies to —
-// used by an inline script to show a "not applicable" banner when the visitor's
-// active rating-system filter doesn't match.
+// Data attributes describing which rating systems, seals, and Mark status apply
+// to this activity — used by an inline script to show a "not applicable" banner
+// when the visitor's active Product filter doesn't include it.
 const rs = activity.ratingSystemApplication
-const rsAttrs: Record<string, string> = {}
-if (rs?.bi_developer) rsAttrs['data-rs-bid'] = '1'
-if (rs?.bi_occupier) rsAttrs['data-rs-bio'] = '1'
-if (rs?.om_developer) rsAttrs['data-rs-omd'] = '1'
-if (rs?.om_occupier) rsAttrs['data-rs-omo'] = '1'
+const articleAttrs: Record<string, string> = {}
+if (rs?.bi_developer) articleAttrs['data-rs-bid'] = '1'
+if (rs?.bi_occupier) articleAttrs['data-rs-bio'] = '1'
+if (rs?.om_developer) articleAttrs['data-rs-omd'] = '1'
+if (rs?.om_occupier) articleAttrs['data-rs-omo'] = '1'
+if (activity.markEligible) articleAttrs['data-mark'] = '1'
+if (activity.seals && activity.seals.length > 0) {
+  articleAttrs['data-seals'] = activity.seals.map((s) => s.slug).join(' ')
+}
 ---
 
 <StandardLayout
@@ -75,26 +79,26 @@ if (rs?.om_occupier) rsAttrs['data-rs-omo'] = '1'
   <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
     <SideNav tree={navTree} currentActivitySlug={activity.slug} />
 
-    <article class="min-w-0 flex-1 max-w-4xl" data-seam-activity {...rsAttrs}>
+    <article class="min-w-0 flex-1 max-w-4xl" data-seam-activity {...articleAttrs}>
       <div
         hidden
-        data-seam-rs-mismatch
+        data-seam-product-mismatch
         class="mb-6 flex items-start gap-3 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
       >
         <span aria-hidden="true" class="mt-0.5 shrink-0">⚠</span>
         <div class="flex-1">
-          <p>
+          <p data-seam-product-mismatch-text>
             <strong>Heads up:</strong> this activity does not apply to your
-            selected rating system (<span data-seam-rs-name class="font-mono"></span>).
+            current filter.
           </p>
           <p class="mt-1 text-xs">
             It still appears here so you can read it — change or clear the
-            rating system from the filter in the top bar.
+            filter from the Product picker in the top bar.
           </p>
         </div>
         <button
           type="button"
-          data-seam-rs-mismatch-dismiss
+          data-seam-product-mismatch-dismiss
           class="ml-2 shrink-0 text-amber-700 hover:text-amber-900"
           aria-label="Dismiss"
         >×</button>
@@ -145,7 +149,12 @@ if (rs?.om_occupier) rsAttrs['data-rs-omo'] = '1'
   </div>
 
   <script>
-    const STORAGE_KEY = 'seam:rs-filter'
+    type ProductKey = 'certification' | 'seals' | 'marks'
+
+    const STORAGE_PRODUCT = 'seam:product'
+    const STORAGE_RS = 'seam:rs-filter'
+    const STORAGE_SEAL = 'seam:seal-filter'
+
     const RS_LABELS: Record<string, string> = {
       bid: 'B+I:D (Buildings + Interiors: Developer)',
       bio: 'B+I:O (Buildings + Interiors: Occupier)',
@@ -154,20 +163,43 @@ if (rs?.om_occupier) rsAttrs['data-rs-omo'] = '1'
     }
 
     const article = document.querySelector<HTMLElement>('[data-seam-activity]')
-    const banner = document.querySelector<HTMLElement>('[data-seam-rs-mismatch]')
+    const banner = document.querySelector<HTMLElement>('[data-seam-product-mismatch]')
     if (article && banner) {
-      const filter = (() => {
-        try { return localStorage.getItem(STORAGE_KEY) } catch { return null }
-      })()
+      const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
+      const product = (read(STORAGE_PRODUCT) as ProductKey) || 'certification'
 
-      const applies = filter ? article.hasAttribute(`data-rs-${filter}`) : true
-      if (filter && !applies) {
-        const nameEl = banner.querySelector<HTMLElement>('[data-seam-rs-name]')
-        if (nameEl) nameEl.textContent = RS_LABELS[filter] ?? filter
+      let mismatch = false
+      let html = ''
+
+      if (product === 'certification') {
+        const rs = read(STORAGE_RS)
+        if (rs && !article.hasAttribute(`data-rs-${rs}`)) {
+          mismatch = true
+          html = `<strong>Heads up:</strong> this activity does not apply to your selected rating system (<span class="font-mono">${RS_LABELS[rs] ?? rs}</span>).`
+        }
+      } else if (product === 'seals') {
+        const seal = read(STORAGE_SEAL)
+        if (seal) {
+          const seals = (article.getAttribute('data-seals') ?? '').split(/\s+/).filter(Boolean)
+          if (!seals.includes(seal)) {
+            mismatch = true
+            html = `<strong>Heads up:</strong> this activity is not part of the <span class="font-mono">${seal}</span> SEAL.`
+          }
+        }
+      } else if (product === 'marks') {
+        if (!article.hasAttribute('data-mark')) {
+          mismatch = true
+          html = `<strong>Heads up:</strong> this activity is not Mark-eligible. Marks include only a curated subset of activities.`
+        }
+      }
+
+      if (mismatch) {
+        const text = banner.querySelector<HTMLElement>('[data-seam-product-mismatch-text]')
+        if (text) text.innerHTML = html
         banner.hidden = false
       }
 
-      banner.querySelector<HTMLButtonElement>('[data-seam-rs-mismatch-dismiss]')
+      banner.querySelector<HTMLButtonElement>('[data-seam-product-mismatch-dismiss]')
         ?.addEventListener('click', () => {
           banner.hidden = true
         })

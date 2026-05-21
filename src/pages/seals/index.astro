@@ -1,0 +1,63 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { listSeals, getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const [seals, navTree] = await Promise.all([
+  listSeals(),
+  getNavigationTree(),
+])
+---
+
+<StandardLayout title="SEALs — The SEAM Standard" description="Thematic collections of SEAM activities.">
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current="seals" />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">SEALs</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="text-xs uppercase tracking-wider text-gold-500">Product</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900">SEALs</h1>
+        <p class="mt-3 text-base text-warm-700">
+          Thematic collections of SEAM activities. Each SEAL focuses on a single
+          social-equity theme and curates the activities most relevant to it.
+        </p>
+      </header>
+
+      {seals.length === 0 ? (
+        <p class="mt-10 text-sm italic text-warm-500">No SEALs published yet.</p>
+      ) : (
+        <ul class="mt-8 divide-y divide-warm-200 border-y border-warm-200">
+          {seals.map((s) => (
+            <li>
+              <a
+                href={`/seals/${s.slug}`}
+                class="group block py-4 hover:text-seam-700"
+              >
+                <div class="flex items-baseline gap-3">
+                  <h2 class="flex-1 text-base font-medium text-warm-900 group-hover:text-seam-800">
+                    {s.name}
+                  </h2>
+                  <span class="shrink-0 text-xs font-mono text-warm-500">
+                    {s.activityCount} activit{s.activityCount === 1 ? 'y' : 'ies'}
+                  </span>
+                  <span class="text-warm-400 group-hover:text-seam-500" aria-hidden="true">→</span>
+                </div>
+                {s.summary && (
+                  <p class="mt-1 text-sm text-warm-600">{s.summary}</p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
+  </div>
+</StandardLayout>

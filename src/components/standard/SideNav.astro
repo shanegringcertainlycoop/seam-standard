@@ -9,7 +9,7 @@ import {
 interface Props {
   tree: NavPillar[]
   currentActivitySlug?: string
-  /** One of: 'home' | 'intro' | `intro:<slug>` | 'glossary' | 'bibliography' */
+  /** One of: 'home' | 'intro' | `intro:<slug>` | 'glossary' | 'bibliography' | 'seals' | `seals:<slug>` | 'marks' */
   current?: string
 }
 
@@ -56,16 +56,36 @@ function rsAttrsForActivity(rs?: RatingSystemApplication) {
   return out
 }
 
-function unionRsAttrs(...sources: Array<RatingSystemApplication | undefined>) {
-  const merged: RatingSystemApplication = {}
-  for (const src of sources) {
-    if (!src) continue
-    for (const k of Object.keys(RS_FIELD)) {
-      const field = RS_FIELD[k as RSKey]
-      if (src[field]) merged[field] = true
-    }
+function activityAttrs(a: { ratingSystemApplication?: RatingSystemApplication; markEligible?: boolean; sealSlugs?: string[] }) {
+  const out: Record<string, string> = { ...rsAttrsForActivity(a.ratingSystemApplication) }
+  if (a.markEligible) out['data-mark'] = '1'
+  if (a.sealSlugs && a.sealSlugs.length) {
+    out['data-seals'] = a.sealSlugs.join(' ')
   }
-  return rsAttrsForActivity(merged)
+  return out
+}
+
+type ActivityFacts = { ratingSystemApplication?: RatingSystemApplication; markEligible?: boolean; sealSlugs?: string[] }
+
+function unionAttrs(...activities: ActivityFacts[]) {
+  const rs: RatingSystemApplication = {}
+  const seals = new Set<string>()
+  let anyMark = false
+  for (const a of activities) {
+    const src = a.ratingSystemApplication
+    if (src) {
+      for (const k of Object.keys(RS_FIELD)) {
+        const field = RS_FIELD[k as RSKey]
+        if (src[field]) rs[field] = true
+      }
+    }
+    if (a.markEligible) anyMark = true
+    a.sealSlugs?.forEach((s) => seals.add(s))
+  }
+  const out: Record<string, string> = { ...rsAttrsForActivity(rs) }
+  if (anyMark) out['data-mark'] = '1'
+  if (seals.size) out['data-seals'] = Array.from(seals).join(' ')
+  return out
 }
 
 const activeClass = 'font-semibold text-seam-700'
@@ -125,11 +145,10 @@ const PILLAR_GLYPHS: Record<string, string> = {
     <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree>
       {
         tree.map((pillar) => {
-          const pillarAttrs = unionRsAttrs(
-            ...(pillar.concepts ?? []).flatMap((c) =>
-              (c.objectives ?? []).flatMap((o) => (o.activities ?? []).map((a) => a.ratingSystemApplication)),
-            ),
+          const allActs = (pillar.concepts ?? []).flatMap((c) =>
+            (c.objectives ?? []).flatMap((o) => o.activities ?? []),
           )
+          const pillarAttrs = unionAttrs(...allActs)
           return (
             <li {...pillarAttrs}>
               <details open={pillar.slug === openPillar} class="group">
@@ -140,11 +159,8 @@ const PILLAR_GLYPHS: Record<string, string> = {
                 </summary>
                 <ul class="ml-4 mt-1 space-y-1 border-l border-warm-200 pl-3">
                   {(pillar.concepts ?? []).map((concept) => {
-                    const conceptAttrs = unionRsAttrs(
-                      ...(concept.objectives ?? []).flatMap((o) =>
-                        (o.activities ?? []).map((a) => a.ratingSystemApplication),
-                      ),
-                    )
+                    const conceptActs = (concept.objectives ?? []).flatMap((o) => o.activities ?? [])
+                    const conceptAttrs = unionAttrs(...conceptActs)
                     return (
                       <li {...conceptAttrs}>
                         <details open={concept.slug === openConcept} class="group/concept">
@@ -154,9 +170,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
                           </summary>
                           <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3">
                             {(concept.objectives ?? []).map((objective) => {
-                              const objectiveAttrs = unionRsAttrs(
-                                ...(objective.activities ?? []).map((a) => a.ratingSystemApplication),
-                              )
+                              const objectiveAttrs = unionAttrs(...(objective.activities ?? []))
                               return (
                                 <li {...objectiveAttrs}>
                                   <details open={objective.slug === openObjective} class="group/obj">
@@ -169,9 +183,9 @@ const PILLAR_GLYPHS: Record<string, string> = {
                                         {(objective.activities ?? []).map((activity) => {
                                           const isCurrent = activity.slug === currentActivitySlug
                                           const href = `/${pillar.slug}/${concept.slug}/${objective.slug}/${activity.slug}`
-                                          const activityAttrs = rsAttrsForActivity(activity.ratingSystemApplication)
+                                          const attrs = activityAttrs(activity)
                                           return (
-                                            <li {...activityAttrs}>
+                                            <li {...attrs}>
                                               <a
                                                 href={href}
                                                 title={activity.title}
@@ -211,6 +225,27 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
     </ul>
 
+    <ul class="mt-4 space-y-0.5 border-b border-warm-200 pb-4 text-sm">
+      <li>
+        <a
+          href="/seals"
+          class:list={['block py-0.5', current === 'seals' || current?.startsWith('seals:') ? activeClass : idleClass]}
+          aria-current={current === 'seals' ? 'page' : undefined}
+        >
+          SEALs
+        </a>
+      </li>
+      <li>
+        <a
+          href="/marks"
+          class:list={['block py-0.5', current === 'marks' ? activeClass : idleClass]}
+          aria-current={current === 'marks' ? 'page' : undefined}
+        >
+          Marks
+        </a>
+      </li>
+    </ul>
+
     <ul class="mt-4 space-y-0.5 text-sm">
       <li>
         <a
@@ -235,12 +270,50 @@ const PILLAR_GLYPHS: Record<string, string> = {
 </aside>
 
 <style>
-  /* When data-seam-rs-active is set on the nav, dim any descendant <li> that
-     doesn't carry the matching data-rs-* attribute (so it's clearly not
-     relevant, but still visible / navigable). */
+  /* Rating-system dim (Product = Certification). */
   [data-seam-sidenav][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { opacity: 0.35; }
   [data-seam-sidenav][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { opacity: 0.35; }
   [data-seam-sidenav][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { opacity: 0.35; }
   [data-seam-sidenav][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { opacity: 0.35; }
+
+  /* Mark dim (Product = Marks). */
+  [data-seam-sidenav][data-seam-mark-active] [data-seam-tree] li:not([data-mark]) { opacity: 0.35; }
+
+  /* Seal dim (Product = SEALs). data-seals is a space-separated list; we use
+     ~="slug" attribute selector to test membership. The selector for the active
+     seal is set dynamically by the TopBar script via a child <style> element. */
+  [data-seam-sidenav][data-seam-seal-active] [data-seam-tree] li:not([data-seals]) { opacity: 0.35; }
 </style>
+
+<script is:inline>
+  // For seal filtering we need a per-seal CSS rule because the slug is dynamic.
+  // Inject (and re-inject on change) a stylesheet that targets the active seal.
+  (function () {
+    const STYLE_ID = 'seam-seal-dim-style'
+    const sidenav = document.querySelector('[data-seam-sidenav]')
+    if (!sidenav) return
+
+    function applySealStyle() {
+      const slug = sidenav.getAttribute('data-seam-seal-active')
+      let style = document.getElementById(STYLE_ID)
+      if (!slug) {
+        if (style) style.remove()
+        return
+      }
+      if (!style) {
+        style = document.createElement('style')
+        style.id = STYLE_ID
+        document.head.appendChild(style)
+      }
+      // Escape the slug for CSS attribute matching.
+      const safe = slug.replace(/["\\]/g, '\\$&')
+      style.textContent =
+        `[data-seam-sidenav] [data-seam-tree] li:not([data-seals~="${safe}"]) { opacity: 0.35; }`
+    }
+
+    const observer = new MutationObserver(applySealStyle)
+    observer.observe(sidenav, { attributes: true, attributeFilter: ['data-seam-seal-active'] })
+    applySealStyle()
+  })()
+</script>
 

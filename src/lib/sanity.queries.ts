@@ -169,6 +169,9 @@ export interface Activity {
   slug: string
   activityType: 'Driver' | 'Impact'
   ratingSystemApplication?: RatingSystemApplication
+  markEligible?: boolean
+  /** Seals this activity belongs to (resolved at query time). */
+  seals?: Array<{ name: string; slug: string; accentColor?: string }>
   pillar: PillarRef
   concept: ConceptRef
   objective: ObjectiveRef
@@ -201,6 +204,12 @@ const activityProjection = `{
   "slug": slug.current,
   activityType,
   ratingSystemApplication,
+  markEligible,
+  "seals": *[_type == "seal" && references(^._id)] | order(order asc, name asc) {
+    name,
+    "slug": slug.current,
+    accentColor
+  },
   "pillar": pillar->{
     title,
     "slug": slug.current,
@@ -400,6 +409,9 @@ export interface NavActivity {
   slug: string
   activityType: 'Driver' | 'Impact'
   ratingSystemApplication?: RatingSystemApplication
+  markEligible?: boolean
+  /** Slugs of seals this activity belongs to (joined via reverse reference). */
+  sealSlugs?: string[]
 }
 
 export interface NavObjective {
@@ -622,7 +634,9 @@ export async function getNavigationTree(): Promise<NavPillar[]> {
           title,
           "slug": slug.current,
           activityType,
-          ratingSystemApplication
+          ratingSystemApplication,
+          markEligible,
+          "sealSlugs": *[_type == "seal" && references(^._id)].slug.current
         }
       }
     }
@@ -773,6 +787,95 @@ export async function getLandingData(): Promise<LandingPillar[]> {
         }
       }
     }
+  }`)
+}
+
+// ─── Seals + Marks ────────────────────────────────────────────────────────
+
+export interface SealSummary {
+  name: string
+  slug: string
+  order?: number
+  summary?: string
+  accentColor?: string
+  activityCount: number
+}
+
+export interface SealDetail extends SealSummary {
+  body?: PortableTextBlock[]
+  activities: Array<{
+    activityId: string
+    title: string
+    slug: string
+    activityType: 'Driver' | 'Impact'
+    pillarSlug: string
+    conceptSlug: string
+    objectiveSlug: string
+  }>
+}
+
+export async function listSeals(): Promise<SealSummary[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "seal"] | order(order asc, name asc) {
+    name,
+    "slug": slug.current,
+    order,
+    summary,
+    accentColor,
+    "activityCount": count(activities)
+  }`)
+}
+
+export async function getSealBySlug(slug: string): Promise<SealDetail | null> {
+  const client = requireClient()
+  if (!client) return null
+  return client.fetch(
+    `*[_type == "seal" && slug.current == $slug][0]{
+      name,
+      "slug": slug.current,
+      order,
+      summary,
+      accentColor,
+      body,
+      "activityCount": count(activities),
+      "activities": activities[]->{
+        activityId,
+        title,
+        "slug": slug.current,
+        activityType,
+        "pillarSlug": pillar->slug.current,
+        "conceptSlug": concept->slug.current,
+        "objectiveSlug": objective->slug.current
+      }
+    }`,
+    { slug },
+  )
+}
+
+export interface MarkActivity {
+  activityId: string
+  title: string
+  slug: string
+  activityType: 'Driver' | 'Impact'
+  pillarSlug: string
+  pillarTitle: string
+  conceptSlug: string
+  objectiveSlug: string
+}
+
+export async function listMarkActivities(): Promise<MarkActivity[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "activity" && markEligible == true] | order(activityId asc) {
+    activityId,
+    title,
+    "slug": slug.current,
+    activityType,
+    "pillarSlug": pillar->slug.current,
+    "pillarTitle": pillar->title,
+    "conceptSlug": concept->slug.current,
+    "objectiveSlug": objective->slug.current
   }`)
 }
 

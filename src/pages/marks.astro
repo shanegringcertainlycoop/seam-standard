@@ -1,0 +1,66 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { listMarkActivities, getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const [marks, navTree] = await Promise.all([
+  listMarkActivities(),
+  getNavigationTree(),
+])
+---
+
+<StandardLayout title="Marks — The SEAM Standard" description="Activities eligible to be earned as standalone SEAM Marks.">
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current="marks" />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">Marks</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="text-xs uppercase tracking-wider text-gold-500">Product</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900">Marks</h1>
+        <p class="mt-3 text-base text-warm-700">
+          Activities that can be earned as standalone SEAM Marks. Marks recognize
+          specific, focused accomplishments without requiring a full certification.
+        </p>
+        <p class="mt-2 text-xs text-warm-500">
+          {marks.length} Mark-eligible activit{marks.length === 1 ? 'y' : 'ies'}
+        </p>
+      </header>
+
+      {marks.length === 0 ? (
+        <p class="mt-10 text-sm italic text-warm-500">No Mark-eligible activities yet.</p>
+      ) : (
+        <ul class="mt-8 divide-y divide-warm-200 border-y border-warm-200">
+          {marks.map((a) => (
+            <li>
+              <a
+                href={`/${a.pillarSlug}/${a.conceptSlug}/${a.objectiveSlug}/${a.slug}`}
+                class="group flex items-baseline gap-3 py-3 hover:text-seam-700"
+              >
+                <span class="w-20 shrink-0 font-mono text-xs text-warm-500 group-hover:text-seam-600">
+                  {a.activityId}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-warm-900 group-hover:text-seam-800">
+                    {a.title}
+                  </p>
+                  <p class="mt-0.5 text-xs text-warm-500">
+                    {a.pillarTitle} · {a.activityType}
+                  </p>
+                </div>
+                <span class="text-warm-400 group-hover:text-seam-500" aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
+  </div>
+</StandardLayout>

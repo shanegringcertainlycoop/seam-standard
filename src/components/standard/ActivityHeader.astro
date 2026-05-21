@@ -68,5 +68,30 @@ const ratingFlags = [
     </div>
   </div>
 
+  {
+    ((activity.seals && activity.seals.length > 0) || activity.markEligible) && (
+      <div class="mt-3 flex flex-wrap items-center gap-2 border-b border-warm-300 pb-3 text-xs">
+        {activity.markEligible && (
+          <a
+            href="/marks"
+            class="inline-flex items-center gap-1 rounded-full border border-gold-400 bg-gold-50 px-2 py-0.5 font-medium text-gold-700 hover:border-gold-500"
+            title="This activity can be earned standalone as a SEAM Mark"
+          >
+            <span aria-hidden="true">★</span> Mark eligible
+          </a>
+        )}
+        {activity.seals?.map((s) => (
+          <a
+            href={`/seals/${s.slug}`}
+            class="inline-flex items-center gap-1 rounded-full border border-seam-300 bg-seam-50 px-2 py-0.5 font-medium text-seam-800 hover:border-seam-500"
+            title={`Part of the ${s.name} SEAL`}
+          >
+            <span aria-hidden="true">◆</span> {s.name}
+          </a>
+        ))}
+      </div>
+    )
+  }
+
   <h1 class="mt-8 text-3xl font-semibold leading-tight text-warm-900">{activity.title}</h1>
 </header>
