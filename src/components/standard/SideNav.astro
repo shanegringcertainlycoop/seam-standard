@@ -138,6 +138,15 @@ const PILLAR_GLYPHS: Record<string, string> = {
             </a>
           </summary>
           <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+            <li>
+              <a
+                href="/"
+                class:list={['block py-0.5', current === 'home' ? activeClass : idleClass]}
+                aria-current={current === 'home' ? 'page' : undefined}
+              >
+                Overview
+              </a>
+            </li>
             {
               introSections.map((s) => {
                 const isActive = activeIntroSlug === s.slug
