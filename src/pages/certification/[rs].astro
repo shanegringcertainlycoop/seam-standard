@@ -1,0 +1,172 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { getNavigationTree, type RatingSystemApplication } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const { rs } = Astro.params
+
+type RSKey = 'bid' | 'bio' | 'omd' | 'omo'
+const RS_INFO: Record<RSKey, {
+  code: string
+  title: string
+  field: keyof RatingSystemApplication
+  description: string
+  phase: 'Construction / renovation' | 'Operations / maintenance'
+  role: 'Developer' | 'Occupier'
+}> = {
+  bid: {
+    code: 'B+I:D',
+    title: 'Buildings + Interiors: Developer',
+    field: 'bi_developer',
+    phase: 'Construction / renovation',
+    role: 'Developer',
+    description: 'Includes construction projects where a building or interior is undergoing ground-up construction — starting from raw, undeveloped land, tear-down of an existing structure, from a previously developed site ground, or major renovations of an existing building — as the Developer, where the Owner assumes Developer responsibilities including project ownership, vision establishment, financing procurement, construction supervision, landlord duties, and tenant leasing management.',
+  },
+  bio: {
+    code: 'B+I:O',
+    title: 'Buildings + Interiors: Occupier',
+    field: 'bi_occupier',
+    phase: 'Construction / renovation',
+    role: 'Occupier',
+    description: 'For construction projects of an existing building or space where the Owner is either a Tenant or Property Owner that has no Landlord duties or control over Tenant leasing.',
+  },
+  omd: {
+    code: 'O+M:D',
+    title: 'Operations + Maintenance: Developer',
+    field: 'om_developer',
+    phase: 'Operations / maintenance',
+    role: 'Developer',
+    description: "For projects that involve the ongoing operations and maintenance of a building or space that's already constructed, where the Owner is the entity that owns the building or space and oversees its long-term operations, maintenance, and acts as Landlord.",
+  },
+  omo: {
+    code: 'O+M:O',
+    title: 'Operations + Maintenance: Occupier',
+    field: 'om_occupier',
+    phase: 'Operations / maintenance',
+    role: 'Occupier',
+    description: "For projects that involve the ongoing operations and maintenance of a building or space that's already constructed, where the Owner is either a Tenant or property owner with no Landlord duties or control over Tenant leasing.",
+  },
+}
+
+if (!rs || !(rs in RS_INFO)) {
+  return new Response('Rating system not found', { status: 404 })
+}
+const info = RS_INFO[rs as RSKey]
+
+const navTree = await getNavigationTree()
+
+// Collect every activity that applies to this rating system, grouped by pillar.
+const groups = navTree.map((pillar) => {
+  const concepts = pillar.concepts.flatMap((concept) =>
+    concept.objectives.flatMap((objective) =>
+      objective.activities
+        .filter((a) => a.ratingSystemApplication?.[info.field])
+        .map((a) => ({
+          activity: a,
+          pillar,
+          concept,
+          objective,
+        })),
+    ),
+  )
+  return { pillar, activities: concepts }
+}).filter((g) => g.activities.length > 0)
+
+const totalActivities = groups.reduce((s, g) => s + g.activities.length, 0)
+---
+
+<StandardLayout title={`${info.code} — ${info.title}`} description={info.description}>
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current="certification" />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <a href="/certification" class="hover:text-seam-700">Certification</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">{info.code}</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="font-mono text-xs uppercase tracking-wider text-gold-500">{info.code}</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900">{info.title}</h1>
+        <p class="mt-3 text-sm text-warm-500">
+          <span class="font-medium">Phase:</span> {info.phase}
+          <span class="mx-2">·</span>
+          <span class="font-medium">Owner role:</span> {info.role}
+        </p>
+        <p class="mt-4 text-base leading-relaxed text-warm-700">
+          {info.description}
+        </p>
+        <p class="mt-2 text-xs text-warm-500">
+          {totalActivities} applicable activit{totalActivities === 1 ? 'y' : 'ies'}
+        </p>
+      </header>
+
+      <div class="mt-4">
+        <button
+          type="button"
+          data-seam-rs-apply={rs}
+          class="rounded border border-seam-400 bg-seam-50 px-3 py-1.5 text-xs font-medium text-seam-800 hover:border-seam-600 hover:bg-seam-100"
+        >
+          Filter side nav to {info.code}
+        </button>
+      </div>
+
+      <section class="mt-8 space-y-8">
+        {
+          groups.map(({ pillar, activities }) => (
+            <div>
+              <h2 class="border-b border-warm-200 pb-1 text-sm font-semibold uppercase tracking-wider text-warm-500">
+                <a href={`/${pillar.slug}`} class="hover:text-seam-700">
+                  {pillar.title}
+                </a>
+                <span class="ml-2 text-xs font-normal normal-case text-warm-400">
+                  {activities.length} activit{activities.length === 1 ? 'y' : 'ies'}
+                </span>
+              </h2>
+              <ul class="mt-2 divide-y divide-warm-200 border-b border-warm-200">
+                {activities.map(({ activity, concept, objective }) => (
+                  <li>
+                    <a
+                      href={`/${pillar.slug}/${concept.slug}/${objective.slug}/${activity.slug}`}
+                      class="group flex items-baseline gap-3 py-2.5 hover:text-seam-700"
+                    >
+                      <span class="w-16 shrink-0 font-mono text-xs text-warm-500 group-hover:text-seam-600">
+                        {activity.activityId}
+                      </span>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-warm-800 group-hover:text-seam-800">
+                          {activity.title}
+                        </p>
+                        <p class="mt-0.5 text-xs text-warm-500">
+                          {concept.title} · {objective.objectiveCode}
+                        </p>
+                      </div>
+                      <span class="shrink-0 text-xs text-warm-500">{activity.activityType}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </section>
+    </article>
+  </div>
+
+  <script>
+    const STORAGE = 'seam:filter'
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-rs-apply]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = `rs-${btn.dataset.seamRsApply}`
+        try { localStorage.setItem(STORAGE, key) } catch {}
+        // Trigger SideNav to repaint by reloading; simpler than wiring cross-component events.
+        window.location.reload()
+      })
+    })
+  </script>
+</StandardLayout>
