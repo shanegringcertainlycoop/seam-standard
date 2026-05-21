@@ -302,16 +302,21 @@ const PILLAR_GLYPHS: Record<string, string> = {
                                             <li {...attrs}>
                                               <a
                                                 href={href}
-                                                title={activity.title}
+                                                title={`${activity.activityId} — ${activity.title}`}
                                                 class:list={[
-                                                  'block py-0.5 font-mono text-xs hover:text-seam-700',
+                                                  'flex items-baseline gap-1.5 py-0.5 text-xs hover:text-seam-700',
                                                   isCurrent
                                                     ? 'font-semibold text-seam-700'
                                                     : 'text-warm-600',
                                                 ]}
                                                 aria-current={isCurrent ? 'page' : undefined}
                                               >
-                                                {activity.activityId}
+                                                <span class="shrink-0 font-mono text-[10px] text-warm-500">
+                                                  {activity.activityId}
+                                                </span>
+                                                <span class="min-w-0 flex-1 truncate">
+                                                  {activity.title}
+                                                </span>
                                               </a>
                                             </li>
                                           )
