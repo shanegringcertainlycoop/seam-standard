@@ -88,12 +88,12 @@ if (activity.seals && activity.seals.length > 0) {
         <span aria-hidden="true" class="mt-0.5 shrink-0">⚠</span>
         <div class="flex-1">
           <p data-seam-product-mismatch-text>
-            <strong>Heads up:</strong> this activity does not apply to your
+            <strong>Heads up:</strong> this activity does not match your
             current filter.
           </p>
           <p class="mt-1 text-xs">
-            It still appears here so you can read it — change or clear the
-            filter from the Product picker in the top bar.
+            It's still shown so you can read it. Change or clear the filter
+            in the side nav under <span class="font-semibold">Product filter</span>.
           </p>
         </div>
         <button
@@ -178,12 +178,16 @@ if (activity.seals && activity.seals.length > 0) {
         const seals = (article.getAttribute('data-seals') ?? '').split(/\s+/).filter(Boolean)
         if (!seals.includes(slug)) {
           mismatch = true
-          html = `<strong>Heads up:</strong> this activity is not part of the <span class="font-mono">${slug}</span> SEAL.`
+          // Look up the SEAL's display name from the side nav.
+          const labelEl = document.querySelector(`[data-seam-seal-label="${slug}"]`)
+          const baseName = labelEl?.textContent?.trim() || slug
+          const sealName = /SEAL$/i.test(baseName) ? baseName : `${baseName} SEAL`
+          html = `<strong>Heads up:</strong> this activity is not part of the <em>${sealName}</em>.`
         }
       } else if (filter === 'mark') {
         if (!article.hasAttribute('data-mark')) {
           mismatch = true
-          html = `<strong>Heads up:</strong> this activity is not Mark-eligible. Marks include only a curated subset of activities.`
+          html = `<strong>Heads up:</strong> this activity isn't Mark-eligible. Marks recognize only a curated subset of activities that can be earned as standalone SEAM Marks.`
         }
       }
 
