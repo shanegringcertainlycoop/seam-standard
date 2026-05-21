@@ -510,15 +510,11 @@ const PILLAR_GLYPHS: Record<string, string> = {
 </aside>
 
 <script>
-  // Prevent the native <details> toggle when a click lands on a link inside
-  // a <summary> — the link should just navigate, not also open/close the
-  // branch. Toggle behavior is preserved when the user clicks the chevron
-  // (or anywhere outside the link).
-  document.querySelectorAll<HTMLElement>('[data-seam-sidenav] summary').forEach((s) => {
-    s.addEventListener('click', (e) => {
-      const t = e.target as HTMLElement
-      if (t.closest('a[href]')) e.preventDefault()
-    })
+  // Stop link clicks inside <summary> from bubbling — that way the link
+  // navigates without also toggling the parent <details>. Clicking the
+  // chevron (outside the link) still toggles.
+  document.querySelectorAll<HTMLAnchorElement>('[data-seam-sidenav] summary a[href]').forEach((a) => {
+    a.addEventListener('click', (e) => e.stopPropagation())
   })
 </script>
 

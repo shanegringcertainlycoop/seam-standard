@@ -460,7 +460,14 @@ export interface PillarDetail {
       slug: string
       objectiveCode: string
       number: number
+      headlineGoal?: string
       activityCount: number
+      activities?: Array<{
+        activityId: string
+        title: string
+        slug: string
+        activityType: 'Driver' | 'Impact'
+      }>
     }>
     activityCount: number
   }>
@@ -515,7 +522,14 @@ export async function getPillarBySlug(pillarSlug: string): Promise<PillarDetail 
           "slug": slug.current,
           objectiveCode,
           number,
-          "activityCount": count(*[_type == "activity" && objective._ref == ^._id])
+          headlineGoal,
+          "activityCount": count(*[_type == "activity" && objective._ref == ^._id]),
+          "activities": *[_type == "activity" && objective._ref == ^._id] | order(activityId asc) {
+            activityId,
+            title,
+            "slug": slug.current,
+            activityType
+          }
         },
         "activityCount": count(*[_type == "activity" && objective->concept._ref == ^._id])
       }

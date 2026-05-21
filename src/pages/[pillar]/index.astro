@@ -85,20 +85,47 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
                 <ul class="divide-y divide-warm-200">
                   {concept.objectives.map((obj) => (
                     <li>
-                      <a
-                        href={`/${pillar.slug}/${concept.slug}/${obj.slug}`}
-                        class="group flex items-baseline gap-3 px-4 py-2.5 hover:bg-warm-50 hover:text-seam-700"
-                      >
-                        <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
-                          {obj.objectiveCode}
-                        </span>
-                        <span class="flex-1 text-sm text-warm-800 group-hover:text-seam-800">
-                          {obj.title}
-                        </span>
-                        <span class="shrink-0 text-xs text-warm-500">
-                          {obj.activityCount} activit{obj.activityCount === 1 ? 'y' : 'ies'}
-                        </span>
-                      </a>
+                      <details class="group/obj">
+                        <summary class="flex cursor-pointer list-none items-baseline gap-3 px-4 py-2.5 marker:hidden hover:bg-warm-50">
+                          <span class="inline-block w-3 shrink-0 text-warm-400 group-open/obj:rotate-90 transition-transform">›</span>
+                          <a
+                            href={`/${pillar.slug}/${concept.slug}/${obj.slug}`}
+                            class="group/link inline-flex flex-1 items-baseline gap-3 hover:text-seam-700"
+                          >
+                            <span class="font-mono text-xs text-warm-500 group-hover/link:text-seam-600 w-16 shrink-0">
+                              {obj.objectiveCode}
+                            </span>
+                            <span class="flex-1 text-sm text-warm-800 group-hover/link:text-seam-800">
+                              {obj.title}
+                            </span>
+                          </a>
+                          <span class="shrink-0 text-xs text-warm-500">
+                            {obj.activityCount} activit{obj.activityCount === 1 ? 'y' : 'ies'}
+                          </span>
+                        </summary>
+                        {obj.activities && obj.activities.length > 0 && (
+                          <ul class="border-t border-warm-100 bg-warm-50/50 divide-y divide-warm-100">
+                            {obj.activities.map((a) => (
+                              <li>
+                                <a
+                                  href={`/${pillar.slug}/${concept.slug}/${obj.slug}/${a.slug}`}
+                                  class="group flex items-baseline gap-3 px-4 py-2 pl-12 hover:bg-warm-100 hover:text-seam-700"
+                                >
+                                  <span class="font-mono text-[11px] text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
+                                    {a.activityId}
+                                  </span>
+                                  <span class="flex-1 text-sm text-warm-700 group-hover:text-seam-800">
+                                    {a.title}
+                                  </span>
+                                  <span class="shrink-0 text-[10px] uppercase tracking-wider text-warm-500">
+                                    {a.activityType}
+                                  </span>
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </details>
                     </li>
                   ))}
                 </ul>
