@@ -527,15 +527,14 @@ const PILLAR_GLYPHS: Record<string, string> = {
 
 <!-- Resize handle — sibling flex item next to the aside on desktop -->
 <div
-  class="group hidden cursor-col-resize touch-none select-none lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-5rem)] lg:w-3 lg:shrink-0 lg:items-center lg:justify-center lg:-mx-3"
+  class="group relative hidden cursor-col-resize touch-none select-none bg-warm-200 hover:bg-seam-500 lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-5rem)] lg:w-1.5 lg:shrink-0 lg:items-center lg:justify-center"
   data-seam-sidenav-resize
   role="separator"
   aria-orientation="vertical"
   aria-label="Resize navigation. Drag horizontally."
   title="Drag to resize · double-click to reset"
 >
-  <span class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-warm-300 transition-colors group-hover:w-0.5 group-hover:bg-seam-500" aria-hidden="true"></span>
-  <span class="relative flex h-12 w-5 items-center justify-center rounded-full border border-warm-300 bg-white text-warm-500 shadow-sm transition-colors group-hover:border-seam-500 group-hover:text-seam-700">
+  <span class="absolute left-1/2 top-1/2 flex h-12 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-warm-400 bg-white text-warm-600 shadow-md transition-colors group-hover:border-seam-600 group-hover:text-seam-700">
     <svg viewBox="0 0 12 16" width="10" height="14" fill="currentColor" aria-hidden="true">
       <circle cx="4" cy="4" r="1"/>
       <circle cx="8" cy="4" r="1"/>
