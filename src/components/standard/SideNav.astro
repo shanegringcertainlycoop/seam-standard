@@ -168,18 +168,33 @@ const PILLAR_GLYPHS: Record<string, string> = {
       </li>
     </ul>
 
-    <div class="mb-2 flex items-baseline justify-between">
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-        Framework
-      </p>
-      <button
-        type="button"
-        data-seam-mode-toggle
-        title="Switch how non-applicable activities are displayed when a filter is active"
-        class="text-[10px] uppercase tracking-wider text-warm-400 hover:text-seam-700"
-      >
-        <span data-seam-mode-label>dim</span>
-      </button>
+    <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+      Framework
+    </p>
+    <div class="mb-2 mt-1 flex items-center gap-2 text-[10px] text-warm-500">
+      <span title="When a Product filter is active, choose whether non-applicable activities are dimmed or hidden in the tree below.">
+        When filtered:
+      </span>
+      <span class="inline-flex overflow-hidden rounded border border-warm-300" role="group" aria-label="Filter display mode">
+        <button
+          type="button"
+          data-seam-mode-set="dim"
+          title="Dim non-applicable activities (kept visible)"
+          class="px-2 py-0.5 hover:bg-warm-50"
+          data-seam-mode-btn="dim"
+        >
+          Dim
+        </button>
+        <button
+          type="button"
+          data-seam-mode-set="hide"
+          title="Hide non-applicable activities entirely"
+          class="border-l border-warm-300 px-2 py-0.5 hover:bg-warm-50"
+          data-seam-mode-btn="hide"
+        >
+          Hide
+        </button>
+      </span>
     </div>
     <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree>
       {
@@ -475,25 +490,40 @@ const PILLAR_GLYPHS: Record<string, string> = {
          [data-seam-sidenav][data-seam-filter-mode='hide'] [data-seam-tree] li:not([data-seals~="${safe}"]) { display: none; }`
     }
 
-    // Mode toggle (dim ↔ hide)
+    // Mode segmented control (dim ↔ hide)
     const MODE_KEY = 'seam:filter-mode'
-    const modeBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-mode-toggle]')
-    const modeLabel = sidenav.querySelector<HTMLElement>('[data-seam-mode-label]')
+    const modeSetters = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-mode-set]')
+    const modeBtns = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-mode-btn]')
+
+    function paintModeBtns(active: 'dim' | 'hide') {
+      modeBtns.forEach((b) => {
+        const on = b.dataset.seamModeBtn === active
+        b.classList.toggle('bg-seam-700', on)
+        b.classList.toggle('text-white', on)
+        b.classList.toggle('text-warm-700', !on)
+      })
+    }
+
     function applyMode(mode: 'dim' | 'hide') {
       sidenav.setAttribute('data-seam-filter-mode', mode)
-      if (modeLabel) modeLabel.textContent = mode
+      paintModeBtns(mode)
     }
+
     function readMode(): 'dim' | 'hide' {
       try {
         const v = localStorage.getItem(MODE_KEY)
         return v === 'hide' ? 'hide' : 'dim'
       } catch { return 'dim' }
     }
-    modeBtn?.addEventListener('click', () => {
-      const next = readMode() === 'dim' ? 'hide' : 'dim'
-      try { localStorage.setItem(MODE_KEY, next) } catch {}
-      applyMode(next)
+
+    modeSetters.forEach((b) => {
+      b.addEventListener('click', () => {
+        const next = (b.dataset.seamModeSet === 'hide' ? 'hide' : 'dim') as 'dim' | 'hide'
+        try { localStorage.setItem(MODE_KEY, next) } catch {}
+        applyMode(next)
+      })
     })
+
     applyMode(readMode())
 
     function apply(filter: string | null) {
