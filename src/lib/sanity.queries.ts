@@ -170,6 +170,8 @@ export interface Activity {
   activityType: 'Driver' | 'Impact'
   ratingSystemApplication?: RatingSystemApplication
   markEligible?: boolean
+  /** UN SDG numbers this activity aligns with (per Appendix A). */
+  sdgs?: number[]
   /** Seals this activity belongs to (resolved at query time). */
   seals?: Array<{ name: string; slug: string; accentColor?: string }>
   pillar: PillarRef
@@ -205,6 +207,7 @@ const activityProjection = `{
   activityType,
   ratingSystemApplication,
   markEligible,
+  sdgs,
   "seals": *[_type == "seal" && references(^._id)] | order(order asc, name asc) {
     name,
     "slug": slug.current,
@@ -682,6 +685,42 @@ export function findPrevNext(
   const i = flat.findIndex((a) => a.slug === slug)
   if (i === -1) return {}
   return { prev: i > 0 ? flat[i - 1] : undefined, next: i < flat.length - 1 ? flat[i + 1] : undefined }
+}
+
+// ─── Appendices ───────────────────────────────────────────────────────────
+
+export interface AppendixSummary {
+  code: string
+  title: string
+  slug: string
+}
+
+export interface AppendixDetail extends AppendixSummary {
+  body?: PortableTextBlock[]
+}
+
+export async function listAppendices(): Promise<AppendixSummary[]> {
+  const client = requireClient()
+  if (!client) return []
+  return client.fetch(`*[_type == "appendix"] | order(code asc) {
+    code,
+    title,
+    "slug": slug.current
+  }`)
+}
+
+export async function getAppendixBySlug(slug: string): Promise<AppendixDetail | null> {
+  const client = requireClient()
+  if (!client) return null
+  return client.fetch(
+    `*[_type == "appendix" && slug.current == $slug][0]{
+      code,
+      title,
+      "slug": slug.current,
+      body
+    }`,
+    { slug },
+  )
 }
 
 // ─── Intro sections + glossary ────────────────────────────────────────────

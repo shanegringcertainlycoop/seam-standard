@@ -69,7 +69,7 @@ const ratingFlags = [
   </div>
 
   {
-    ((activity.seals && activity.seals.length > 0) || activity.markEligible) && (
+    ((activity.seals && activity.seals.length > 0) || activity.markEligible || (activity.sdgs && activity.sdgs.length > 0)) && (
       <div class="mt-3 flex flex-wrap items-center gap-2 border-b border-warm-300 pb-3 text-xs">
         {activity.markEligible && (
           <a
@@ -89,6 +89,16 @@ const ratingFlags = [
             <span aria-hidden="true">◆</span> {s.name}
           </a>
         ))}
+        {activity.sdgs && activity.sdgs.length > 0 && (
+          <a
+            href="/appendix/sdg-alignment"
+            class="inline-flex flex-wrap items-center gap-1 rounded-full border border-warm-300 bg-white px-2 py-0.5 font-medium text-warm-700 hover:border-seam-400 hover:text-seam-700"
+            title="UN Sustainable Development Goals this activity aligns with (per Appendix A)"
+          >
+            <span aria-hidden="true" class="font-mono text-[10px] text-warm-500">SDG</span>
+            <span class="font-mono">{activity.sdgs.join(' · ')}</span>
+          </a>
+        )}
       </div>
     )
   }

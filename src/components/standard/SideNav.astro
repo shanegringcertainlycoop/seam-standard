@@ -122,56 +122,40 @@ const PILLAR_GLYPHS: Record<string, string> = {
 <aside class="hidden lg:block lg:w-80 lg:shrink-0">
   <nav class="sticky top-16 max-h-[calc(100vh-5rem)] overflow-y-auto pb-8 text-sm" data-seam-sidenav>
     <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-      Standard
+      Standard v1.1
     </p>
     <ul class="mb-4 space-y-0.5 border-b border-warm-200 pb-4 text-sm">
       <li>
-        <details open={isIntroOpen} class="group/intro">
-          <summary class="cursor-pointer list-none py-0.5 marker:hidden">
-            <span class="inline-block w-3 text-warm-400 group-open/intro:rotate-90 transition-transform">›</span>
-            <a
-              href="/intro"
-              class:list={['ml-1', current === 'intro' ? activeClass : idleClass]}
-              aria-current={current === 'intro' ? 'page' : undefined}
-            >
-              Introduction
-            </a>
-          </summary>
-          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+        <a
+          href="/"
+          class:list={['block py-0.5', current === 'home' ? activeClass : idleClass]}
+          aria-current={current === 'home' ? 'page' : undefined}
+        >
+          Overview
+        </a>
+      </li>
+      {
+        introSections.filter((s) => s.slug !== 'acknowledgments').map((s) => {
+          const isActive = activeIntroSlug === s.slug
+          return (
             <li>
               <a
-                href="/"
-                class:list={['block py-0.5', current === 'home' ? activeClass : idleClass]}
-                aria-current={current === 'home' ? 'page' : undefined}
+                href={`/intro/${s.slug}`}
+                class:list={['block py-0.5', isActive ? activeClass : idleClass]}
+                aria-current={isActive ? 'page' : undefined}
               >
-                Overview
+                {s.title}
               </a>
             </li>
-            {
-              introSections.map((s) => {
-                const isActive = activeIntroSlug === s.slug
-                return (
-                  <li>
-                    <a
-                      href={`/intro/${s.slug}`}
-                      class:list={['block py-0.5', isActive ? activeClass : idleClass]}
-                      aria-current={isActive ? 'page' : undefined}
-                    >
-                      {s.title}
-                    </a>
-                  </li>
-                )
-              })
-            }
-          </ul>
-        </details>
-      </li>
+          )
+        })
+      }
     </ul>
 
     <div class="mb-2">
       <div class="flex items-center justify-between gap-2">
         <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-          Framework
+          Standard
         </p>
         <div class="flex items-center gap-1.5 text-[10px] text-warm-500">
           <button
@@ -299,15 +283,25 @@ const PILLAR_GLYPHS: Record<string, string> = {
         Product filter
       </p>
 
-      <p class="mt-1 text-[11px] font-semibold uppercase tracking-wider text-warm-500">
-        <a
-          href="/certification"
-          class:list={[current === 'certification' ? 'text-seam-700' : 'hover:text-seam-700']}
-          aria-current={current === 'certification' ? 'page' : undefined}
+      <div class="mt-1 flex items-baseline justify-between gap-2">
+        <p class="text-[11px] font-semibold uppercase tracking-wider text-warm-500">
+          <a
+            href="/certification"
+            class:list={[current === 'certification' ? 'text-seam-700' : 'hover:text-seam-700']}
+            aria-current={current === 'certification' ? 'page' : undefined}
+          >
+            Certification
+          </a>
+        </p>
+        <button
+          type="button"
+          data-seam-share-link
+          title="Copy a link to this page with the current Product filter applied"
+          class="text-[10px] text-warm-400 hover:text-seam-700"
         >
-          Certification
-        </a>
-      </p>
+          <span data-seam-share-label>share view</span>
+        </button>
+      </div>
       <ul class="ml-1 mt-1 space-y-0.5 text-xs">
         {
           RS_OPTIONS.map((rs) => (
@@ -427,6 +421,24 @@ const PILLAR_GLYPHS: Record<string, string> = {
           Bibliography
         </a>
       </li>
+      <li>
+        <a
+          href="/appendix"
+          class:list={['block py-0.5', current === 'appendix' || current?.startsWith('appendix:') ? activeClass : idleClass]}
+          aria-current={current === 'appendix' ? 'page' : undefined}
+        >
+          Appendices
+        </a>
+      </li>
+      <li>
+        <a
+          href="/intro/acknowledgments"
+          class:list={['block py-0.5', activeIntroSlug === 'acknowledgments' ? activeClass : idleClass]}
+          aria-current={activeIntroSlug === 'acknowledgments' ? 'page' : undefined}
+        >
+          Acknowledgments
+        </a>
+      </li>
     </ul>
   </nav>
 </aside>
@@ -477,6 +489,19 @@ const PILLAR_GLYPHS: Record<string, string> = {
         if (v) localStorage.setItem(STORAGE, v)
         else localStorage.removeItem(STORAGE)
       } catch {}
+    }
+
+    // URL <-> filter sync. The ?filter= query param mirrors the active filter
+    // so links can be shared with the filter pre-applied.
+    function readFromUrl(): string | null {
+      const v = new URL(location.href).searchParams.get('filter')
+      return v && /^(rs-(bid|bio|omd|omo)|seal:[a-z0-9-]+|mark)$/.test(v) ? v : null
+    }
+    function writeToUrl(v: string | null) {
+      const url = new URL(location.href)
+      if (v) url.searchParams.set('filter', v)
+      else url.searchParams.delete('filter')
+      history.replaceState(null, '', url.toString())
     }
 
     function paintActive(dot: HTMLElement | null, label: HTMLElement | null, on: boolean) {
@@ -589,6 +614,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
       const current = read()
       const next = current === filter ? null : filter
       write(next)
+      writeToUrl(next)
       apply(next)
     }
 
@@ -608,7 +634,31 @@ const PILLAR_GLYPHS: Record<string, string> = {
       set('mark')
     })
 
-    apply(read())
+    // On page load: prefer the URL filter (link-sharing wins), else localStorage.
+    const initial = readFromUrl() ?? read()
+    if (readFromUrl()) write(initial)
+    apply(initial)
+    writeToUrl(initial)
+
+    // Share link button
+    const shareBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-share-link]')
+    const shareLabel = sidenav.querySelector<HTMLElement>('[data-seam-share-label]')
+    shareBtn?.addEventListener('click', async () => {
+      const url = new URL(location.href)
+      const cur = read()
+      if (cur) url.searchParams.set('filter', cur)
+      else url.searchParams.delete('filter')
+      try {
+        await navigator.clipboard.writeText(url.toString())
+        if (shareLabel) {
+          const original = shareLabel.textContent
+          shareLabel.textContent = 'copied!'
+          setTimeout(() => { if (shareLabel) shareLabel.textContent = original }, 1400)
+        }
+      } catch {
+        if (shareLabel) shareLabel.textContent = 'copy failed'
+      }
+    })
   }
 </script>
 

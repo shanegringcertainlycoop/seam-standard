@@ -1,0 +1,95 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { renderPT } from '@/lib/renderPortableText'
+import {
+  getAppendixBySlug,
+  listAppendices,
+  getNavigationTree,
+  getFootnoteLookup,
+  buildActivityUrlMap,
+} from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const { slug } = Astro.params
+if (!slug) return Astro.redirect('/appendix')
+
+const [appendix, allAppendices, navTree, lookup] = await Promise.all([
+  getAppendixBySlug(slug),
+  listAppendices(),
+  getNavigationTree(),
+  getFootnoteLookup(),
+])
+
+if (!appendix) return new Response('Appendix not found', { status: 404 })
+
+lookup.activityUrls = buildActivityUrlMap(navTree)
+
+const i = allAppendices.findIndex((a) => a.slug === appendix.slug)
+const prev = i > 0 ? allAppendices[i - 1] : undefined
+const next = i < allAppendices.length - 1 ? allAppendices[i + 1] : undefined
+---
+
+<StandardLayout title={`Appendix ${appendix.code}: ${appendix.title} — The SEAM Standard`}>
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current={`appendix:${appendix.slug}`} />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <a href="/appendix" class="hover:text-seam-700">Appendices</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">Appendix {appendix.code}</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="font-mono text-xs uppercase tracking-wider text-gold-500">Appendix {appendix.code}</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900">{appendix.title}</h1>
+      </header>
+
+      {appendix.body && appendix.body.length > 0 && (
+        <section
+          class="mt-6 text-warm-800 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-seam-800 [&>p]:mt-3 [&>p]:leading-relaxed [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mt-1 [&_a]:text-seam-700 [&_a]:underline"
+          set:html={renderPT(appendix.body, lookup)}
+        />
+      )}
+
+      <nav class="mt-16 flex flex-col gap-3 border-t border-warm-200 pt-6 sm:flex-row sm:justify-between">
+        {prev ? (
+          <a
+            href={`/appendix/${prev.slug}`}
+            class="group flex flex-1 flex-col rounded border border-warm-200 p-4 hover:border-seam-400"
+          >
+            <span class="text-xs uppercase tracking-wider text-warm-500">← Previous</span>
+            <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+              Appendix {prev.code}: {prev.title}
+            </span>
+          </a>
+        ) : (
+          <a
+            href="/appendix"
+            class="group flex flex-1 flex-col rounded border border-warm-200 p-4 hover:border-seam-400"
+          >
+            <span class="text-xs uppercase tracking-wider text-warm-500">← Back</span>
+            <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+              Appendix index
+            </span>
+          </a>
+        )}
+        {next && (
+          <a
+            href={`/appendix/${next.slug}`}
+            class="group flex flex-1 flex-col rounded border border-warm-200 p-4 text-right hover:border-seam-400"
+          >
+            <span class="text-xs uppercase tracking-wider text-warm-500">Next →</span>
+            <span class="mt-1 text-sm font-medium text-warm-900 group-hover:text-seam-700">
+              Appendix {next.code}: {next.title}
+            </span>
+          </a>
+        )}
+      </nav>
+    </article>
+  </div>
+</StandardLayout>
