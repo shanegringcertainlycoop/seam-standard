@@ -160,47 +160,53 @@ if (activity.seals && activity.seals.length > 0) {
     const article = document.querySelector<HTMLElement>('[data-seam-activity]')
     const banner = document.querySelector<HTMLElement>('[data-seam-product-mismatch]')
     if (article && banner) {
-      const filter = (() => {
-        try { return localStorage.getItem(STORAGE) } catch { return null }
-      })()
+      function evaluate() {
+        if (!article || !banner) return
+        let filter: string | null = null
+        try { filter = localStorage.getItem(STORAGE) } catch {}
 
-      let mismatch = false
-      let html = ''
+        let mismatch = false
+        let html = ''
 
-      if (filter?.startsWith('rs-')) {
-        const rs = filter.slice(3)
-        if (!article.hasAttribute(`data-rs-${rs}`)) {
-          mismatch = true
-          html = `<strong>Heads up:</strong> this activity does not apply to your selected rating system (<span class="font-mono">${RS_LABELS[rs] ?? rs}</span>).`
+        if (filter?.startsWith('rs-')) {
+          const rs = filter.slice(3)
+          if (!article.hasAttribute(`data-rs-${rs}`)) {
+            mismatch = true
+            html = `<strong>Heads up:</strong> this activity does not apply to your selected rating system (<span class="font-mono">${RS_LABELS[rs] ?? rs}</span>).`
+          }
+        } else if (filter?.startsWith('seal:')) {
+          const slug = filter.slice('seal:'.length)
+          const seals = (article.getAttribute('data-seals') ?? '').split(/\s+/).filter(Boolean)
+          if (!seals.includes(slug)) {
+            mismatch = true
+            const labelEl = document.querySelector(`[data-seam-seal-label="${slug}"]`)
+            const baseName = labelEl?.textContent?.trim() || slug
+            const sealName = /SEAL$/i.test(baseName) ? baseName : `${baseName} SEAL`
+            html = `<strong>Heads up:</strong> this activity is not part of the <em>${sealName}</em>.`
+          }
+        } else if (filter === 'mark') {
+          if (!article.hasAttribute('data-mark')) {
+            mismatch = true
+            html = `<strong>Heads up:</strong> this activity isn't Mark-eligible. Marks recognize only a curated subset of activities that can be earned as standalone SEAM Marks.`
+          }
         }
-      } else if (filter?.startsWith('seal:')) {
-        const slug = filter.slice('seal:'.length)
-        const seals = (article.getAttribute('data-seals') ?? '').split(/\s+/).filter(Boolean)
-        if (!seals.includes(slug)) {
-          mismatch = true
-          // Look up the SEAL's display name from the side nav.
-          const labelEl = document.querySelector(`[data-seam-seal-label="${slug}"]`)
-          const baseName = labelEl?.textContent?.trim() || slug
-          const sealName = /SEAL$/i.test(baseName) ? baseName : `${baseName} SEAL`
-          html = `<strong>Heads up:</strong> this activity is not part of the <em>${sealName}</em>.`
-        }
-      } else if (filter === 'mark') {
-        if (!article.hasAttribute('data-mark')) {
-          mismatch = true
-          html = `<strong>Heads up:</strong> this activity isn't Mark-eligible. Marks recognize only a curated subset of activities that can be earned as standalone SEAM Marks.`
-        }
-      }
 
-      if (mismatch) {
         const text = banner.querySelector<HTMLElement>('[data-seam-product-mismatch-text]')
-        if (text) text.innerHTML = html
-        banner.hidden = false
+        if (mismatch) {
+          if (text) text.innerHTML = html
+          banner.hidden = false
+        } else {
+          banner.hidden = true
+        }
       }
 
       banner.querySelector<HTMLButtonElement>('[data-seam-product-mismatch-dismiss]')
         ?.addEventListener('click', () => {
           banner.hidden = true
         })
+
+      evaluate()
+      window.addEventListener('seam:filter-change', evaluate)
     }
   </script>
 </StandardLayout>
