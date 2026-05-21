@@ -168,9 +168,19 @@ const PILLAR_GLYPHS: Record<string, string> = {
       </li>
     </ul>
 
-    <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-      Framework
-    </p>
+    <div class="mb-2 flex items-baseline justify-between">
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+        Framework
+      </p>
+      <button
+        type="button"
+        data-seam-mode-toggle
+        title="Switch how non-applicable activities are displayed when a filter is active"
+        class="text-[10px] uppercase tracking-wider text-warm-400 hover:text-seam-700"
+      >
+        <span data-seam-mode-label>dim</span>
+      </button>
+    </div>
     <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree>
       {
         tree.map((pillar) => {
@@ -392,19 +402,21 @@ const PILLAR_GLYPHS: Record<string, string> = {
 </aside>
 
 <style>
-  /* Rating-system dim (Product = Certification). */
+  /* Default mode (dim): non-applicable items fade to opacity 0.35. */
   [data-seam-sidenav][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { opacity: 0.35; }
   [data-seam-sidenav][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { opacity: 0.35; }
   [data-seam-sidenav][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { opacity: 0.35; }
   [data-seam-sidenav][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { opacity: 0.35; }
-
-  /* Mark dim (Product = Marks). */
   [data-seam-sidenav][data-seam-mark-active] [data-seam-tree] li:not([data-mark]) { opacity: 0.35; }
-
-  /* Seal dim (Product = SEALs). data-seals is a space-separated list; we use
-     ~="slug" attribute selector to test membership. The selector for the active
-     seal is set dynamically by the TopBar script via a child <style> element. */
   [data-seam-sidenav][data-seam-seal-active] [data-seam-tree] li:not([data-seals]) { opacity: 0.35; }
+
+  /* Hide mode: non-applicable items are removed from the tree. */
+  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { display: none; }
+  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { display: none; }
+  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { display: none; }
+  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { display: none; }
+  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-mark-active] [data-seam-tree] li:not([data-mark]) { display: none; }
+  [data-seam-sidenav][data-seam-filter-mode='hide'][data-seam-seal-active] [data-seam-tree] li:not([data-seals]) { display: none; }
 </style>
 
 <script>
@@ -459,8 +471,30 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
       const safe = slug.replace(/["\\]/g, '\\$&')
       style.textContent =
-        `[data-seam-sidenav] [data-seam-tree] li:not([data-seals~="${safe}"]) { opacity: 0.35; }`
+        `[data-seam-sidenav] [data-seam-tree] li:not([data-seals~="${safe}"]) { opacity: 0.35; }
+         [data-seam-sidenav][data-seam-filter-mode='hide'] [data-seam-tree] li:not([data-seals~="${safe}"]) { display: none; }`
     }
+
+    // Mode toggle (dim ↔ hide)
+    const MODE_KEY = 'seam:filter-mode'
+    const modeBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-mode-toggle]')
+    const modeLabel = sidenav.querySelector<HTMLElement>('[data-seam-mode-label]')
+    function applyMode(mode: 'dim' | 'hide') {
+      sidenav.setAttribute('data-seam-filter-mode', mode)
+      if (modeLabel) modeLabel.textContent = mode
+    }
+    function readMode(): 'dim' | 'hide' {
+      try {
+        const v = localStorage.getItem(MODE_KEY)
+        return v === 'hide' ? 'hide' : 'dim'
+      } catch { return 'dim' }
+    }
+    modeBtn?.addEventListener('click', () => {
+      const next = readMode() === 'dim' ? 'hide' : 'dim'
+      try { localStorage.setItem(MODE_KEY, next) } catch {}
+      applyMode(next)
+    })
+    applyMode(readMode())
 
     function apply(filter: string | null) {
       sidenav.removeAttribute('data-seam-rs-active')
