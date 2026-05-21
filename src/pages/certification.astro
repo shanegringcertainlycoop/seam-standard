@@ -1,0 +1,135 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import { getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const navTree = await getNavigationTree()
+
+const ratingSystems = [
+  {
+    code: 'B+I:D',
+    title: 'Buildings + Interiors: Developer',
+    summary: 'Ground-up construction, tear-down, or major renovation where the Owner takes on Developer responsibilities — project ownership, vision, financing, construction supervision, landlord duties, and tenant leasing.',
+  },
+  {
+    code: 'B+I:O',
+    title: 'Buildings + Interiors: Occupier',
+    summary: 'Construction projects of an existing building or space where the Owner is a Tenant or Property Owner with no Landlord duties or control over Tenant leasing.',
+  },
+  {
+    code: 'O+M:D',
+    title: 'Operations + Maintenance: Developer',
+    summary: "Ongoing operations and maintenance of a building or space that's already constructed, where the Owner owns the building and oversees long-term operations and acts as Landlord.",
+  },
+  {
+    code: 'O+M:O',
+    title: 'Operations + Maintenance: Occupier',
+    summary: 'Ongoing operations and maintenance where the Owner is a Tenant or property owner with no Landlord duties or control over Tenant leasing.',
+  },
+]
+
+const levels = [
+  { name: 'Bronze',  summary: 'Acting to avoid harm by making progress towards international social targets.' },
+  { name: 'Silver',  summary: 'Preventing harm with a commitment to grow into achieving positive social impact.' },
+  { name: 'Gold',    summary: 'Achieving positive social impact and sustainable benefits for impacted parties.' },
+  { name: 'Platinum', summary: 'Setting the standard for positive social impact and contributing to sustainable solutions.' },
+]
+---
+
+<StandardLayout title="Certification — The SEAM Standard" description="SEAM Certification — rating systems, levels, and how a project earns the credential.">
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current="certification" />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
+      <nav class="mb-6 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span class="mx-2">/</span>
+        <span class="text-warm-700">Certification</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="text-xs uppercase tracking-wider text-gold-500">Product</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900">SEAM Certification</h1>
+        <p class="mt-3 text-base text-warm-700">
+          The world's first independent certification system designed exclusively to measure,
+          manage, and improve social equity outcomes in commercial real estate projects.
+        </p>
+      </header>
+
+      <section class="mt-8">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-warm-500">
+          Rating systems
+        </h2>
+        <p class="mt-2 text-sm text-warm-700">
+          Not every Activity applies to every project. Each project follows the Rating
+          System that matches its project type (construction/renovation or operations/
+          maintenance) and the Owner's role (Developer or Occupier).
+        </p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          {
+            ratingSystems.map((r) => (
+              <div class="rounded border border-warm-200 bg-white p-4">
+                <p class="font-mono text-xs text-gold-500">{r.code}</p>
+                <h3 class="mt-1 text-base font-semibold text-warm-900">{r.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-warm-600">{r.summary}</p>
+              </div>
+            ))
+          }
+        </div>
+        <p class="mt-3 text-xs text-warm-500">
+          A fifth Rating System — <span class="font-mono">CD</span> (Community Development) —
+          is reserved for future use.
+        </p>
+        <p class="mt-2 text-xs text-warm-500">
+          To filter the side nav by a Rating System, open the
+          <span class="font-semibold">Product filter</span> group and click the dot next
+          to the Rating System code.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-warm-500">
+          Certification levels
+        </h2>
+        <p class="mt-2 text-sm text-warm-700">
+          Projects earn one of four levels along a continuum from acting to avoid harm,
+          through preventing harm, to contributing to sustainable solutions.
+        </p>
+        <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+          {
+            levels.map((l) => (
+              <li class="rounded border border-warm-200 bg-white p-4">
+                <p class="text-base font-semibold text-seam-800">{l.name}</p>
+                <p class="mt-1 text-sm leading-relaxed text-warm-600">{l.summary}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="mt-10 flex flex-wrap gap-3 border-t border-warm-200 pt-6 text-sm">
+        <a
+          href="/intro/framework"
+          class="rounded border border-warm-300 px-3 py-1.5 text-warm-700 hover:border-seam-400 hover:text-seam-700"
+        >
+          Standard framework →
+        </a>
+        <a
+          href="/intro/design"
+          class="rounded border border-warm-300 px-3 py-1.5 text-warm-700 hover:border-seam-400 hover:text-seam-700"
+        >
+          Standard design →
+        </a>
+        <a
+          href="https://www.seamcertification.org"
+          class="rounded border border-warm-300 px-3 py-1.5 text-warm-700 hover:border-seam-400 hover:text-seam-700"
+          rel="noopener"
+        >
+          SEAM Certification Guidebook ↗
+        </a>
+      </section>
+    </article>
+  </div>
+</StandardLayout>
