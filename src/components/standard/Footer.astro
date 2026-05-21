@@ -1,0 +1,180 @@
+---
+// Mirror of the SEAM marketing-site footer (seamcertification.org).
+// All links are absolute back to the marketing site since this reference
+// site doesn't own those routes. Newsletter form posts to the marketing
+// site endpoint as a fallback.
+const HOST = 'https://seamcertification.org'
+const year = new Date().getFullYear()
+---
+
+<footer class="bg-warm-900 text-warm-300">
+  <div class="mx-auto max-w-[1400px] px-6 py-20 lg:px-10 lg:py-28">
+    <div class="grid grid-cols-1 gap-16 lg:grid-cols-12">
+      <div class="lg:col-span-3">
+        <img src="/seam-wordmark-white.svg" alt="SEAM" decoding="async" class="h-8 w-auto" />
+        <p class="mt-6 max-w-sm text-[17px] leading-relaxed text-warm-400">
+          Real estate has a human impact. SEAM exists to make that impact
+          positive, for the people connected to it.
+        </p>
+        <a
+          href="https://www.linkedin.com/company/seam-inc/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-6 inline-flex items-center gap-2 text-[14px] text-warm-400 transition-colors hover:text-white"
+        >
+          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          Follow on LinkedIn
+        </a>
+        <a
+          aria-label="SEAM, Inc. on Candid"
+          href="https://app.candid.org/profile/13959346/seam-inc-84-5054317/?pkId=1838cc46-09c0-4b8b-9468-c52a38c6177b"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-6 block"
+        >
+          <img
+            alt="Candid Transparency Seal"
+            src="https://widgets.guidestar.org/prod/v1/pdp/transparency-seal/13959346/svg"
+            class="h-16 w-auto"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8 lg:col-span-9 lg:grid-cols-6 lg:gap-10">
+        <div>
+          <h3 class="mb-6 text-[13px] font-semibold uppercase tracking-[0.1em] text-seam-400">
+            Solutions
+          </h3>
+          <ul class="space-y-4">
+            <li><a href={`${HOST}/certification`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Certification</a></li>
+            <li><a href={`${HOST}/ap-credential`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">AP Credential</a></li>
+            <li><a href={`${HOST}/resources/standard`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">The Standard</a></li>
+            <li><a href={`${HOST}/membership`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Membership Community</a></li>
+            <li><a href={`${HOST}/membership/individual`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Individual Membership</a></li>
+            <li><a href={`${HOST}/membership/organization`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Organization Membership</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="mb-6 text-[13px] font-semibold uppercase tracking-[0.1em] text-seam-400">
+            Ratings
+          </h3>
+          <ul class="space-y-4">
+            <li><a href={`${HOST}/rating-system/buildings-interiors`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Buildings + Interiors</a></li>
+            <li><a href={`${HOST}/rating-system/operations-maintenance`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Operations + Maintenance</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="mb-6 text-[13px] font-semibold uppercase tracking-[0.1em] text-seam-400">
+            Pillars
+          </h3>
+          <ul class="space-y-4">
+            <li><a href={`${HOST}/standard/social-impact`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Social Impact</a></li>
+            <li><a href={`${HOST}/standard/social-responsibility`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Social Responsibility</a></li>
+            <li><a href={`${HOST}/standard/social-justice`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Social Justice</a></li>
+            <li><a href={`${HOST}/standard/social-accountability`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Social Accountability</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="mb-6 text-[13px] font-semibold uppercase tracking-[0.1em] text-seam-400">
+            Resources
+          </h3>
+          <ul class="space-y-4">
+            <li><a href={`${HOST}/social-equity-101`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Social Equity 101</a></li>
+            <li><a href={`${HOST}/resources/standard`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">The Standard</a></li>
+            <li><a href={`${HOST}/resources/rossi`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">ROSSI Calculator</a></li>
+            <li><a href={`${HOST}/resources/blog`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Blog &amp; Insights</a></li>
+            <li><a href={`${HOST}/resources/courses`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Courses</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="mb-6 text-[13px] font-semibold uppercase tracking-[0.1em] text-seam-400">
+            Who We Serve
+          </h3>
+          <ul class="space-y-4">
+            <li><a href={`${HOST}/for/developers-owners`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Developers &amp; Owners</a></li>
+            <li><a href={`${HOST}/for/building-professionals`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Building Professionals</a></li>
+            <li><a href={`${HOST}/for/operators`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Property Managers</a></li>
+            <li><a href={`${HOST}/for/capital-providers`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Capital Providers</a></li>
+            <li><a href={`${HOST}/for/impact-professionals`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Impact Professionals</a></li>
+            <li><a href={`${HOST}/for/people`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">People &amp; Communities</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="mb-6 text-[13px] font-semibold uppercase tracking-[0.1em] text-seam-400">
+            Directory
+          </h3>
+          <ul class="space-y-4">
+            <li><a href={`${HOST}/directory?tab=professionals`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Professionals</a></li>
+            <li><a href={`${HOST}/directory?tab=projects`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Projects</a></li>
+            <li><a href={`${HOST}/directory?tab=organizations`} class="text-[15px] text-warm-400 transition-colors duration-300 hover:text-white">Organizations</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="mt-16 border-t border-warm-700/50 pt-10">
+      <form
+        action="https://seamcertification.org/api/newsletter"
+        method="post"
+        class="flex flex-col items-center gap-3 sm:flex-row"
+      >
+        <p class="shrink-0 text-[13px] font-medium uppercase tracking-[0.15em] text-warm-400 sm:mr-2">
+          Stay in the loop
+        </p>
+        <input
+          type="text"
+          name="firstname"
+          placeholder="First name"
+          required
+          aria-label="First name"
+          class="w-full min-w-0 rounded-full border border-warm-700 bg-warm-800 px-5 py-2.5 text-[14px] text-white placeholder-warm-500 transition-colors focus:border-seam-500 focus:outline-none sm:w-auto sm:flex-1"
+        />
+        <input
+          type="text"
+          name="lastname"
+          placeholder="Last name"
+          required
+          aria-label="Last name"
+          class="w-full min-w-0 rounded-full border border-warm-700 bg-warm-800 px-5 py-2.5 text-[14px] text-white placeholder-warm-500 transition-colors focus:border-seam-500 focus:outline-none sm:w-auto sm:flex-1"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Your email"
+          required
+          aria-label="Email address"
+          class="w-full min-w-0 rounded-full border border-warm-700 bg-warm-800 px-5 py-2.5 text-[14px] text-white placeholder-warm-500 transition-colors focus:border-seam-500 focus:outline-none sm:w-auto sm:flex-1"
+        />
+        <button
+          type="submit"
+          class="shrink-0 rounded-full bg-white px-6 py-2.5 text-[14px] font-medium text-warm-900 transition-colors hover:bg-warm-100"
+        >
+          Subscribe
+        </button>
+      </form>
+    </div>
+
+    <div class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-warm-700/50 pt-10 md:flex-row">
+      <p class="text-[14px] text-warm-400">
+        &copy; {year} SEAM, Inc. All rights reserved.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4 sm:gap-8 md:justify-end">
+        <a href={`${HOST}/about`} class="text-[14px] text-warm-400 transition-colors hover:text-warm-300">About</a>
+        <a href={`${HOST}/contact`} class="text-[14px] text-warm-400 transition-colors hover:text-warm-300">Contact</a>
+        <a href={`${HOST}/get-started`} class="text-[14px] text-warm-400 transition-colors hover:text-warm-300">Talk to an Advisor</a>
+        <a href={`${HOST}/privacy`} class="text-[14px] text-warm-400 transition-colors hover:text-warm-300">Privacy</a>
+        <a href={`${HOST}/terms`} class="text-[14px] text-warm-400 transition-colors hover:text-warm-300">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>

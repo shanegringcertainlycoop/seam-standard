@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css'
 import TopBar from '@/components/standard/TopBar.astro'
+import Footer from '@/components/standard/Footer.astro'
 
 interface Props {
   title: string
@@ -83,5 +84,6 @@ const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
     <main id="main">
       <slot />
     </main>
+    <Footer />
   </body>
 </html>
