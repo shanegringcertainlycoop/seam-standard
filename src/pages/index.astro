@@ -202,7 +202,7 @@ const allActivities = pillars.flatMap((p) =>
           <li>
             <a
               href="/intro"
-              class="group flex items-center justify-between py-3 hover:text-seam-700"
+              class="group flex items-center justify-between px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
             >
               <span class="text-sm font-medium text-warm-900 group-hover:text-seam-700">
                 Introduction
@@ -213,7 +213,7 @@ const allActivities = pillars.flatMap((p) =>
           <li>
             <a
               href="/glossary"
-              class="group flex items-center justify-between py-3 hover:text-seam-700"
+              class="group flex items-center justify-between px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
             >
               <span class="text-sm font-medium text-warm-900 group-hover:text-seam-700">
                 Key terms + definitions
@@ -224,7 +224,7 @@ const allActivities = pillars.flatMap((p) =>
           <li>
             <a
               href="/intro/framework"
-              class="group flex items-center justify-between py-3 hover:text-seam-700"
+              class="group flex items-center justify-between px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
             >
               <span class="text-sm font-medium text-warm-900 group-hover:text-seam-700">
                 Standard framework
@@ -235,7 +235,7 @@ const allActivities = pillars.flatMap((p) =>
           <li>
             <a
               href="/intro/design"
-              class="group flex items-center justify-between py-3 hover:text-seam-700"
+              class="group flex items-center justify-between px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
             >
               <span class="text-sm font-medium text-warm-900 group-hover:text-seam-700">
                 Standard design
@@ -246,7 +246,7 @@ const allActivities = pillars.flatMap((p) =>
           <li>
             <a
               href="/bibliography"
-              class="group flex items-center justify-between py-3 hover:text-seam-700"
+              class="group flex items-center justify-between px-4 py-3 hover:bg-warm-50 hover:text-seam-700"
             >
               <span class="text-sm font-medium text-warm-900 group-hover:text-seam-700">
                 Bibliography
@@ -352,7 +352,19 @@ const allActivities = pillars.flatMap((p) =>
                 </a>
               </h3>
               <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                {p.concepts.map((c) => (
+                {p.concepts.map((c) => {
+                  const CONCEPT_BLURBS: any = {
+                    IA: 'Structured process for understanding the social context of a project, engaging the people most likely to be affected, and monitoring whether efforts are working.',
+                    TG: 'Governance practices, voluntary initiatives, site-specific policies, transparent communication, and impacted-party materiality.',
+                    CI: 'Community development programs that go beyond financial support — direct engagement that addresses community-identified goals.',
+                    SI: 'Financial investments that build long-term community capacity rather than create ongoing dependency.',
+                    SJ: 'Equity across procurement, the workplace, the community, and access to capital.',
+                    IN: 'New models, programs, and partnerships that push commercial real estate toward more equitable outcomes — including design for embodied justice.',
+                    HR: 'Ethical materials and supplier procurement, human-rights reporting and grievance channels, and internal capacity to identify and respond to human-rights risks.',
+                    HS: 'Physical wellbeing of everyone the project touches — occupants, surrounding community, construction workers, and the structural safety of all spaces.',
+                  }
+                  const blurb = c.headlineGoal || CONCEPT_BLURBS[c.code]
+                  return (
                   <a
                     href={`/${p.slug}/${c.slug}`}
                     class="group flex flex-col gap-1 rounded border border-warm-200 bg-white p-4 hover:border-seam-400 hover:shadow-sm"
@@ -363,16 +375,17 @@ const allActivities = pillars.flatMap((p) =>
                         {c.title}
                       </h4>
                     </div>
-                    {c.headlineGoal && (
-                      <p class="text-sm leading-relaxed text-warm-600 line-clamp-2">
-                        {c.headlineGoal}
+                    {blurb && (
+                      <p class="text-sm leading-relaxed text-warm-600 line-clamp-3">
+                        {blurb}
                       </p>
                     )}
                     <p class="mt-1 text-xs text-warm-500">
                       {c.objectives.length} objective{c.objectives.length === 1 ? '' : 's'}
                     </p>
                   </a>
-                ))}
+                  )
+                })}
               </div>
             </div>
           ))
