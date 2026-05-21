@@ -239,132 +239,117 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
     </ul>
 
-    <ul class="mt-4 space-y-1 border-b border-warm-200 pb-4 text-sm">
-      <li>
-        <details open class="group/cert">
-          <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
-            <span class="inline-block w-3 text-warm-400 group-open/cert:rotate-90 transition-transform">›</span>
-            <span class="ml-1">Certification</span>
-          </summary>
-          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
-            {
-              RS_OPTIONS.map((rs) => (
-                <li>
-                  <button
-                    type="button"
-                    data-seam-rs-toggle={rs.key}
-                    title={rs.title}
-                    class="group/btn flex w-full items-center gap-1.5 py-0.5 text-left text-warm-600 hover:text-seam-700"
-                  >
-                    <span
-                      aria-hidden="true"
-                      class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
-                      data-seam-rs-dot={rs.key}
-                    />
-                    <span class="font-mono">{rs.label}</span>
-                    <span class="ml-1 text-[10px] text-warm-400 group-hover/btn:text-warm-600">
-                      {rs.title.replace(/^(Buildings|Operations).*: /, '')}
-                    </span>
-                  </button>
-                </li>
-              ))
-            }
-            <li>
-              <button
-                type="button"
-                data-seam-rs-clear-side
-                class="mt-0.5 text-[11px] text-warm-500 underline hover:text-seam-700"
-              >
-                Show all rating systems
-              </button>
-            </li>
-          </ul>
-        </details>
-      </li>
-
-      <li>
-        <details open={isSealsOpen} class="group/seals">
-          <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
-            <span class="inline-block w-3 text-warm-400 group-open/seals:rotate-90 transition-transform">›</span>
-            <a
-              href="/seals"
-              class:list={['ml-1', current === 'seals' ? activeClass : '']}
-              aria-current={current === 'seals' ? 'page' : undefined}
-            >
-              SEALs
-            </a>
-          </summary>
-          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
-            {seals.length === 0 ? (
-              <li class="py-0.5 italic text-warm-400">No SEALs yet</li>
-            ) : (
-              seals.map((s) => {
-                const isActive = activeSealSlug === s.slug
-                return (
-                  <li class="flex items-center gap-1">
-                    <a
-                      href={`/seals/${s.slug}`}
-                      class:list={['flex-1 truncate py-0.5', isActive ? activeClass : idleClass]}
-                      aria-current={isActive ? 'page' : undefined}
-                      title={s.name}
-                    >
-                      {s.name.replace(/\s+SEAL$/, '')}
-                    </a>
+    <div class="mt-4 border-b border-warm-200 pb-4">
+      <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+        Product filter
+      </p>
+      <ul class="space-y-1 text-sm">
+        <li>
+          <details open class="group/cert">
+            <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
+              <span class="inline-block w-3 text-warm-400 group-open/cert:rotate-90 transition-transform">›</span>
+              <span class="ml-1">Certification</span>
+            </summary>
+            <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+              {
+                RS_OPTIONS.map((rs) => (
+                  <li>
                     <button
                       type="button"
-                      data-seam-seal-toggle={s.slug}
-                      title={`Filter the side nav to activities in ${s.name}`}
-                      class="shrink-0 text-warm-400 hover:text-seam-700"
-                      aria-label={`Filter by ${s.name}`}
+                      data-seam-rs-toggle={rs.key}
+                      data-seam-filter-row
+                      title={rs.title}
+                      class="group/btn flex w-full items-center gap-1.5 py-0.5 text-left text-warm-600 hover:text-seam-700"
                     >
                       <span
                         aria-hidden="true"
-                        class="inline-block h-2 w-2 rounded-full border border-warm-400"
-                        data-seam-seal-dot={s.slug}
+                        class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
+                        data-seam-rs-dot={rs.key}
                       />
+                      <span class="font-mono" data-seam-rs-label={rs.key}>{rs.label}</span>
                     </button>
                   </li>
-                )
-              })
-            )}
-            {seals.length > 0 && (
-              <li>
-                <button
-                  type="button"
-                  data-seam-seal-clear-side
-                  class="mt-0.5 text-[11px] text-warm-500 underline hover:text-seam-700"
-                >
-                  Show all SEALs
-                </button>
-              </li>
-            )}
-          </ul>
-        </details>
-      </li>
+                ))
+              }
+            </ul>
+          </details>
+        </li>
 
-      <li class="flex items-center gap-1">
-        <a
-          href="/marks"
-          class:list={['flex-1 py-0.5 font-medium', current === 'marks' ? activeClass : idleClass]}
-          aria-current={current === 'marks' ? 'page' : undefined}
-        >
-          Marks
-        </a>
-        <button
-          type="button"
-          data-seam-mark-toggle
-          title="Filter the side nav to Mark-eligible activities"
-          class="shrink-0 text-warm-400 hover:text-seam-700"
-          aria-label="Filter by Marks"
-        >
-          <span
-            aria-hidden="true"
-            class="inline-block h-2 w-2 rounded-full border border-warm-400"
-            data-seam-mark-dot
-          />
-        </button>
-      </li>
-    </ul>
+        <li>
+          <details open={isSealsOpen} class="group/seals">
+            <summary class="cursor-pointer list-none py-0.5 font-medium text-warm-700 marker:hidden hover:text-seam-700">
+              <span class="inline-block w-3 text-warm-400 group-open/seals:rotate-90 transition-transform">›</span>
+              <a
+                href="/seals"
+                class:list={['ml-1', current === 'seals' ? activeClass : '']}
+                aria-current={current === 'seals' ? 'page' : undefined}
+              >
+                SEALs
+              </a>
+            </summary>
+            <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+              {seals.length === 0 ? (
+                <li class="py-0.5 italic text-warm-400">No SEALs yet</li>
+              ) : (
+                seals.map((s) => {
+                  const isActive = activeSealSlug === s.slug
+                  return (
+                    <li class="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        data-seam-seal-toggle={s.slug}
+                        title={`Filter the side nav to activities in ${s.name}`}
+                        class="shrink-0"
+                        aria-label={`Filter by ${s.name}`}
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="inline-block h-2 w-2 rounded-full border border-warm-400"
+                          data-seam-seal-dot={s.slug}
+                        />
+                      </button>
+                      <a
+                        href={`/seals/${s.slug}`}
+                        class:list={['flex-1 truncate py-0.5', isActive ? activeClass : idleClass]}
+                        aria-current={isActive ? 'page' : undefined}
+                        title={s.name}
+                        data-seam-seal-label={s.slug}
+                      >
+                        {s.name.replace(/\s+SEAL$/, '')}
+                      </a>
+                    </li>
+                  )
+                })
+              )}
+            </ul>
+          </details>
+        </li>
+
+        <li class="flex items-center gap-1.5 pl-3 text-sm">
+          <button
+            type="button"
+            data-seam-mark-toggle
+            title="Filter the side nav to Mark-eligible activities"
+            class="shrink-0"
+            aria-label="Filter by Marks"
+          >
+            <span
+              aria-hidden="true"
+              class="inline-block h-2 w-2 rounded-full border border-warm-400"
+              data-seam-mark-dot
+            />
+          </button>
+          <a
+            href="/marks"
+            class:list={['flex-1 py-0.5 font-medium', current === 'marks' ? activeClass : idleClass]}
+            aria-current={current === 'marks' ? 'page' : undefined}
+            data-seam-mark-label
+          >
+            Marks
+          </a>
+        </li>
+      </ul>
+    </div>
 
     <ul class="mt-4 space-y-0.5 text-sm">
       <li>
@@ -415,12 +400,13 @@ const PILLAR_GLYPHS: Record<string, string> = {
   if (sidenav) {
     const rsButtons = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-rs-toggle]')
     const rsDots = sidenav.querySelectorAll<HTMLElement>('[data-seam-rs-dot]')
-    const rsClearBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-rs-clear-side]')
+    const rsLabels = sidenav.querySelectorAll<HTMLElement>('[data-seam-rs-label]')
     const sealButtons = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-seal-toggle]')
     const sealDots = sidenav.querySelectorAll<HTMLElement>('[data-seam-seal-dot]')
-    const sealClearBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-seal-clear-side]')
+    const sealLabels = sidenav.querySelectorAll<HTMLElement>('[data-seam-seal-label]')
     const markBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-mark-toggle]')
     const markDot = sidenav.querySelector<HTMLElement>('[data-seam-mark-dot]')
+    const markLabel = sidenav.querySelector<HTMLElement>('[data-seam-mark-label]')
 
     const SEAL_STYLE_ID = 'seam-seal-dim-style'
 
@@ -434,10 +420,16 @@ const PILLAR_GLYPHS: Record<string, string> = {
       } catch {}
     }
 
-    function paintActiveDot(dot: HTMLElement, on: boolean) {
-      dot.classList.toggle('bg-seam-600', on)
-      dot.classList.toggle('border-seam-600', on)
-      dot.classList.toggle('border-warm-400', !on)
+    function paintActive(dot: HTMLElement | null, label: HTMLElement | null, on: boolean) {
+      if (dot) {
+        dot.classList.toggle('bg-seam-600', on)
+        dot.classList.toggle('border-seam-600', on)
+        dot.classList.toggle('border-warm-400', !on)
+      }
+      if (label) {
+        label.classList.toggle('text-seam-700', on)
+        label.classList.toggle('font-semibold', on)
+      }
     }
 
     function ensureSealStyle(slug: string | null) {
@@ -458,25 +450,33 @@ const PILLAR_GLYPHS: Record<string, string> = {
       sidenav.removeAttribute('data-seam-seal-active')
       sidenav.removeAttribute('data-seam-mark-active')
 
-      rsDots.forEach((d) => paintActiveDot(d, false))
-      sealDots.forEach((d) => paintActiveDot(d, false))
-      if (markDot) paintActiveDot(markDot, false)
+      rsDots.forEach((d) => {
+        const label = sidenav.querySelector<HTMLElement>(`[data-seam-rs-label="${d.dataset.seamRsDot}"]`)
+        paintActive(d, label, false)
+      })
+      sealDots.forEach((d) => {
+        const label = sidenav.querySelector<HTMLElement>(`[data-seam-seal-label="${d.dataset.seamSealDot}"]`)
+        paintActive(d, label, false)
+      })
+      paintActive(markDot, markLabel, false)
 
       if (filter?.startsWith('rs-')) {
         const k = filter.slice(3)
         sidenav.setAttribute('data-seam-rs-active', k)
         const dot = sidenav.querySelector<HTMLElement>(`[data-seam-rs-dot="${k}"]`)
-        if (dot) paintActiveDot(dot, true)
+        const label = sidenav.querySelector<HTMLElement>(`[data-seam-rs-label="${k}"]`)
+        paintActive(dot, label, true)
         ensureSealStyle(null)
       } else if (filter?.startsWith('seal:')) {
         const slug = filter.slice('seal:'.length)
         sidenav.setAttribute('data-seam-seal-active', slug)
         const dot = sidenav.querySelector<HTMLElement>(`[data-seam-seal-dot="${slug}"]`)
-        if (dot) paintActiveDot(dot, true)
+        const label = sidenav.querySelector<HTMLElement>(`[data-seam-seal-label="${slug}"]`)
+        paintActive(dot, label, true)
         ensureSealStyle(slug)
       } else if (filter === 'mark') {
         sidenav.setAttribute('data-seam-mark-active', '1')
-        if (markDot) paintActiveDot(markDot, true)
+        paintActive(markDot, markLabel, true)
         ensureSealStyle(null)
       } else {
         ensureSealStyle(null)
@@ -493,20 +493,12 @@ const PILLAR_GLYPHS: Record<string, string> = {
     rsButtons.forEach((b) => {
       b.addEventListener('click', () => set(`rs-${b.dataset.seamRsToggle}`))
     })
-    rsClearBtn?.addEventListener('click', () => {
-      const cur = read()
-      if (cur?.startsWith('rs-')) { write(null); apply(null) }
-    })
 
     sealButtons.forEach((b) => {
       b.addEventListener('click', (e) => {
         e.preventDefault()
         set(`seal:${b.dataset.seamSealToggle}`)
       })
-    })
-    sealClearBtn?.addEventListener('click', () => {
-      const cur = read()
-      if (cur?.startsWith('seal:')) { write(null); apply(null) }
     })
 
     markBtn?.addEventListener('click', (e) => {
