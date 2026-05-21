@@ -159,7 +159,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
     </svg>
     Close
   </button>
-  <nav class="pb-8 text-sm lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" data-seam-sidenav>
+  <nav class="pb-8 text-[15px] leading-snug lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" data-seam-sidenav>
     <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
       Overview
     </p>
@@ -305,14 +305,14 @@ const PILLAR_GLYPHS: Record<string, string> = {
                                                 href={href}
                                                 title={`${activity.activityId} — ${activity.title}`}
                                                 class:list={[
-                                                  'flex items-baseline gap-1.5 py-0.5 text-xs hover:text-seam-700',
+                                                  'flex items-baseline gap-1.5 py-1 text-[13px] hover:text-seam-700',
                                                   isCurrent
                                                     ? 'font-semibold text-seam-700'
                                                     : 'text-warm-600',
                                                 ]}
                                                 aria-current={isCurrent ? 'page' : undefined}
                                               >
-                                                <span class="shrink-0 font-mono text-[10px] text-warm-500">
+                                                <span class="shrink-0 font-mono text-[11px] text-warm-500">
                                                   {activity.activityId}
                                                 </span>
                                                 <span class="min-w-0 flex-1 truncate">

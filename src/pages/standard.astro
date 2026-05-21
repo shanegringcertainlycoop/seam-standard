@@ -1,0 +1,224 @@
+---
+import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
+import ConceptBadge from '@/components/standard/ConceptBadge.astro'
+import PillarGlyph from '@/components/standard/PillarGlyph.astro'
+import { getLandingData, getNavigationTree } from '@/lib/sanity.queries'
+
+export const prerender = false
+
+const [pillars, navTree] = await Promise.all([
+  getLandingData(),
+  getNavigationTree(),
+])
+
+const stats = pillars.reduce(
+  (s, p) => {
+    s.concepts += p.concepts.length
+    for (const c of p.concepts) {
+      s.objectives += c.objectives.length
+      for (const o of c.objectives) {
+        s.activities += o.activities.length
+      }
+    }
+    return s
+  },
+  { concepts: 0, objectives: 0, activities: 0 },
+)
+---
+
+<StandardLayout
+  title="The Standard — full tree view"
+  description="The full SEAM Standard tree — pillars, concepts, objectives, and activities, browseable in one view."
+>
+  <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
+    <SideNav tree={navTree} />
+
+    <article class="min-w-0 flex-1">
+      <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
+        <a href="/" class="hover:text-seam-700">SEAM Standard</a>
+        <span aria-hidden="true">/</span>
+        <span class="text-warm-700">The Standard</span>
+      </nav>
+
+      <header class="border-b border-warm-300 pb-4">
+        <p class="text-xs uppercase tracking-wider text-gold-500">Browse the framework</p>
+        <h1 class="mt-1 text-3xl font-semibold text-warm-900 sm:text-4xl">The Standard</h1>
+        <p class="mt-3 max-w-3xl text-base text-warm-700">
+          Every Pillar, Concept, Objective, and Activity in the SEAM Standard.
+          Click any chevron to expand its contents; click any title to open
+          its dedicated page.
+        </p>
+        <dl class="mt-6 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+          <div>
+            <dt class="text-xs uppercase tracking-wider text-gold-500">Pillars</dt>
+            <dd class="font-semibold text-warm-900">{pillars.length}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase tracking-wider text-gold-500">Concepts</dt>
+            <dd class="font-semibold text-warm-900">{stats.concepts}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase tracking-wider text-gold-500">Objectives</dt>
+            <dd class="font-semibold text-warm-900">{stats.objectives}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase tracking-wider text-gold-500">Activities</dt>
+            <dd class="font-semibold text-warm-900">{stats.activities}</dd>
+          </div>
+        </dl>
+      </header>
+
+      <!-- Quick jump links -->
+      <nav class="mt-6 flex flex-wrap gap-2" aria-label="Jump to pillar">
+        {
+          pillars.map((p) => (
+            <a
+              href={`#pillar-${p.slug}`}
+              class="inline-flex items-center gap-1.5 rounded border border-warm-200 bg-white px-3 py-1.5 text-xs text-warm-700 hover:border-seam-400 hover:text-seam-700"
+            >
+              <span class="text-seam-700"><PillarGlyph slug={p.slug} size="sm" /></span>
+              <span>{p.title}</span>
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="mt-8 space-y-10">
+        {
+          pillars.map((p) => {
+            const pillarActivities = p.concepts.reduce(
+              (s, c) => s + c.objectives.reduce((s2, o) => s2 + o.activities.length, 0),
+              0,
+            )
+            return (
+              <section id={`pillar-${p.slug}`} class="scroll-mt-20">
+                <header class="flex items-center gap-3 border-b border-warm-300 pb-3">
+                  <span class="text-seam-700"><PillarGlyph slug={p.slug} size="md" /></span>
+                  <div class="min-w-0 flex-1">
+                    <h2 class="text-xl font-semibold text-warm-900">
+                      <a href={`/${p.slug}`} class="hover:text-seam-700">{p.title}</a>
+                    </h2>
+                  </div>
+                  <span class="shrink-0 text-xs text-warm-500">
+                    {p.concepts.length} concept{p.concepts.length === 1 ? '' : 's'} ·{' '}
+                    {pillarActivities} activit{pillarActivities === 1 ? 'y' : 'ies'}
+                  </span>
+                </header>
+
+                <div class="mt-4 space-y-3">
+                  {p.concepts.map((c) => {
+                    const conceptActivities = c.objectives.reduce(
+                      (s, o) => s + o.activities.length,
+                      0,
+                    )
+                    return (
+                      <details open class="group/concept overflow-hidden rounded-lg border border-warm-200 bg-white">
+                        <summary class="flex cursor-pointer list-none items-center gap-3 px-4 py-3 marker:hidden hover:bg-warm-50">
+                          <span class="inline-block w-3 shrink-0 text-warm-400 group-open/concept:rotate-90 transition-transform">›</span>
+                          <a
+                            href={`/${p.slug}/${c.slug}`}
+                            class="inline-flex flex-1 items-center gap-2 hover:text-seam-700"
+                          >
+                            <ConceptBadge code={c.code} size="md" />
+                            <span class="text-base font-medium text-warm-900">{c.title}</span>
+                          </a>
+                          <span class="shrink-0 text-xs text-warm-500">
+                            {conceptActivities} activit{conceptActivities === 1 ? 'y' : 'ies'}
+                          </span>
+                        </summary>
+                        {c.headlineGoal && (
+                          <p class="border-t border-warm-100 px-4 py-2 text-sm leading-relaxed text-warm-600">
+                            {c.headlineGoal}
+                          </p>
+                        )}
+                        <ul class="divide-y divide-warm-100 border-t border-warm-100 bg-warm-50/40">
+                          {c.objectives.map((o) => (
+                            <li>
+                              <details class="group/obj">
+                                <summary class="flex cursor-pointer list-none items-baseline gap-3 px-4 py-2.5 marker:hidden hover:bg-warm-100">
+                                  <span class="inline-block w-3 shrink-0 text-warm-400 group-open/obj:rotate-90 transition-transform">›</span>
+                                  <a
+                                    href={`/${p.slug}/${c.slug}/${o.slug}`}
+                                    class="group/link inline-flex flex-1 items-baseline gap-3 hover:text-seam-700"
+                                  >
+                                    <span class="w-16 shrink-0 font-mono text-xs text-warm-500 group-hover/link:text-seam-600">
+                                      {o.objectiveCode}
+                                    </span>
+                                    <span class="flex-1 text-sm text-warm-800 group-hover/link:text-seam-800">
+                                      {o.title}
+                                    </span>
+                                  </a>
+                                  <span class="shrink-0 text-xs text-warm-500">
+                                    {o.activities.length} activit{o.activities.length === 1 ? 'y' : 'ies'}
+                                  </span>
+                                </summary>
+                                {o.headlineGoal && (
+                                  <p class="px-4 pb-2 pl-[3.25rem] text-xs leading-relaxed text-warm-500">
+                                    {o.headlineGoal}
+                                  </p>
+                                )}
+                                {o.activities.length > 0 && (
+                                  <ul class="divide-y divide-warm-100 border-t border-warm-100 bg-white">
+                                    {o.activities.map((a) => (
+                                      <li>
+                                        <a
+                                          href={`/${p.slug}/${c.slug}/${o.slug}/${a.slug}`}
+                                          class="group flex items-baseline gap-3 px-4 py-2 pl-[3.25rem] hover:bg-warm-50 hover:text-seam-700"
+                                        >
+                                          <span class="w-16 shrink-0 font-mono text-[11px] text-warm-500 group-hover:text-seam-600">
+                                            {a.activityId}
+                                          </span>
+                                          <span class="flex-1 text-sm text-warm-700 group-hover:text-seam-800">
+                                            {a.title}
+                                          </span>
+                                          <span class="shrink-0 text-[10px] uppercase tracking-wider text-warm-500">
+                                            {a.activityType}
+                                          </span>
+                                        </a>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </details>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    )
+                  })}
+                </div>
+              </section>
+            )
+          })
+        }
+      </div>
+
+      <div class="mt-12 flex flex-wrap gap-3 border-t border-warm-200 pt-6">
+        <button
+          type="button"
+          data-seam-expand-all
+          class="rounded border border-warm-300 px-3 py-1.5 text-xs text-warm-700 hover:border-seam-400 hover:text-seam-700"
+        >
+          Expand all
+        </button>
+        <button
+          type="button"
+          data-seam-collapse-all
+          class="rounded border border-warm-300 px-3 py-1.5 text-xs text-warm-700 hover:border-seam-400 hover:text-seam-700"
+        >
+          Collapse all
+        </button>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    document.querySelector('[data-seam-expand-all]')?.addEventListener('click', () => {
+      document.querySelectorAll<HTMLDetailsElement>('article details').forEach((d) => (d.open = true))
+    })
+    document.querySelector('[data-seam-collapse-all]')?.addEventListener('click', () => {
+      document.querySelectorAll<HTMLDetailsElement>('article details').forEach((d) => (d.open = false))
+    })
+  </script>
+</StandardLayout>
