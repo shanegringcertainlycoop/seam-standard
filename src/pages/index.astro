@@ -277,6 +277,13 @@ const allActivities = pillars.flatMap((p) =>
               (s, c) => s + c.objectives.reduce((s2, o) => s2 + o.activities.length, 0),
               0,
             )
+            const PILLAR_BLURBS: Record<string, string> = {
+              'social-impact': 'Know who your project affects — and whether it is working. Measurable outcomes for people and communities, backed by evidence.',
+              'social-responsibility': 'Walk the talk on governance, community, and investment. Match your organization’s actions to its values.',
+              'social-justice': 'Equity across procurement, the workplace, and capital access. Decisions that expand opportunity for everyone.',
+              'social-accountability': 'Human rights, ethical sourcing, and worker well-being — the full reach of a building’s connection to people.',
+            }
+            const blurb = PILLAR_BLURBS[p.slug] ?? p.summary
             return (
               <a
                 href={`/${p.slug}`}
@@ -301,9 +308,9 @@ const allActivities = pillars.flatMap((p) =>
                   <h3 class="mt-1 text-xl font-semibold text-warm-900 group-hover:text-seam-700">
                     {p.title}
                   </h3>
-                  {p.summary && (
-                    <p class="mt-2 text-sm leading-relaxed text-warm-600 line-clamp-3">
-                      {p.summary}
+                  {blurb && (
+                    <p class="mt-2 text-sm leading-relaxed text-warm-600">
+                      {blurb}
                     </p>
                   )}
                   <p class="mt-3 text-xs text-warm-500">
