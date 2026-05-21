@@ -1,5 +1,6 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
+import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
 import {
   getIntroSectionBySlug,
@@ -34,7 +35,10 @@ const next = i < ordered.length - 1 ? ordered[i + 1] : undefined
 ---
 
 <StandardLayout title={`${section.title} — The SEAM Standard`}>
-  <article class="mx-auto max-w-4xl px-6 py-12">
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current={`intro:${section.slug}`} />
+
+    <article class="min-w-0 flex-1 max-w-4xl">
     <nav class="mb-6 text-sm text-warm-500">
       <a href="/" class="hover:text-seam-700">SEAM Standard</a>
       <span class="mx-2">/</span>
@@ -105,4 +109,5 @@ const next = i < ordered.length - 1 ? ordered[i + 1] : undefined
       )}
     </nav>
   </article>
+  </div>
 </StandardLayout>

@@ -1,13 +1,21 @@
 ---
-import SiteSearch from './SiteSearch.astro'
-import type { NavPillar, RatingSystemApplication } from '@/lib/sanity.queries'
+import {
+  listIntroSections,
+  type NavPillar,
+  type RatingSystemApplication,
+  type IntroSection,
+} from '@/lib/sanity.queries'
 
 interface Props {
   tree: NavPillar[]
   currentActivitySlug?: string
+  /** One of: 'home' | 'intro' | `intro:<slug>` | 'glossary' | 'bibliography' */
+  current?: string
 }
 
-const { tree, currentActivitySlug } = Astro.props
+const { tree, currentActivitySlug, current } = Astro.props
+
+const introSections: IntroSection[] = await listIntroSections()
 
 // Locate the current activity's branch so we can auto-expand it
 let openPillar = ''
@@ -26,6 +34,9 @@ for (const p of tree) {
     }
   }
 }
+
+const isIntroOpen = current === 'intro' || (current?.startsWith('intro:') ?? false)
+const activeIntroSlug = current?.startsWith('intro:') ? current.slice('intro:'.length) : undefined
 
 // data-rs-* aggregator: returns the union of applicable rating systems across activities.
 const RS_KEYS = ['bid', 'bio', 'omd', 'omo'] as const
@@ -57,84 +68,73 @@ function unionRsAttrs(...sources: Array<RatingSystemApplication | undefined>) {
   return rsAttrsForActivity(merged)
 }
 
-const RS_LABELS: Record<RSKey, string> = {
-  bid: 'B+I:D',
-  bio: 'B+I:O',
-  omd: 'O+M:D',
-  omo: 'O+M:O',
-}
-const RS_TITLES: Record<RSKey, string> = {
-  bid: 'Buildings + Interiors: Developer',
-  bio: 'Buildings + Interiors: Occupier',
-  omd: 'Operations + Maintenance: Developer',
-  omo: 'Operations + Maintenance: Occupier',
-}
+const activeClass = 'font-semibold text-seam-700'
+const idleClass = 'text-warm-600 hover:text-seam-700'
 ---
 
 <aside class="hidden lg:block lg:w-72 lg:shrink-0">
-  <nav class="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pb-8 text-sm" data-seam-sidenav>
-    <a
-      href="/"
-      class="mb-4 block text-xs font-semibold uppercase tracking-wider text-gold-500 hover:text-gold-600"
-    >
-      The SEAM Standard
-    </a>
-
-    <div class="mb-4">
-      <SiteSearch />
-    </div>
-
-    <ul class="mb-4 space-y-0.5 text-xs">
+  <nav class="sticky top-16 max-h-[calc(100vh-5rem)] overflow-y-auto pb-8 text-sm" data-seam-sidenav>
+    <ul class="mb-4 space-y-0.5 border-b border-warm-200 pb-3 text-sm">
       <li>
-        <a href="/intro" class="block py-0.5 text-warm-600 hover:text-seam-700">
-          Introduction
+        <a
+          href="/"
+          class:list={['block py-0.5', current === 'home' ? activeClass : idleClass]}
+          aria-current={current === 'home' ? 'page' : undefined}
+        >
+          Home
         </a>
       </li>
       <li>
-        <a href="/glossary" class="block py-0.5 text-warm-600 hover:text-seam-700">
+        <details open={isIntroOpen} class="group/intro">
+          <summary class="cursor-pointer list-none py-0.5 marker:hidden">
+            <span class="inline-block w-3 text-warm-400 group-open/intro:rotate-90 transition-transform">›</span>
+            <a
+              href="/intro"
+              class:list={['ml-1', current === 'intro' ? activeClass : idleClass]}
+              aria-current={current === 'intro' ? 'page' : undefined}
+            >
+              Introduction
+            </a>
+          </summary>
+          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-xs">
+            {
+              introSections.map((s) => {
+                const isActive = activeIntroSlug === s.slug
+                return (
+                  <li>
+                    <a
+                      href={`/intro/${s.slug}`}
+                      class:list={['block py-0.5', isActive ? activeClass : idleClass]}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      {s.title}
+                    </a>
+                  </li>
+                )
+              })
+            }
+          </ul>
+        </details>
+      </li>
+      <li>
+        <a
+          href="/glossary"
+          class:list={['block py-0.5', current === 'glossary' ? activeClass : idleClass]}
+          aria-current={current === 'glossary' ? 'page' : undefined}
+        >
           Key terms + definitions
         </a>
       </li>
       <li>
-        <a href="/bibliography" class="block py-0.5 text-warm-600 hover:text-seam-700">
+        <a
+          href="/bibliography"
+          class:list={['block py-0.5', current === 'bibliography' ? activeClass : idleClass]}
+          aria-current={current === 'bibliography' ? 'page' : undefined}
+        >
           Bibliography
         </a>
       </li>
     </ul>
-
-    <details class="mb-4 border-y border-warm-200 py-3" data-seam-rs-filter open>
-      <summary class="flex cursor-pointer list-none items-center justify-between text-xs font-semibold uppercase tracking-wider text-warm-500 marker:hidden hover:text-seam-700">
-        <span>Rating systems</span>
-        <span class="text-warm-400 group-open:rotate-180" aria-hidden="true">⌄</span>
-      </summary>
-      <p class="mt-2 text-xs text-warm-500">
-        Show only activities that apply to:
-      </p>
-      <div class="mt-2 grid grid-cols-2 gap-1.5">
-        {
-          RS_KEYS.map((k) => (
-            <label
-              class="flex cursor-pointer items-center gap-1.5 rounded border border-warm-200 px-2 py-1 text-xs hover:border-seam-400"
-              title={RS_TITLES[k]}
-            >
-              <input
-                type="checkbox"
-                class="accent-seam-600"
-                data-seam-rs={k}
-              />
-              <span class="font-mono text-warm-700">{RS_LABELS[k]}</span>
-            </label>
-          ))
-        }
-      </div>
-      <button
-        type="button"
-        class="mt-2 text-xs text-warm-500 underline hover:text-seam-700"
-        data-seam-rs-clear
-      >
-        Show all
-      </button>
-    </details>
 
     <ul class="space-y-1" data-seam-tree>
       {
@@ -235,57 +235,3 @@ const RS_TITLES: Record<RSKey, string> = {
   [data-seam-sidenav][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { display: none; }
 </style>
 
-<script>
-  const STORAGE_KEY = 'seam:rs-filter'
-  const nav = document.querySelector<HTMLElement>('[data-seam-sidenav]')
-  if (nav) {
-    const inputs = nav.querySelectorAll<HTMLInputElement>('input[data-seam-rs]')
-    const clearBtn = nav.querySelector<HTMLButtonElement>('[data-seam-rs-clear]')
-
-    const apply = (key: string | null) => {
-      if (key) {
-        nav.setAttribute('data-seam-rs-active', key)
-        // Auto-expand all branches so user can see what's available.
-        nav.querySelectorAll<HTMLDetailsElement>('details').forEach((d) => {
-          if (!d.hasAttribute('data-seam-rs-filter')) d.open = true
-        })
-      } else {
-        nav.removeAttribute('data-seam-rs-active')
-      }
-    }
-
-    const current = (() => {
-      try {
-        return localStorage.getItem(STORAGE_KEY)
-      } catch {
-        return null
-      }
-    })()
-
-    inputs.forEach((input) => {
-      if (input.dataset.seamRs === current) input.checked = true
-      input.addEventListener('change', () => {
-        if (input.checked) {
-          // Only one rating system active at a time — uncheck siblings.
-          inputs.forEach((other) => {
-            if (other !== input) other.checked = false
-          })
-          const key = input.dataset.seamRs ?? null
-          apply(key)
-          try { localStorage.setItem(STORAGE_KEY, key ?? '') } catch {}
-        } else {
-          apply(null)
-          try { localStorage.removeItem(STORAGE_KEY) } catch {}
-        }
-      })
-    })
-
-    clearBtn?.addEventListener('click', () => {
-      inputs.forEach((input) => (input.checked = false))
-      apply(null)
-      try { localStorage.removeItem(STORAGE_KEY) } catch {}
-    })
-
-    if (current) apply(current)
-  }
-</script>

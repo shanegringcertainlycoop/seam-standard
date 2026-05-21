@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css'
+import TopBar from '@/components/standard/TopBar.astro'
 
 interface Props {
   title: string
@@ -20,6 +21,7 @@ const { title, description } = Astro.props
   </head>
   <body class="bg-warm-50 text-warm-900 font-sans antialiased">
     <a href="#main" class="sr-only">Skip to content</a>
+    <TopBar />
     <main id="main">
       <slot />
     </main>

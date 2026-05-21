@@ -1,10 +1,14 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
-import { getLandingData } from '@/lib/sanity.queries'
+import SideNav from '@/components/standard/SideNav.astro'
+import { getLandingData, getNavigationTree } from '@/lib/sanity.queries'
 
 export const prerender = false
 
-const pillars = await getLandingData()
+const [pillars, navTree] = await Promise.all([
+  getLandingData(),
+  getNavigationTree(),
+])
 
 const conceptCount = pillars.reduce((s, p) => s + p.concepts.length, 0)
 const objectiveCount = pillars.reduce(
@@ -41,9 +45,13 @@ const allActivities = pillars.flatMap((p) =>
   title="The SEAM Standard"
   description="The digital reference for the SEAM Standard — pillars, concepts, objectives, and activities for advancing social equity in commercial real estate."
 >
+  <div class="mx-auto flex max-w-7xl gap-8 px-6 py-12">
+    <SideNav tree={navTree} current="home" />
+
+    <div class="min-w-0 flex-1">
   <!-- Hero -->
-  <section class="border-b border-warm-200 bg-warm-50/50">
-    <div class="mx-auto max-w-6xl px-6 py-20">
+  <section class="rounded-lg border border-warm-200 bg-warm-50/50">
+    <div class="px-6 py-16 sm:px-10">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         v1.1 with Implementation Guidance
       </p>
@@ -94,7 +102,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Explainer + reference links -->
   <section class="border-b border-warm-200">
-    <div class="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:grid-cols-3">
+    <div class="grid gap-12 px-2 py-12 sm:px-6 md:grid-cols-3">
       <div class="md:col-span-2">
         <h2 class="text-2xl font-semibold text-warm-900">What is SEAM?</h2>
         <div class="mt-4 space-y-4 text-base leading-relaxed text-warm-700">
@@ -184,7 +192,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Pillars -->
   <section id="pillars" class="border-b border-warm-200 bg-warm-50/30 scroll-mt-4">
-    <div class="mx-auto max-w-6xl px-6 py-16">
+    <div class="px-2 py-12 sm:px-6">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         The framework
       </p>
@@ -247,7 +255,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Concepts -->
   <section id="concepts" class="border-b border-warm-200 scroll-mt-4">
-    <div class="mx-auto max-w-6xl px-6 py-16">
+    <div class="px-2 py-12 sm:px-6">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         Themes
       </p>
@@ -299,7 +307,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Objectives -->
   <section id="objectives" class="border-b border-warm-200 bg-warm-50/30 scroll-mt-4">
-    <div class="mx-auto max-w-6xl px-6 py-16">
+    <div class="px-2 py-12 sm:px-6">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         Goals
       </p>
@@ -365,7 +373,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Activities -->
   <section id="activities" class="scroll-mt-4">
-    <div class="mx-auto max-w-6xl px-6 py-16">
+    <div class="px-2 py-12 sm:px-6">
       <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">
         Actions
       </p>
@@ -424,7 +432,7 @@ const allActivities = pillars.flatMap((p) =>
 
   <!-- Footer CTA -->
   <section class="border-t border-warm-200 bg-warm-50/50">
-    <div class="mx-auto max-w-6xl px-6 py-12 text-center">
+    <div class="px-2 py-10 text-center sm:px-6">
       <p class="text-xs uppercase tracking-wider text-gold-500">
         Administered by SEAM, Inc.
       </p>
@@ -438,4 +446,6 @@ const allActivities = pillars.flatMap((p) =>
       </p>
     </div>
   </section>
+    </div>
+  </div>
 </StandardLayout>

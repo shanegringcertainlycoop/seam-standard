@@ -1,0 +1,146 @@
+---
+import SiteSearch from './SiteSearch.astro'
+
+const RS_KEYS = ['bid', 'bio', 'omd', 'omo'] as const
+type RSKey = (typeof RS_KEYS)[number]
+
+const RS_LABELS: Record<RSKey, string> = {
+  bid: 'B+I:D',
+  bio: 'B+I:O',
+  omd: 'O+M:D',
+  omo: 'O+M:O',
+}
+const RS_TITLES: Record<RSKey, string> = {
+  bid: 'Buildings + Interiors: Developer',
+  bio: 'Buildings + Interiors: Occupier',
+  omd: 'Operations + Maintenance: Developer',
+  omo: 'Operations + Maintenance: Occupier',
+}
+---
+
+<header class="sticky top-0 z-40 border-b border-warm-200 bg-white/95 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center gap-4 px-6 py-2">
+    <a
+      href="/"
+      class="text-xs font-semibold uppercase tracking-wider text-gold-500 hover:text-gold-600"
+    >
+      The SEAM Standard
+    </a>
+
+    <div class="ml-auto flex items-center gap-3">
+      <div class="w-64 sm:w-72">
+        <SiteSearch />
+      </div>
+
+      <details class="relative" data-seam-rs-filter>
+        <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded border border-warm-300 bg-white px-3 py-1.5 text-xs text-warm-700 marker:hidden hover:border-seam-400">
+          <span>Rating system</span>
+          <span class="hidden font-mono text-[10px] text-seam-700" data-seam-rs-active-label></span>
+          <span class="text-warm-400" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="absolute right-0 z-50 mt-1 w-64 rounded border border-warm-200 bg-white p-3 shadow-lg">
+          <p class="text-xs text-warm-500">
+            Show only activities that apply to:
+          </p>
+          <div class="mt-2 grid grid-cols-2 gap-1.5">
+            {
+              RS_KEYS.map((k) => (
+                <label
+                  class="flex cursor-pointer items-center gap-1.5 rounded border border-warm-200 px-2 py-1 text-xs hover:border-seam-400"
+                  title={RS_TITLES[k]}
+                >
+                  <input
+                    type="checkbox"
+                    class="accent-seam-600"
+                    data-seam-rs={k}
+                  />
+                  <span class="font-mono text-warm-700">{RS_LABELS[k]}</span>
+                </label>
+              ))
+            }
+          </div>
+          <button
+            type="button"
+            class="mt-2 text-xs text-warm-500 underline hover:text-seam-700"
+            data-seam-rs-clear
+          >
+            Show all
+          </button>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
+
+<script>
+  const STORAGE_KEY = 'seam:rs-filter'
+  const filter = document.querySelector<HTMLElement>('[data-seam-rs-filter]')
+  const sidenav = document.querySelector<HTMLElement>('[data-seam-sidenav]')
+
+  if (filter) {
+    const inputs = filter.querySelectorAll<HTMLInputElement>('input[data-seam-rs]')
+    const clearBtn = filter.querySelector<HTMLButtonElement>('[data-seam-rs-clear]')
+    const activeLabel = filter.querySelector<HTMLElement>('[data-seam-rs-active-label]')
+
+    const apply = (key: string | null) => {
+      if (key && sidenav) {
+        sidenav.setAttribute('data-seam-rs-active', key)
+        // Auto-expand SideNav branches so the user can see what passes the filter.
+        sidenav.querySelectorAll<HTMLDetailsElement>('details').forEach((d) => {
+          d.open = true
+        })
+      } else if (sidenav) {
+        sidenav.removeAttribute('data-seam-rs-active')
+      }
+      if (activeLabel) {
+        if (key) {
+          const label = {
+            bid: 'B+I:D',
+            bio: 'B+I:O',
+            omd: 'O+M:D',
+            omo: 'O+M:O',
+          }[key]
+          activeLabel.textContent = label ?? ''
+          activeLabel.classList.toggle('hidden', !label)
+        } else {
+          activeLabel.textContent = ''
+          activeLabel.classList.add('hidden')
+        }
+      }
+    }
+
+    const current = (() => {
+      try {
+        return localStorage.getItem(STORAGE_KEY)
+      } catch {
+        return null
+      }
+    })()
+
+    inputs.forEach((input) => {
+      if (input.dataset.seamRs === current) input.checked = true
+      input.addEventListener('change', () => {
+        if (input.checked) {
+          // Only one rating system active at a time — uncheck siblings.
+          inputs.forEach((other) => {
+            if (other !== input) other.checked = false
+          })
+          const key = input.dataset.seamRs ?? null
+          apply(key)
+          try { localStorage.setItem(STORAGE_KEY, key ?? '') } catch {}
+        } else {
+          apply(null)
+          try { localStorage.removeItem(STORAGE_KEY) } catch {}
+        }
+      })
+    })
+
+    clearBtn?.addEventListener('click', () => {
+      inputs.forEach((input) => (input.checked = false))
+      apply(null)
+      try { localStorage.removeItem(STORAGE_KEY) } catch {}
+    })
+
+    if (current) apply(current)
+  }
+</script>
