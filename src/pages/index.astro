@@ -2,6 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import ConceptBadge from '@/components/standard/ConceptBadge.astro'
+import ProductGlyph from '@/components/standard/ProductGlyph.astro'
 import { getLandingData, getNavigationTree } from '@/lib/sanity.queries'
 import { website, organization } from '@/lib/seo'
 
@@ -120,7 +121,10 @@ const allActivities = pillars.flatMap((p) =>
           class="group flex flex-col rounded-lg border border-warm-200 bg-white p-5 hover:border-seam-400 hover:shadow-sm"
         >
           <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">Product</p>
-          <h3 class="mt-1 text-lg font-semibold text-warm-900 group-hover:text-seam-700">Certification</h3>
+          <h3 class="mt-1 flex items-center gap-2 text-lg font-semibold text-warm-900 group-hover:text-seam-700">
+            <span class="text-seam-700"><ProductGlyph product="certification" size="md" /></span>
+            Certification
+          </h3>
           <p class="mt-2 flex-1 text-sm leading-relaxed text-warm-600">
             Full SEAM Certification across the four Rating Systems
             (B+I:D / B+I:O / O+M:D / O+M:O) and four Levels
@@ -133,7 +137,10 @@ const allActivities = pillars.flatMap((p) =>
           class="group flex flex-col rounded-lg border border-warm-200 bg-white p-5 hover:border-seam-400 hover:shadow-sm"
         >
           <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">Product</p>
-          <h3 class="mt-1 text-lg font-semibold text-warm-900 group-hover:text-seam-700">SEALs</h3>
+          <h3 class="mt-1 flex items-center gap-2 text-lg font-semibold text-warm-900 group-hover:text-seam-700">
+            <span class="text-seam-700"><ProductGlyph product="seals" size="md" /></span>
+            SEALs
+          </h3>
           <p class="mt-2 flex-1 text-sm leading-relaxed text-warm-600">
             Limited-scope thematic credentials. Each SEAL is a curated subset of
             SEAM Activities reviewed against a defined Assessment Scope —
@@ -146,7 +153,10 @@ const allActivities = pillars.flatMap((p) =>
           class="group flex flex-col rounded-lg border border-warm-200 bg-white p-5 hover:border-seam-400 hover:shadow-sm"
         >
           <p class="text-xs font-semibold uppercase tracking-wider text-gold-500">Product</p>
-          <h3 class="mt-1 text-lg font-semibold text-warm-900 group-hover:text-seam-700">Marks</h3>
+          <h3 class="mt-1 flex items-center gap-2 text-lg font-semibold text-warm-900 group-hover:text-seam-700">
+            <span class="text-seam-700"><ProductGlyph product="marks" size="md" /></span>
+            Marks
+          </h3>
           <p class="mt-2 flex-1 text-sm leading-relaxed text-warm-600">
             Standalone Mark-eligible Activities. Each Mark recognizes a single
             focused accomplishment — a community grievance mechanism, a living-wage

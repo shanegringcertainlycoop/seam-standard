@@ -1,0 +1,36 @@
+---
+interface Props {
+  product: 'certification' | 'seals' | 'marks'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+}
+
+const { product, size = 'sm' } = Astro.props
+
+const SIZE_PX: Record<string, number> = { xs: 12, sm: 14, md: 18, lg: 24 }
+const px = SIZE_PX[size]
+
+const PATHS: Record<string, string> = {
+  // Circle — Certification
+  certification: '<circle cx="12" cy="12" r="9"/>',
+  // Shield — SEALs
+  seals: '<path d="M12 3l8 3v5c0 4.5-3.5 8.5-8 10-4.5-1.5-8-5.5-8-10V6l8-3z"/>',
+  // Rounded square — Marks
+  marks: '<rect x="4" y="4" width="16" height="16" rx="4" ry="4"/>',
+}
+
+const inner = PATHS[product] ?? ''
+---
+
+<svg
+  viewBox="0 0 24 24"
+  width={px}
+  height={px}
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  class="inline-block shrink-0"
+  set:html={inner}
+/>
