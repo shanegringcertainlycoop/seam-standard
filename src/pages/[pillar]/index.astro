@@ -62,11 +62,11 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
         )
       }
 
-      <section class="mt-8 space-y-8">
+      <section class="mt-8 space-y-4">
         {
           pillar.concepts.map((concept) => (
-            <div>
-              <div class="flex items-baseline justify-between border-b border-warm-200 pb-1">
+            <div class="overflow-hidden rounded-lg border border-warm-200 bg-white">
+              <div class="flex items-baseline justify-between border-b border-warm-200 px-4 py-3">
                 <h2 class="text-lg font-medium text-seam-700">
                   <a
                     href={`/${pillar.slug}/${concept.slug}`}
@@ -82,12 +82,12 @@ const totalActivities = pillar.concepts.reduce((sum, c) => sum + c.activityCount
               </div>
 
               {concept.objectives.length > 0 && (
-                <ul class="mt-2 divide-y divide-warm-200">
+                <ul class="divide-y divide-warm-200">
                   {concept.objectives.map((obj) => (
                     <li>
                       <a
                         href={`/${pillar.slug}/${concept.slug}/${obj.slug}`}
-                        class="group flex items-baseline gap-3 py-2 hover:text-seam-700"
+                        class="group flex items-baseline gap-3 px-4 py-2.5 hover:bg-warm-50 hover:text-seam-700"
                       >
                         <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
                           {obj.objectiveCode}
