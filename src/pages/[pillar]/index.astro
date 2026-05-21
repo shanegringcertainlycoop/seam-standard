@@ -112,10 +112,10 @@ const copy = MARKETING[pillar.slug]
         <span class="text-warm-700">{pillar.title}</span>
       </nav>
 
-      <header class="flex items-start gap-5 border-b border-warm-300 pb-6">
+      <header class="flex flex-col items-start gap-6 border-b border-warm-300 pb-6 sm:flex-row sm:gap-8">
         {
           pillar.iconUrl && (
-            <img src={pillar.iconUrl} alt={`${pillar.title} icon`} class="h-20 w-20 shrink-0 object-contain" loading="lazy" />
+            <img src={pillar.iconUrl} alt={`${pillar.title} icon`} class="h-32 w-32 shrink-0 object-contain sm:h-40 sm:w-40 lg:h-48 lg:w-48" loading="lazy" />
           )
         }
         <div class="min-w-0 flex-1">
