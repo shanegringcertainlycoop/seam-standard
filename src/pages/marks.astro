@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
+import ProductGlyph from '@/components/standard/ProductGlyph.astro'
 import { listMarkActivities, getNavigationTree } from '@/lib/sanity.queries'
 
 export const prerender = false
@@ -24,7 +25,10 @@ const [marks, navTree] = await Promise.all([
 
       <header class="border-b border-warm-300 pb-4">
         <p class="text-xs uppercase tracking-wider text-gold-500">Product</p>
-        <h1 class="mt-1 text-3xl font-semibold text-warm-900">Marks</h1>
+        <h1 class="mt-1 flex items-center gap-3 text-3xl font-semibold text-warm-900">
+          <span class="text-seam-700"><ProductGlyph product="marks" size="lg" /></span>
+          <span>Marks</span>
+        </h1>
         <p class="mt-3 text-base text-warm-700">
           Activities that can be earned as standalone SEAM Marks. Marks recognize
           specific, focused accomplishments without requiring a full certification.

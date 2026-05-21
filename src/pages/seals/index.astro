@@ -24,7 +24,10 @@ const [seals, navTree] = await Promise.all([
 
       <header class="border-b border-warm-300 pb-4">
         <p class="text-xs uppercase tracking-wider text-gold-500">Product</p>
-        <h1 class="mt-1 text-3xl font-semibold text-warm-900">SEALs</h1>
+        <h1 class="mt-1 flex items-center gap-3 text-3xl font-semibold text-warm-900">
+          <span class="text-seam-700"><ProductGlyph product="seals" size="lg" /></span>
+          <span>SEALs</span>
+        </h1>
         <p class="mt-3 text-base text-warm-700">
           Thematic collections of SEAM activities. Each SEAL focuses on a single
           social-equity theme and curates the activities most relevant to it.
