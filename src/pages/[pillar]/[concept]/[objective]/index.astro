@@ -2,6 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import { renderPT } from '@/lib/renderPortableText'
+import ConceptBadge from '@/components/standard/ConceptBadge.astro'
 import { getObjectiveBySlug, getNavigationTree, getFootnoteLookup } from '@/lib/sanity.queries'
 
 export const prerender = false
@@ -27,7 +28,7 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
 
 <StandardLayout title={`${objective.objectiveCode}. ${objective.title} — The SEAM Standard`}>
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
-    <SideNav tree={navTree} />
+    <SideNav tree={navTree} currentObjectiveSlug={objective.slug} currentConceptSlug={objective.concept.slug} currentPillarSlug={objective.pillar.slug} />
 
     <article class="min-w-0 flex-1 max-w-4xl">
       <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
@@ -40,22 +41,15 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
         <span class="text-warm-700">{objective.objectiveCode}. {objective.title}</span>
       </nav>
 
-      <header class="flex items-start gap-5 border-b border-warm-300 pb-4">
-        {
-          objective.pillar.iconUrl && (
-            <img
-              src={objective.pillar.iconUrl}
-              alt={`${objective.pillar.title} icon`}
-              class="h-16 w-16 shrink-0 object-contain"
-              loading="lazy"
-            />
-          )
-        }
+      <header class="border-b border-warm-300 pb-4">
         <div class="min-w-0 flex-1">
           <p class="text-xs uppercase tracking-wider text-gold-500">
             Objective · {objective.objectiveCode}
           </p>
-          <h1 class="mt-1 text-3xl font-semibold text-warm-900">{objective.title}</h1>
+          <h1 class="mt-1 flex items-center gap-3 text-3xl font-semibold text-warm-900">
+            <ConceptBadge code={objective.concept.code} size="md" />
+            <span>{objective.title}</span>
+          </h1>
           {
             objective.headlineGoal && (
               <p class="mt-3 text-lg font-light leading-relaxed text-seam-800">

@@ -12,24 +12,38 @@ import {
 interface Props {
   tree: NavPillar[]
   currentActivitySlug?: string
+  currentObjectiveSlug?: string
+  currentConceptSlug?: string
+  currentPillarSlug?: string
   /** One of: 'home' | 'intro' | `intro:<slug>` | 'glossary' | 'bibliography' | 'seals' | `seals:<slug>` | 'marks' */
   current?: string
 }
 
-const { tree, currentActivitySlug, current } = Astro.props
+const {
+  tree,
+  currentActivitySlug,
+  currentObjectiveSlug,
+  currentConceptSlug,
+  currentPillarSlug,
+  current,
+} = Astro.props
 
 const [introSections, seals] = await Promise.all([
   listIntroSections() as Promise<IntroSection[]>,
   listSeals() as Promise<SealSummary[]>,
 ])
 
-// Locate the current activity's branch so we can auto-expand it
-let openPillar = ''
-let openConcept = ''
-let openObjective = ''
+// Determine which branch(es) to auto-expand based on the current page.
+let openPillar = currentPillarSlug ?? ''
+let openConcept = currentConceptSlug ?? ''
+let openObjective = currentObjectiveSlug ?? ''
 for (const p of tree) {
   for (const c of p.concepts ?? []) {
     for (const o of c.objectives ?? []) {
+      if (o.slug === currentObjectiveSlug) {
+        openPillar = p.slug
+        openConcept = c.slug
+      }
       for (const a of o.activities ?? []) {
         if (a.slug === currentActivitySlug) {
           openPillar = p.slug
@@ -37,6 +51,9 @@ for (const p of tree) {
           openObjective = o.slug
         }
       }
+    }
+    if (c.slug === currentConceptSlug) {
+      openPillar = p.slug
     }
   }
 }
@@ -127,7 +144,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
 ></div>
 
 <aside
-  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:max-h-[calc(100vh-5rem)] lg:w-80 lg:shrink-0 lg:translate-x-0 lg:overflow-y-auto lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
+  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:max-h-[calc(100vh-5rem)] lg:w-96 lg:shrink-0 lg:translate-x-0 lg:overflow-y-auto lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
   data-seam-mobile-nav-panel
 >
   <button
@@ -229,10 +246,16 @@ const PILLAR_GLYPHS: Record<string, string> = {
           return (
             <li {...pillarAttrs}>
               <details open={pillar.slug === openPillar} class="group">
-                <summary class="flex cursor-pointer list-none items-center gap-1.5 py-1 font-semibold text-seam-800 marker:hidden hover:text-seam-700">
+                <summary class="flex cursor-pointer list-none items-center gap-1.5 py-1 font-semibold text-seam-800 marker:hidden">
                   <span class="inline-block w-3 shrink-0 text-warm-400 group-open:rotate-90 transition-transform">›</span>
-                  <span class="inline-flex shrink-0 text-seam-700" set:html={PILLAR_GLYPHS[pillar.slug] ?? ''} />
-                  <span>{pillar.title}</span>
+                  <a
+                    href={`/${pillar.slug}`}
+                    class:list={['inline-flex flex-1 items-center gap-1.5', currentPillarSlug === pillar.slug ? 'text-seam-700' : 'hover:text-seam-600']}
+                    aria-current={currentPillarSlug === pillar.slug ? 'page' : undefined}
+                  >
+                    <span class="inline-flex shrink-0 text-seam-700" set:html={PILLAR_GLYPHS[pillar.slug] ?? ''} />
+                    <span>{pillar.title}</span>
+                  </a>
                 </summary>
                 <ul class="ml-4 mt-1 space-y-1 border-l border-warm-200 pl-3">
                   {(pillar.concepts ?? []).map((concept) => {
@@ -241,10 +264,16 @@ const PILLAR_GLYPHS: Record<string, string> = {
                     return (
                       <li {...conceptAttrs}>
                         <details open={concept.slug === openConcept} class="group/concept">
-                          <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 font-medium text-warm-800 marker:hidden hover:text-seam-700">
+                          <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 font-medium text-warm-800 marker:hidden">
                             <span class="inline-block w-3 shrink-0 text-warm-400 group-open/concept:rotate-90 transition-transform">›</span>
-                            <ConceptBadge code={concept.code} size="xs" />
-                            <span>{concept.title}</span>
+                            <a
+                              href={`/${pillar.slug}/${concept.slug}`}
+                              class:list={['inline-flex flex-1 items-center gap-1.5', currentConceptSlug === concept.slug ? 'font-semibold text-seam-700' : 'hover:text-seam-700']}
+                              aria-current={currentConceptSlug === concept.slug ? 'page' : undefined}
+                            >
+                              <ConceptBadge code={concept.code} size="xs" />
+                              <span>{concept.title}</span>
+                            </a>
                           </summary>
                           <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3">
                             {(concept.objectives ?? []).map((objective) => {
@@ -252,9 +281,16 @@ const PILLAR_GLYPHS: Record<string, string> = {
                               return (
                                 <li {...objectiveAttrs}>
                                   <details open={objective.slug === openObjective} class="group/obj">
-                                    <summary class="cursor-pointer list-none py-0.5 text-warm-700 marker:hidden hover:text-seam-700">
-                                      <span class="inline-block w-3 text-warm-400 group-open/obj:rotate-90 transition-transform">›</span>
-                                      <span class="ml-1">{objective.objectiveCode}. {objective.title}</span>
+                                    <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 text-warm-700 marker:hidden">
+                                      <span class="inline-block w-3 shrink-0 text-warm-400 group-open/obj:rotate-90 transition-transform">›</span>
+                                      <a
+                                        href={`/${pillar.slug}/${concept.slug}/${objective.slug}`}
+                                        class:list={['inline-flex flex-1 items-baseline gap-1.5', currentObjectiveSlug === objective.slug ? 'font-semibold text-seam-700' : 'hover:text-seam-700']}
+                                        aria-current={currentObjectiveSlug === objective.slug ? 'page' : undefined}
+                                      >
+                                        <span class="font-mono text-[10px] text-warm-500">{objective.objectiveCode}</span>
+                                        <span>{objective.title}</span>
+                                      </a>
                                     </summary>
                                     {(objective.activities ?? []).length > 0 ? (
                                       <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3">
@@ -467,6 +503,19 @@ const PILLAR_GLYPHS: Record<string, string> = {
     </ul>
   </nav>
 </aside>
+
+<script>
+  // Prevent the native <details> toggle when a click lands on a link inside
+  // a <summary> — the link should just navigate, not also open/close the
+  // branch. Toggle behavior is preserved when the user clicks the chevron
+  // (or anywhere outside the link).
+  document.querySelectorAll<HTMLElement>('[data-seam-sidenav] summary').forEach((s) => {
+    s.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement
+      if (t.closest('a[href]')) e.preventDefault()
+    })
+  })
+</script>
 
 <script>
   // Mobile nav drawer toggle (off-canvas on < lg)

@@ -286,7 +286,7 @@ const allActivities = pillars.flatMap((p) =>
                 )}
                 <div class="min-w-0 flex-1">
                   <p class="text-xs uppercase tracking-wider text-gold-500">
-                    Pillar {p.number}
+                    Pillar
                   </p>
                   <h3 class="mt-1 text-xl font-semibold text-warm-900 group-hover:text-seam-700">
                     {p.title}
@@ -330,7 +330,7 @@ const allActivities = pillars.flatMap((p) =>
             <div>
               <h3 class="border-b border-warm-200 pb-2 text-sm font-semibold uppercase tracking-wider text-warm-500">
                 <a href={`/${p.slug}`} class="hover:text-seam-700">
-                  Pillar {p.number} · {p.title}
+                  {p.title}
                 </a>
               </h3>
               <div class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -382,7 +382,7 @@ const allActivities = pillars.flatMap((p) =>
             <div>
               <h3 class="border-b border-warm-200 pb-2 text-sm font-semibold uppercase tracking-wider text-warm-500">
                 <a href={`/${p.slug}`} class="hover:text-seam-700">
-                  Pillar {p.number} · {p.title}
+                  {p.title}
                 </a>
               </h3>
               {p.concepts.map((c) => (

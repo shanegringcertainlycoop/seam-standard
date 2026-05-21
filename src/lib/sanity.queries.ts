@@ -488,7 +488,7 @@ export async function listPillars(): Promise<PillarDetail[]> {
         number,
         "activityCount": count(*[_type == "activity" && objective._ref == ^._id])
       },
-      "activityCount": count(*[_type == "activity" && objective._ref in *[_type == "objective" && concept._ref == ^._id]._id])
+      "activityCount": count(*[_type == "activity" && objective->concept._ref == ^._id])
     }
   }`)
 }
@@ -517,7 +517,7 @@ export async function getPillarBySlug(pillarSlug: string): Promise<PillarDetail 
           number,
           "activityCount": count(*[_type == "activity" && objective._ref == ^._id])
         },
-        "activityCount": count(*[_type == "activity" && objective._ref in *[_type == "objective" && concept._ref == ^._id]._id])
+        "activityCount": count(*[_type == "activity" && objective->concept._ref == ^._id])
       }
     }`,
     { pillarSlug },

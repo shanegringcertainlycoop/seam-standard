@@ -1,0 +1,44 @@
+---
+interface Props {
+  slug: string
+  size?: 'xs' | 'sm' | 'md'
+  /** Tailwind text color class. Defaults to currentColor. */
+  color?: string
+}
+
+const { slug, size = 'sm', color = 'text-seam-700' } = Astro.props
+
+const SIZE_PX: Record<string, number> = { xs: 12, sm: 14, md: 16 }
+const px = SIZE_PX[size]
+
+const PATHS: Record<string, string> = {
+  // Bridge — Social Impact
+  'social-impact': '<path d="M3 18h18M5 18V9a7 7 0 0 1 14 0v9M9 18v-6M15 18v-6"/>',
+  // Clock — Social Responsibility
+  'social-responsibility': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  // Balance scale — Social Justice
+  'social-justice': '<path d="M12 4v17M8 21h8M5 7h14M6 7l-3 5h6L6 7zM18 7l-3 5h6l-3-5z"/>',
+  // Lightbulb — Social Accountability
+  'social-accountability': '<path d="M9 18h6M10 21h4M8.5 14a5 5 0 1 1 7 0c-.7.6-1.5 1.5-1.5 3v1h-4v-1c0-1.5-.8-2.4-1.5-3z"/>',
+}
+
+const inner = PATHS[slug] ?? ''
+---
+
+{
+  inner ? (
+    <svg
+      viewBox="0 0 24 24"
+      width={px}
+      height={px}
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class:list={['inline-block shrink-0', color]}
+      set:html={inner}
+    />
+  ) : null
+}

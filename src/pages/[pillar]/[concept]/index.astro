@@ -30,7 +30,7 @@ const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities
 
 <StandardLayout title={`${concept.title} — The SEAM Standard`}>
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
-    <SideNav tree={navTree} />
+    <SideNav tree={navTree} currentConceptSlug={concept.slug} currentPillarSlug={concept.pillar.slug} />
 
     <article class="min-w-0 flex-1 max-w-4xl">
       <nav class="mb-6 flex flex-wrap items-center gap-x-2 text-sm text-warm-500">
@@ -41,20 +41,10 @@ const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities
         <span class="text-warm-700">{concept.title}</span>
       </nav>
 
-      <header class="flex items-start gap-5 border-b border-warm-300 pb-4">
-        {
-          concept.pillar.iconUrl && (
-            <img
-              src={concept.pillar.iconUrl}
-              alt={`${concept.pillar.title} icon`}
-              class="h-16 w-16 shrink-0 object-contain"
-              loading="lazy"
-            />
-          )
-        }
+      <header class="border-b border-warm-300 pb-4">
         <div class="min-w-0 flex-1">
           <p class="text-xs uppercase tracking-wider text-gold-500">
-            Concept {concept.number}
+            Concept
           </p>
           <h1 class="mt-1 flex items-center gap-3 text-3xl font-semibold text-warm-900">
             <ConceptBadge code={concept.code} size="lg" />
@@ -107,12 +97,12 @@ const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities
               )}
 
               {obj.activities.length > 0 ? (
-                <ul class="mt-2 divide-y divide-warm-200">
+                <ul class="mt-2 divide-y divide-warm-200 overflow-hidden rounded border border-warm-200 bg-white">
                   {obj.activities.map((a) => (
                     <li>
                       <a
                         href={`/${pillarSlug}/${concept.slug}/${obj.slug}/${a.slug}`}
-                        class="group flex items-baseline gap-3 py-2 hover:text-seam-700"
+                        class="group flex items-baseline gap-3 px-3 py-2 hover:bg-warm-50 hover:text-seam-700"
                       >
                         <span class="font-mono text-xs text-warm-500 group-hover:text-seam-600 w-16 shrink-0">
                           {a.activityId}

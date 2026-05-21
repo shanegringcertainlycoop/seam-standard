@@ -10,13 +10,14 @@ const { code, size = 'sm', outline = false } = Astro.props
 
 // Consistent color per concept code. The hues echo the SEAM palette.
 const COLORS: Record<string, { bg: string; text: string; ring: string }> = {
-  IA: { bg: 'bg-seam-700',  text: 'text-white',     ring: 'ring-seam-700' },
-  TG: { bg: 'bg-gold-500',  text: 'text-white',     ring: 'ring-gold-500' },
-  CI: { bg: 'bg-warm-700',  text: 'text-white',     ring: 'ring-warm-700' },
-  SJ: { bg: 'bg-amber-600', text: 'text-white',     ring: 'ring-amber-600' },
-  IN: { bg: 'bg-emerald-700', text: 'text-white',   ring: 'ring-emerald-700' },
-  HR: { bg: 'bg-rose-700',  text: 'text-white',     ring: 'ring-rose-700' },
-  HS: { bg: 'bg-sky-700',   text: 'text-white',     ring: 'ring-sky-700' },
+  IA: { bg: 'bg-seam-700',    text: 'text-white', ring: 'ring-seam-700' },
+  TG: { bg: 'bg-gold-500',    text: 'text-white', ring: 'ring-gold-500' },
+  CI: { bg: 'bg-warm-700',    text: 'text-white', ring: 'ring-warm-700' },
+  SI: { bg: 'bg-black',       text: 'text-white', ring: 'ring-black' },
+  SJ: { bg: 'bg-amber-600',   text: 'text-white', ring: 'ring-amber-600' },
+  IN: { bg: 'bg-emerald-700', text: 'text-white', ring: 'ring-emerald-700' },
+  HR: { bg: 'bg-rose-700',    text: 'text-white', ring: 'ring-rose-700' },
+  HS: { bg: 'bg-sky-700',     text: 'text-white', ring: 'ring-sky-700' },
 }
 
 const FALLBACK = { bg: 'bg-warm-500', text: 'text-white', ring: 'ring-warm-500' }
