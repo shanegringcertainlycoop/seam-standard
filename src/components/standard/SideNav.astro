@@ -121,6 +121,9 @@ const PILLAR_GLYPHS: Record<string, string> = {
 
 <aside class="hidden lg:block lg:w-80 lg:shrink-0">
   <nav class="sticky top-16 max-h-[calc(100vh-5rem)] overflow-y-auto pb-8 text-sm" data-seam-sidenav>
+    <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+      Standard
+    </p>
     <ul class="mb-4 space-y-0.5 border-b border-warm-200 pb-4 text-sm">
       <li>
         <details open={isIntroOpen} class="group/intro">
@@ -156,6 +159,9 @@ const PILLAR_GLYPHS: Record<string, string> = {
       </li>
     </ul>
 
+    <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+      Framework
+    </p>
     <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree>
       {
         tree.map((pillar) => {
@@ -336,7 +342,10 @@ const PILLAR_GLYPHS: Record<string, string> = {
       </ul>
     </div>
 
-    <ul class="mt-4 space-y-0.5 text-sm">
+    <p class="mt-4 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+      Reference
+    </p>
+    <ul class="space-y-0.5 text-sm">
       <li>
         <a
           href="/glossary"
