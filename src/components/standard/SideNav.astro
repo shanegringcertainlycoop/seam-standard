@@ -221,11 +221,12 @@ const idleClass = 'text-warm-600 hover:text-seam-700'
 </aside>
 
 <style>
-  /* When data-seam-rs-active is set on the nav, hide any descendant <li> that
-     doesn't carry the matching data-rs-* attribute. */
-  [data-seam-sidenav][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { display: none; }
-  [data-seam-sidenav][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { display: none; }
-  [data-seam-sidenav][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { display: none; }
-  [data-seam-sidenav][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { display: none; }
+  /* When data-seam-rs-active is set on the nav, dim any descendant <li> that
+     doesn't carry the matching data-rs-* attribute (so it's clearly not
+     relevant, but still visible / navigable). */
+  [data-seam-sidenav][data-seam-rs-active='bid'] [data-seam-tree] li:not([data-rs-bid]) { opacity: 0.35; }
+  [data-seam-sidenav][data-seam-rs-active='bio'] [data-seam-tree] li:not([data-rs-bio]) { opacity: 0.35; }
+  [data-seam-sidenav][data-seam-rs-active='omd'] [data-seam-tree] li:not([data-rs-omd]) { opacity: 0.35; }
+  [data-seam-sidenav][data-seam-rs-active='omo'] [data-seam-tree] li:not([data-rs-omo]) { opacity: 0.35; }
 </style>
 

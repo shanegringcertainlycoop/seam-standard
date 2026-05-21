@@ -89,10 +89,6 @@ const RS_TITLES: Record<RSKey, string> = {
     const apply = (key: string | null) => {
       if (key && sidenav) {
         sidenav.setAttribute('data-seam-rs-active', key)
-        // Auto-expand SideNav branches so the user can see what passes the filter.
-        sidenav.querySelectorAll<HTMLDetailsElement>('details').forEach((d) => {
-          d.open = true
-        })
       } else if (sidenav) {
         sidenav.removeAttribute('data-seam-rs-active')
       }
