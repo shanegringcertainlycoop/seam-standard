@@ -35,6 +35,12 @@ const ogImage = image ?? `${siteUrl}/images/seam-social-card.jpg`
 const ogImageAlt = 'SEAM — Social Equity Certification for the Built Environment'
 
 const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
+
+/* Pre-launch password gate. Client-side only — not real security, just
+ * stops drive-by visitors. Set STANDARD_PASSWORD env var to override the
+ * default. Remove this block (or set the env var to "") to disable. */
+const PASSWORD = (import.meta.env.STANDARD_PASSWORD as string | undefined) ?? 'seam-pilot'
+const passwordGateEnabled = PASSWORD.length > 0
 ---
 
 <!doctype html>
@@ -86,6 +92,22 @@ const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
         <script type="application/ld+json" set:html={JSON.stringify(doc)} />
       ))
     }
+
+    {passwordGateEnabled && (
+      <>
+        <script is:inline set:html={`
+          try {
+            if (sessionStorage.getItem('seam-unlocked') !== '1') {
+              document.documentElement.classList.add('seam-locked');
+            }
+          } catch (e) {}
+        `} />
+        <style is:inline set:html={`
+          html.seam-locked body > :not(#seam-gate) { visibility: hidden !important; }
+          html.seam-locked { overflow: hidden; }
+        `} />
+      </>
+    )}
   </head>
   <body class="bg-warm-50 text-warm-900 font-sans antialiased">
     <a href="#main" class="sr-only">Skip to content</a>
@@ -127,5 +149,76 @@ const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
     </section>
 
     <Footer />
+
+    {passwordGateEnabled && (
+      <div
+        id="seam-gate"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-warm-900 px-6"
+        style="display: none;"
+      >
+        <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gold-500">In pilot</p>
+          <h2 class="mt-3 text-2xl font-semibold text-warm-900">The SEAM Standard</h2>
+          <p class="mt-3 text-sm text-warm-600">
+            The digital reference is currently in private review. Enter the access code to continue.
+          </p>
+          <form id="seam-gate-form" class="mt-6 space-y-3">
+            <input
+              id="seam-gate-input"
+              type="password"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+              placeholder="Access code"
+              class="w-full rounded-md border border-warm-300 bg-white px-3 py-2 text-sm text-warm-900 focus:border-seam-600 focus:outline-none focus:ring-1 focus:ring-seam-600"
+            />
+            <p id="seam-gate-error" class="hidden text-xs text-rose-600">
+              Incorrect access code. Try again.
+            </p>
+            <button
+              type="submit"
+              class="w-full rounded-md bg-seam-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-seam-800"
+            >
+              Unlock
+            </button>
+          </form>
+          <p class="mt-6 text-xs text-warm-400">
+            Need access? <a href="mailto:hello@seamcertification.org" class="underline decoration-warm-300 hover:text-seam-700">Email SEAM</a>.
+          </p>
+        </div>
+      </div>
+      <script is:inline define:vars={{ password: PASSWORD }}>
+        (function () {
+          var gate = document.getElementById('seam-gate')
+          if (!gate) return
+          try {
+            if (sessionStorage.getItem('seam-unlocked') === '1') {
+              document.documentElement.classList.remove('seam-locked')
+              return
+            }
+          } catch (e) {}
+          gate.style.display = 'flex'
+          var form = document.getElementById('seam-gate-form')
+          var input = document.getElementById('seam-gate-input')
+          var error = document.getElementById('seam-gate-error')
+          if (input) input.focus()
+          if (form) {
+            form.addEventListener('submit', function (e) {
+              e.preventDefault()
+              if (input.value === password) {
+                try { sessionStorage.setItem('seam-unlocked', '1') } catch (e) {}
+                document.documentElement.classList.remove('seam-locked')
+                gate.style.display = 'none'
+              } else {
+                error.classList.remove('hidden')
+                input.value = ''
+                input.focus()
+              }
+            })
+          }
+        })()
+      </script>
+    )}
   </body>
 </html>
