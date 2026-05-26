@@ -27,7 +27,7 @@ if (!objective) {
 lookup.activityUrls = buildActivityUrlMap(navTree)
 ---
 
-<StandardLayout title={`${objective.objectiveCode}. ${objective.title} — The SEAM Standard`}>
+<StandardLayout title={`${objective.objectiveCode}. ${objective.title} — The SEAM Standard`} showProductFilter>
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} currentObjectiveSlug={objective.slug} currentConceptSlug={objective.concept.slug} currentPillarSlug={objective.pillar.slug} />
 

@@ -76,6 +76,7 @@ if (activity.seals && activity.seals.length > 0) {
 <StandardLayout
   title={`Activity ${activity.activityId} — ${activity.title}`}
   description={activity.title}
+  showProductFilter
 >
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} currentActivitySlug={activity.slug} />

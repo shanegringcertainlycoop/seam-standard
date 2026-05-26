@@ -59,6 +59,7 @@ const stats = pillars.reduce(
 <StandardLayout
   title="The SEAM Standard v1.1"
   description="The SEAM Standard v1.1 — every Pillar, Concept, Objective, and Activity."
+  showProductFilter
 >
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} current="standard" />
@@ -99,27 +100,9 @@ const stats = pillars.reduce(
         </span>
         <p class="flex-1">
           <strong>Tip:</strong> use the
-          <span class="font-semibold">Product filter</span>
-          in the side nav to focus this view on a Rating System,
-          a SEAL, or Mark-eligible activities.
+          <span class="font-semibold">Filter by</span> bar above to focus this
+          view on a Rating System, a SEAL, or Mark-eligible activities.
         </p>
-        <div class="flex shrink-0 items-center gap-2 text-xs text-seam-900">
-          <span>Hide non-applicable</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked="false"
-            data-seam-mode-switch
-            class="relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-warm-300 bg-warm-100 transition-colors hover:border-seam-400 aria-checked:border-seam-600 aria-checked:bg-seam-600"
-          >
-            <span class="sr-only">Hide non-applicable activities</span>
-            <span
-              aria-hidden="true"
-              data-seam-mode-thumb
-              class="inline-block h-3 w-3 translate-x-0.5 transform rounded-full bg-white shadow-sm transition-transform"
-            />
-          </button>
-        </div>
       </aside>
 
       <!-- Quick jump links -->
