@@ -1,5 +1,12 @@
 ---
 import SiteSearch from './SiteSearch.astro'
+
+interface Props {
+  /** Render the mobile Filter pill that opens the bottom sheet. */
+  showFilterPill?: boolean
+}
+
+const { showFilterPill = false } = Astro.props
 ---
 
 <header class="sticky top-0 z-40 border-b border-warm-200 bg-warm-50/85 backdrop-blur-sm">
@@ -26,8 +33,82 @@ import SiteSearch from './SiteSearch.astro'
       </span>
     </a>
 
+    {showFilterPill && (
+      <button
+        type="button"
+        data-seam-filter-sheet-toggle
+        class="ml-1 inline-flex items-center gap-1.5 rounded-full border border-warm-300 px-2.5 py-1 text-[12px] text-warm-700 hover:border-seam-500 hover:text-seam-700 md:hidden"
+        aria-label="Open product filter"
+      >
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 5h18M6 12h12M10 19h4"/>
+        </svg>
+        <span data-seam-filter-pill-label>Filter</span>
+      </button>
+    )}
+
     <div class="ml-auto w-40 sm:w-64 lg:w-80">
       <SiteSearch />
     </div>
   </div>
 </header>
+
+{showFilterPill && (
+  <script>
+    // Bottom-sheet open/close for the mobile product filter.
+    const toggle = document.querySelector<HTMLButtonElement>('[data-seam-filter-sheet-toggle]')
+    const sheet = document.querySelector<HTMLElement>('[data-seam-filter-sheet]')
+    const backdrop = document.querySelector<HTMLElement>('[data-seam-filter-sheet-backdrop]')
+    const closeBtn = document.querySelector<HTMLButtonElement>('[data-seam-filter-sheet-close]')
+    const pillLabel = document.querySelector<HTMLElement>('[data-seam-filter-pill-label]')
+
+    function open() {
+      if (!sheet || !backdrop) return
+      sheet.classList.remove('translate-y-full')
+      sheet.setAttribute('aria-hidden', 'false')
+      backdrop.classList.remove('hidden')
+      document.body.classList.add('overflow-hidden')
+    }
+    function close() {
+      if (!sheet || !backdrop) return
+      sheet.classList.add('translate-y-full')
+      sheet.setAttribute('aria-hidden', 'true')
+      backdrop.classList.add('hidden')
+      document.body.classList.remove('overflow-hidden')
+    }
+    toggle?.addEventListener('click', open)
+    closeBtn?.addEventListener('click', close)
+    backdrop?.addEventListener('click', close)
+
+    // Reflect active filter in the pill label so it's visible even when closed.
+    function syncPillLabel(filter: string | null) {
+      if (!pillLabel) return
+      if (!filter) {
+        pillLabel.textContent = 'Filter'
+        toggle?.classList.remove('border-seam-600', 'text-seam-700')
+        return
+      }
+      const map: Record<string, string> = { bid: 'B+I:D', bio: 'B+I:O', omd: 'O+M:D', omo: 'O+M:O' }
+      let label = 'Filter'
+      if (filter.startsWith('rs-')) label = `Filter: ${map[filter.slice(3)] ?? filter}`
+      else if (filter === 'mark') label = 'Filter: Mark'
+      else if (filter.startsWith('seal:')) {
+        const slug = filter.slice('seal:'.length)
+        const sealLabel = document.querySelector<HTMLElement>(`[data-seam-seal-label="${slug}"]`)
+        label = `Filter: ${sealLabel?.textContent?.trim() || slug}`
+      }
+      pillLabel.textContent = label
+      toggle?.classList.add('border-seam-600', 'text-seam-700')
+    }
+
+    function currentFilter(): string | null {
+      try { return localStorage.getItem('seam:filter') } catch { return null }
+    }
+
+    syncPillLabel(currentFilter())
+    window.addEventListener('seam:filter-change', (e: Event) => {
+      const detail = (e as CustomEvent<{ filter: string | null }>).detail
+      syncPillLabel(detail?.filter ?? null)
+    })
+  </script>
+)}

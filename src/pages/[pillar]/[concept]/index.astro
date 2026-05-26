@@ -29,7 +29,7 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
 const totalActivities = concept.objectives.reduce((sum, o) => sum + o.activities.length, 0)
 ---
 
-<StandardLayout title={`${concept.title} — The SEAM Standard`}>
+<StandardLayout title={`${concept.title} — The SEAM Standard`} showProductFilter>
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} currentConceptSlug={concept.slug} currentPillarSlug={concept.pillar.slug} />
 

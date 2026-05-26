@@ -26,7 +26,7 @@ if (!seal) return new Response('SEAL not found', { status: 404 })
 lookup.activityUrls = buildActivityUrlMap(navTree)
 ---
 
-<StandardLayout title={`${seal.name} — The SEAM Standard`} description={seal.summary}>
+<StandardLayout title={`${seal.name} — The SEAM Standard`} description={seal.summary} showProductFilter>
   <div class="mx-auto flex max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-12">
     <SideNav tree={navTree} current={`seals:${seal.slug}`} />
 

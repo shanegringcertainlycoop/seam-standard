@@ -1,0 +1,645 @@
+---
+import ProductGlyph from './ProductGlyph.astro'
+import { listSeals, type SealSummary } from '@/lib/sanity.queries'
+
+interface Props {
+  /** 'desktop' (sticky, hidden < md) or 'sheet' (plain, used inside mobile sheet). */
+  mode?: 'desktop' | 'sheet'
+}
+
+const { mode = 'desktop' } = Astro.props
+
+const seals = (await listSeals()) as SealSummary[]
+
+const RS_OPTIONS = [
+  { key: 'bid', label: 'B+I:D', title: 'Buildings + Interiors: Developer' },
+  { key: 'bio', label: 'B+I:O', title: 'Buildings + Interiors: Occupier' },
+  { key: 'omd', label: 'O+M:D', title: 'Operations + Maintenance: Developer' },
+  { key: 'omo', label: 'O+M:O', title: 'Operations + Maintenance: Occupier' },
+] as const
+
+const outerClass =
+  mode === 'sheet'
+    ? 'border-t border-warm-200 bg-warm-50'
+    : 'sticky top-12 z-30 hidden border-b border-warm-200 bg-warm-50/95 backdrop-blur-sm md:block'
+---
+
+<div
+  class={outerClass}
+  data-seam-filter-bar
+  data-seam-filter-bar-mode={mode}
+  data-seam-active-tab="rs"
+  aria-label="Product filter"
+>
+  {mode === 'desktop' && (
+    <!-- Collapsed strip: chevron in the SAME left position as the expanded bar's collapse button. -->
+    <div
+      class="mx-auto hidden h-10 max-w-7xl items-center gap-3 px-3 text-[12px] leading-none text-warm-700 sm:px-6"
+      data-seam-filter-bar-strip
+    >
+      <button
+        type="button"
+        data-seam-filter-bar-expand
+        class="inline-flex items-center gap-2 text-warm-600 hover:text-seam-700"
+        aria-expanded="false"
+        aria-controls="seam-filter-bar-content"
+        title="Show filter"
+      >
+        <svg class="shrink-0" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+        <span class="font-semibold uppercase tracking-wider text-[11px] text-gold-500">Filter by</span>
+      </button>
+      <span
+        data-seam-active-chip
+        class="hidden items-center gap-1 rounded-full bg-seam-100 px-2 py-0.5 text-seam-800"
+        aria-live="polite"
+      >
+        <span class="font-medium">Active:</span>
+        <span data-seam-active-label>—</span>
+      </span>
+      <button
+        type="button"
+        data-seam-clear-filter
+        class="ml-auto hidden text-[11px] text-warm-600 hover:text-seam-700"
+      >
+        Clear
+      </button>
+    </div>
+  )}
+
+  <div id="seam-filter-bar-content" data-seam-filter-bar-content>
+    <!-- Row 1: collapse chevron · label · tabs · active chip · mode/clear/share -->
+    <div class="mx-auto flex h-10 max-w-7xl items-center gap-3 px-3 text-[13px] leading-none sm:px-6">
+      {mode === 'desktop' && (
+        <button
+          type="button"
+          data-seam-filter-bar-collapse
+          class="inline-flex shrink-0 items-center gap-2 text-warm-600 hover:text-seam-700"
+          aria-expanded="true"
+          aria-controls="seam-filter-bar-content"
+          aria-label="Hide filter"
+          title="Hide filter"
+        >
+          <svg class="shrink-0" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6"/>
+          </svg>
+          <span class="font-semibold uppercase tracking-wider text-[11px] text-gold-500">Filter by</span>
+        </button>
+      )}
+      {mode === 'sheet' && (
+        <span class="font-semibold uppercase tracking-wider text-[11px] text-gold-500">Filter by</span>
+      )}
+
+      <!-- Tabs -->
+      <div role="tablist" class="flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          role="tab"
+          data-seam-tab="rs"
+          class="group/tab inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-warm-700 hover:text-seam-700 aria-selected:border-warm-300 aria-selected:bg-white"
+          aria-selected="true"
+        >
+          <span
+            aria-hidden="true"
+            class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
+            data-seam-tab-dot="rs"
+          />
+          <ProductGlyph product="certification" size="xs" />
+          <span>Certification</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          data-seam-tab="seal"
+          class="group/tab inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-warm-700 hover:text-seam-700 aria-selected:border-warm-300 aria-selected:bg-white"
+          aria-selected="false"
+        >
+          <span
+            aria-hidden="true"
+            class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
+            data-seam-tab-dot="seal"
+          />
+          <ProductGlyph product="seals" size="xs" />
+          <span>SEAL</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          data-seam-tab="mark"
+          class="group/tab inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-warm-700 hover:text-seam-700 aria-selected:border-warm-300 aria-selected:bg-white"
+          aria-selected="false"
+        >
+          <span
+            aria-hidden="true"
+            class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
+            data-seam-tab-dot="mark"
+          />
+          <ProductGlyph product="marks" size="xs" />
+          <span>Mark</span>
+        </button>
+      </div>
+
+      <!-- Active chip -->
+      <span
+        data-seam-active-chip
+        class="hidden shrink-0 items-center gap-1 rounded-full bg-seam-100 px-2 py-0.5 text-[12px] text-seam-800"
+        aria-live="polite"
+      >
+        <span class="font-medium">Active:</span>
+        <span data-seam-active-label>—</span>
+      </span>
+
+      <!-- Right-aligned controls -->
+      <div class="ml-auto flex shrink-0 items-center gap-3 text-[12px] text-warm-600">
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            data-seam-info
+            aria-expanded="false"
+            aria-controls={`seam-filter-mode-info-${mode}`}
+            aria-label="What does the Hide non-applicable toggle do?"
+            class="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-warm-300 text-[9px] font-semibold text-warm-500 hover:border-seam-500 hover:text-seam-700"
+          >
+            ?
+          </button>
+          <span>Hide non-applicable</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked="false"
+            data-seam-mode-switch
+            class="relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-warm-300 bg-warm-100 transition-colors hover:border-seam-400 aria-checked:border-seam-600 aria-checked:bg-seam-600"
+          >
+            <span class="sr-only">Hide non-applicable activities</span>
+            <span
+              aria-hidden="true"
+              data-seam-mode-thumb
+              class="inline-block h-3 w-3 translate-x-0.5 transform rounded-full bg-white shadow-sm transition-transform"
+            />
+          </button>
+        </div>
+        <button
+          type="button"
+          data-seam-clear-filter
+          class="hidden text-warm-600 hover:text-seam-700"
+        >
+          Clear
+        </button>
+        <button
+          type="button"
+          data-seam-share-link
+          title="Copy a link to this page with the current filter applied"
+          class="text-warm-400 hover:text-seam-700"
+        >
+          <span data-seam-share-label>Share</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: options for the active tab -->
+    <div class="mx-auto flex h-9 max-w-7xl items-center border-t border-warm-200/60 px-3 leading-none sm:px-6">
+      <!-- rs panel -->
+      <div role="tabpanel" data-seam-tab-panel="rs" class="flex flex-wrap items-center gap-1.5">
+        {
+          RS_OPTIONS.map((rs) => (
+            <button
+              type="button"
+              data-seam-rs-toggle={rs.key}
+              title={rs.title}
+              class="group/btn inline-flex items-center gap-1.5 rounded-full border border-warm-300 bg-white px-2.5 py-0.5 font-mono text-[12px] text-warm-700 hover:border-seam-500 hover:text-seam-700"
+            >
+              <span
+                aria-hidden="true"
+                class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
+                data-seam-rs-dot={rs.key}
+              />
+              <span data-seam-rs-label={rs.key}>{rs.label}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- seal panel -->
+      <div role="tabpanel" data-seam-tab-panel="seal" class="hidden flex-wrap items-center gap-1.5">
+        {
+          seals.length === 0 ? (
+            <span class="text-[12px] italic text-warm-400">No SEALs yet</span>
+          ) : (
+            seals.map((s) => (
+              <button
+                type="button"
+                data-seam-seal-toggle={s.slug}
+                title={`Filter to activities in ${s.name}`}
+                class="group/btn inline-flex items-center gap-1.5 rounded-full border border-warm-300 bg-white px-2.5 py-0.5 text-[12px] text-warm-700 hover:border-seam-500 hover:text-seam-700"
+              >
+                <span
+                  aria-hidden="true"
+                  class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
+                  data-seam-seal-dot={s.slug}
+                />
+                <span data-seam-seal-label={s.slug}>{s.name.replace(/\s+SEAL$/, '')}</span>
+              </button>
+            ))
+          )
+        }
+      </div>
+
+      <!-- mark panel -->
+      <div role="tabpanel" data-seam-tab-panel="mark" class="hidden flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          data-seam-mark-toggle
+          title="Filter to Mark-eligible activities"
+          class="group/btn inline-flex items-center gap-1.5 rounded-full border border-warm-300 bg-white px-2.5 py-0.5 text-[12px] text-warm-700 hover:border-seam-500 hover:text-seam-700"
+        >
+          <span
+            aria-hidden="true"
+            class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
+            data-seam-mark-dot
+          />
+          <span data-seam-mark-label>Mark-eligible</span>
+        </button>
+      </div>
+    </div>
+
+    <p
+      id={`seam-filter-mode-info-${mode}`}
+      data-seam-info-tip
+      class="mx-auto hidden max-w-7xl rounded border border-warm-200 bg-warm-50 px-3 py-1.5 text-[11px] leading-snug text-warm-700 sm:px-6"
+      role="note"
+    >
+      With a filter active, <strong>Hide non-applicable on</strong> hides
+      activities that don't match. <strong>Off</strong> keeps them visible but
+      dimmed.
+    </p>
+  </div>
+</div>
+
+<style is:global>
+  /* Filter state lives on <html> so any [data-seam-filterable] container
+     (side-nav tree, /standard page tree, etc.) responds to the same toggles. */
+  html[data-seam-rs-active='bid'] [data-seam-filterable] [data-filter-item]:not([data-rs-bid]) { opacity: 0.35; }
+  html[data-seam-rs-active='bio'] [data-seam-filterable] [data-filter-item]:not([data-rs-bio]) { opacity: 0.35; }
+  html[data-seam-rs-active='omd'] [data-seam-filterable] [data-filter-item]:not([data-rs-omd]) { opacity: 0.35; }
+  html[data-seam-rs-active='omo'] [data-seam-filterable] [data-filter-item]:not([data-rs-omo]) { opacity: 0.35; }
+  html[data-seam-mark-active]    [data-seam-filterable] [data-filter-item]:not([data-mark])   { opacity: 0.35; }
+
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='bid'] [data-seam-filterable] [data-filter-item]:not([data-rs-bid]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='bio'] [data-seam-filterable] [data-filter-item]:not([data-rs-bio]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='omd'] [data-seam-filterable] [data-filter-item]:not([data-rs-omd]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-rs-active='omo'] [data-seam-filterable] [data-filter-item]:not([data-rs-omo]) { display: none; }
+  html[data-seam-filter-mode='hide'][data-seam-mark-active]    [data-seam-filterable] [data-filter-item]:not([data-mark])   { display: none; }
+
+  /* Tab panels: only the active tab's panel is shown. */
+  [data-seam-filter-bar][data-seam-active-tab='rs']   [data-seam-tab-panel='rs']   { display: flex; }
+  [data-seam-filter-bar][data-seam-active-tab='seal'] [data-seam-tab-panel='seal'] { display: flex; }
+  [data-seam-filter-bar][data-seam-active-tab='mark'] [data-seam-tab-panel='mark'] { display: flex; }
+  [data-seam-filter-bar][data-seam-active-tab='rs']   [data-seam-tab-panel='seal'],
+  [data-seam-filter-bar][data-seam-active-tab='rs']   [data-seam-tab-panel='mark'],
+  [data-seam-filter-bar][data-seam-active-tab='seal'] [data-seam-tab-panel='rs'],
+  [data-seam-filter-bar][data-seam-active-tab='seal'] [data-seam-tab-panel='mark'],
+  [data-seam-filter-bar][data-seam-active-tab='mark'] [data-seam-tab-panel='rs'],
+  [data-seam-filter-bar][data-seam-active-tab='mark'] [data-seam-tab-panel='seal'] { display: none; }
+</style>
+
+<script>
+  // Product filter state. Filter value is one of:
+  // rs-bid | rs-bio | rs-omd | rs-omo | seal:<slug> | mark | (null = no filter).
+  // The active tab (which product family's options are visible) is independent
+  // of the filter so switching tabs doesn't clear the filter. localStorage:
+  //   seam:filter         — active filter
+  //   seam:filter-mode    — dim | hide
+  //   seam:filter-tab     — rs | seal | mark
+  //   seam:filter-bar-open— open | closed (desktop collapse state)
+  // Bar may render twice (desktop + mobile sheet) — selectors are scoped to
+  // every [data-seam-filter-bar] root and kept in sync.
+  const STORAGE = 'seam:filter'
+  const MODE_KEY = 'seam:filter-mode'
+  const TAB_KEY = 'seam:filter-tab'
+  const OPEN_KEY = 'seam:filter-bar-open'
+  const SEAL_STYLE_ID = 'seam-seal-dim-style'
+
+  type Filter = string | null
+  type Tab = 'rs' | 'seal' | 'mark'
+
+  const bars = document.querySelectorAll<HTMLElement>('[data-seam-filter-bar]')
+  if (bars.length > 0) {
+    function read(): Filter {
+      try { return localStorage.getItem(STORAGE) } catch { return null }
+    }
+    function write(v: Filter) {
+      try {
+        if (v) localStorage.setItem(STORAGE, v)
+        else localStorage.removeItem(STORAGE)
+      } catch {}
+    }
+    function readFromUrl(): Filter {
+      const v = new URL(location.href).searchParams.get('filter')
+      return v && /^(rs-(bid|bio|omd|omo)|seal:[a-z0-9-]+|mark)$/.test(v) ? v : null
+    }
+    function writeToUrl(v: Filter) {
+      const url = new URL(location.href)
+      if (v) url.searchParams.set('filter', v)
+      else url.searchParams.delete('filter')
+      history.replaceState(null, '', url.toString())
+    }
+
+    function readMode(): 'dim' | 'hide' {
+      try {
+        const v = localStorage.getItem(MODE_KEY)
+        return v === 'hide' ? 'hide' : 'dim'
+      } catch { return 'dim' }
+    }
+
+    function familyOf(filter: Filter): Tab | null {
+      if (!filter) return null
+      if (filter.startsWith('rs-')) return 'rs'
+      if (filter.startsWith('seal:')) return 'seal'
+      if (filter === 'mark') return 'mark'
+      return null
+    }
+
+    function readTab(): Tab {
+      try {
+        const v = localStorage.getItem(TAB_KEY)
+        if (v === 'rs' || v === 'seal' || v === 'mark') return v
+      } catch {}
+      return familyOf(read()) ?? 'rs'
+    }
+    function writeTab(t: Tab) {
+      try { localStorage.setItem(TAB_KEY, t) } catch {}
+    }
+
+    function paintDot(dot: HTMLElement | null, label: HTMLElement | null, on: boolean) {
+      if (dot) {
+        dot.classList.toggle('bg-seam-600', on)
+        dot.classList.toggle('border-seam-600', on)
+        dot.classList.toggle('border-warm-400', !on)
+      }
+      if (label) {
+        label.classList.toggle('text-seam-700', on)
+        label.classList.toggle('font-semibold', on)
+      }
+    }
+
+    function paintTabDots(family: Tab | null) {
+      (['rs', 'seal', 'mark'] as const).forEach((f) => {
+        const on = f === family
+        document.querySelectorAll<HTMLElement>(`[data-seam-tab-dot="${f}"]`).forEach((d) => {
+          d.classList.toggle('bg-seam-600', on)
+          d.classList.toggle('border-seam-600', on)
+          d.classList.toggle('border-warm-400', !on)
+        })
+      })
+    }
+
+    function ensureSealStyle(slug: string | null) {
+      let style = document.getElementById(SEAL_STYLE_ID)
+      if (!slug) { if (style) style.remove(); return }
+      if (!style) {
+        style = document.createElement('style')
+        style.id = SEAL_STYLE_ID
+        document.head.appendChild(style)
+      }
+      const safe = slug.replace(/["\\]/g, '\\$&')
+      style.textContent =
+        `html[data-seam-seal-active='${safe}'] [data-seam-filterable] [data-filter-item]:not([data-seals~="${safe}"]) { opacity: 0.35; }
+         html[data-seam-filter-mode='hide'][data-seam-seal-active='${safe}'] [data-seam-filterable] [data-filter-item]:not([data-seals~="${safe}"]) { display: none; }`
+    }
+
+    function activeLabel(filter: Filter): string {
+      if (!filter) return ''
+      if (filter.startsWith('rs-')) {
+        const map: Record<string, string> = { bid: 'B+I:D', bio: 'B+I:O', omd: 'O+M:D', omo: 'O+M:O' }
+        return map[filter.slice(3)] ?? filter
+      }
+      if (filter.startsWith('seal:')) {
+        const slug = filter.slice('seal:'.length)
+        const label = document.querySelector<HTMLElement>(`[data-seam-seal-label="${slug}"]`)
+        return label?.textContent?.trim() || slug
+      }
+      if (filter === 'mark') return 'Mark-eligible'
+      return ''
+    }
+
+    function applyFilter(filter: Filter) {
+      const root = document.documentElement
+      root.removeAttribute('data-seam-rs-active')
+      root.removeAttribute('data-seam-seal-active')
+      root.removeAttribute('data-seam-mark-active')
+
+      // Reset every option dot/label across all bar instances.
+      document.querySelectorAll<HTMLElement>('[data-seam-rs-dot]').forEach((d) => {
+        const k = d.dataset.seamRsDot!
+        const label = d.closest('[data-seam-rs-toggle]')?.querySelector<HTMLElement>(`[data-seam-rs-label="${k}"]`) ?? null
+        paintDot(d, label, false)
+      })
+      document.querySelectorAll<HTMLElement>('[data-seam-seal-dot]').forEach((d) => {
+        const k = d.dataset.seamSealDot!
+        const label = d.closest('[data-seam-seal-toggle]')?.querySelector<HTMLElement>(`[data-seam-seal-label="${k}"]`) ?? null
+        paintDot(d, label, false)
+      })
+      document.querySelectorAll<HTMLElement>('[data-seam-mark-dot]').forEach((d) => {
+        const label = d.closest('[data-seam-mark-toggle]')?.querySelector<HTMLElement>('[data-seam-mark-label]') ?? null
+        paintDot(d, label, false)
+      })
+
+      let family: Tab | null = null
+      if (filter?.startsWith('rs-')) {
+        const k = filter.slice(3)
+        root.setAttribute('data-seam-rs-active', k)
+        document.querySelectorAll<HTMLElement>(`[data-seam-rs-dot="${k}"]`).forEach((d) => {
+          const label = d.closest('[data-seam-rs-toggle]')?.querySelector<HTMLElement>(`[data-seam-rs-label="${k}"]`) ?? null
+          paintDot(d, label, true)
+        })
+        ensureSealStyle(null)
+        family = 'rs'
+      } else if (filter?.startsWith('seal:')) {
+        const slug = filter.slice('seal:'.length)
+        root.setAttribute('data-seam-seal-active', slug)
+        document.querySelectorAll<HTMLElement>(`[data-seam-seal-dot="${slug}"]`).forEach((d) => {
+          const label = d.closest('[data-seam-seal-toggle]')?.querySelector<HTMLElement>(`[data-seam-seal-label="${slug}"]`) ?? null
+          paintDot(d, label, true)
+        })
+        ensureSealStyle(slug)
+        family = 'seal'
+      } else if (filter === 'mark') {
+        root.setAttribute('data-seam-mark-active', '1')
+        document.querySelectorAll<HTMLElement>('[data-seam-mark-dot]').forEach((d) => {
+          const label = d.closest('[data-seam-mark-toggle]')?.querySelector<HTMLElement>('[data-seam-mark-label]') ?? null
+          paintDot(d, label, true)
+        })
+        ensureSealStyle(null)
+        family = 'mark'
+      } else {
+        ensureSealStyle(null)
+      }
+
+      paintTabDots(family)
+
+      const label = activeLabel(filter)
+      document.querySelectorAll<HTMLElement>('[data-seam-active-chip]').forEach((chip) => {
+        chip.classList.toggle('hidden', !filter)
+        chip.classList.toggle('inline-flex', !!filter)
+        const labelEl = chip.querySelector<HTMLElement>('[data-seam-active-label]')
+        if (labelEl) labelEl.textContent = label
+      })
+      document.querySelectorAll<HTMLElement>('[data-seam-clear-filter]').forEach((btn) => {
+        btn.classList.toggle('hidden', !filter)
+      })
+    }
+
+    function applyMode(mode: 'dim' | 'hide') {
+      document.documentElement.setAttribute('data-seam-filter-mode', mode)
+      const on = mode === 'hide'
+      document.querySelectorAll<HTMLButtonElement>('[data-seam-mode-switch]').forEach((s) => s.setAttribute('aria-checked', String(on)))
+      document.querySelectorAll<HTMLElement>('[data-seam-mode-thumb]').forEach((t) => {
+        t.classList.toggle('translate-x-3', on)
+        t.classList.toggle('translate-x-0.5', !on)
+      })
+    }
+
+    function applyTab(tab: Tab) {
+      bars.forEach((b) => b.setAttribute('data-seam-active-tab', tab))
+      document.querySelectorAll<HTMLButtonElement>('[data-seam-tab]').forEach((b) => {
+        b.setAttribute('aria-selected', String(b.dataset.seamTab === tab))
+      })
+    }
+
+    function setFilter(filter: Filter) {
+      const current = read()
+      const next = current === filter ? null : filter
+      write(next)
+      writeToUrl(next)
+      applyFilter(next)
+      window.dispatchEvent(new CustomEvent('seam:filter-change', { detail: { filter: next } }))
+    }
+    function clearFilter() {
+      write(null)
+      writeToUrl(null)
+      applyFilter(null)
+      window.dispatchEvent(new CustomEvent('seam:filter-change', { detail: { filter: null } }))
+    }
+
+    // Tab clicks switch which option panel is visible. They do not change the
+    // filter — that only happens when an option in the panel is clicked.
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-tab]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const t = b.dataset.seamTab as Tab
+        writeTab(t)
+        applyTab(t)
+      })
+    })
+
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-rs-toggle]').forEach((b) => {
+      b.addEventListener('click', () => setFilter(`rs-${b.dataset.seamRsToggle}`))
+    })
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-seal-toggle]').forEach((b) => {
+      b.addEventListener('click', (e) => {
+        e.preventDefault()
+        setFilter(`seal:${b.dataset.seamSealToggle}`)
+      })
+    })
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-mark-toggle]').forEach((b) => {
+      b.addEventListener('click', (e) => {
+        e.preventDefault()
+        setFilter('mark')
+      })
+    })
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-clear-filter]').forEach((b) => {
+      b.addEventListener('click', clearFilter)
+    })
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-mode-switch]').forEach((s) => {
+      s.addEventListener('click', () => {
+        const next = readMode() === 'hide' ? 'dim' : 'hide'
+        try { localStorage.setItem(MODE_KEY, next) } catch {}
+        applyMode(next)
+      })
+    })
+
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-info]').forEach((btn) => {
+      const root = btn.closest('[data-seam-filter-bar]')
+      const tip = root?.querySelector<HTMLElement>('[data-seam-info-tip]') ?? null
+      if (!tip) return
+      btn.addEventListener('click', (e) => {
+        e.preventDefault()
+        const showing = !tip.classList.toggle('hidden')
+        btn.setAttribute('aria-expanded', String(showing))
+      })
+    })
+
+    document.querySelectorAll<HTMLButtonElement>('[data-seam-share-link]').forEach((btn) => {
+      const label = btn.querySelector<HTMLElement>('[data-seam-share-label]')
+      btn.addEventListener('click', async () => {
+        const url = new URL(location.href)
+        const cur = read()
+        if (cur) url.searchParams.set('filter', cur)
+        else url.searchParams.delete('filter')
+        try {
+          await navigator.clipboard.writeText(url.toString())
+          if (label) {
+            const original = label.textContent
+            label.textContent = 'Copied!'
+            setTimeout(() => { if (label) label.textContent = original }, 1400)
+          }
+        } catch {
+          if (label) label.textContent = 'Copy failed'
+        }
+      })
+    })
+
+    // Collapse / expand the desktop bar. Mirror the bar's height to
+    // --seam-filter-bar-h on <html> so the side nav can offset its sticky
+    // top accordingly.
+    const desktopBar = document.querySelector<HTMLElement>('[data-seam-filter-bar][data-seam-filter-bar-mode="desktop"]')
+
+    function readOpen(): boolean {
+      try { return localStorage.getItem(OPEN_KEY) !== 'closed' } catch { return true }
+    }
+    function writeOpen(open: boolean) {
+      try { localStorage.setItem(OPEN_KEY, open ? 'open' : 'closed') } catch {}
+    }
+    function applyOpen(open: boolean) {
+      if (!desktopBar) return
+      const content = desktopBar.querySelector<HTMLElement>('[data-seam-filter-bar-content]')
+      const strip = desktopBar.querySelector<HTMLElement>('[data-seam-filter-bar-strip]')
+      const collapseBtn = desktopBar.querySelector<HTMLButtonElement>('[data-seam-filter-bar-collapse]')
+      const expandBtn = desktopBar.querySelector<HTMLButtonElement>('[data-seam-filter-bar-expand]')
+      content?.classList.toggle('hidden', !open)
+      strip?.classList.toggle('flex', !open)
+      strip?.classList.toggle('hidden', open)
+      collapseBtn?.setAttribute('aria-expanded', String(open))
+      expandBtn?.setAttribute('aria-expanded', String(open))
+    }
+    function syncBarHeight() {
+      if (!desktopBar) return
+      const h = desktopBar.getBoundingClientRect().height
+      document.documentElement.style.setProperty('--seam-filter-bar-h', `${Math.round(h)}px`)
+    }
+
+    document.querySelector<HTMLButtonElement>('[data-seam-filter-bar-collapse]')?.addEventListener('click', () => {
+      writeOpen(false); applyOpen(false); syncBarHeight()
+    })
+    document.querySelector<HTMLButtonElement>('[data-seam-filter-bar-expand]')?.addEventListener('click', () => {
+      writeOpen(true); applyOpen(true); syncBarHeight()
+    })
+
+    if (desktopBar) {
+      applyOpen(readOpen())
+      syncBarHeight()
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(syncBarHeight).observe(desktopBar)
+      }
+      window.addEventListener('resize', syncBarHeight)
+    }
+
+    // Initial state: URL wins over localStorage (link-sharing).
+    const initialFilter = readFromUrl() ?? read()
+    if (readFromUrl()) write(initialFilter)
+    applyMode(readMode())
+    applyTab(readTab())
+    applyFilter(initialFilter)
+    writeToUrl(initialFilter)
+  }
+</script>

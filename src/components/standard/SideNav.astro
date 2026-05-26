@@ -1,13 +1,10 @@
 ---
 import ConceptBadge from './ConceptBadge.astro'
-import ProductGlyph from './ProductGlyph.astro'
 import {
   listIntroSections,
-  listSeals,
   type NavPillar,
   type RatingSystemApplication,
   type IntroSection,
-  type SealSummary,
 } from '@/lib/sanity.queries'
 
 interface Props {
@@ -29,10 +26,7 @@ const {
   current,
 } = Astro.props
 
-const [introSections, seals] = await Promise.all([
-  listIntroSections() as Promise<IntroSection[]>,
-  listSeals() as Promise<SealSummary[]>,
-])
+const introSections = (await listIntroSections()) as IntroSection[]
 
 // Determine which branch(es) to auto-expand based on the current page.
 let openPillar = currentPillarSlug ?? ''
@@ -59,17 +53,7 @@ for (const p of tree) {
   }
 }
 
-const isIntroOpen = current === 'intro' || (current?.startsWith('intro:') ?? false)
 const activeIntroSlug = current?.startsWith('intro:') ? current.slice('intro:'.length) : undefined
-const isSealsOpen = current === 'seals' || (current?.startsWith('seals:') ?? false)
-const activeSealSlug = current?.startsWith('seals:') ? current.slice('seals:'.length) : undefined
-
-const RS_OPTIONS = [
-  { key: 'bid', label: 'B+I:D', title: 'Buildings + Interiors: Developer' },
-  { key: 'bio', label: 'B+I:O', title: 'Buildings + Interiors: Occupier' },
-  { key: 'omd', label: 'O+M:D', title: 'Operations + Maintenance: Developer' },
-  { key: 'omo', label: 'O+M:O', title: 'Operations + Maintenance: Occupier' },
-] as const
 
 // data-rs-* aggregator: returns the union of applicable rating systems across activities.
 const RS_KEYS = ['bid', 'bio', 'omd', 'omo'] as const
@@ -145,7 +129,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
 ></div>
 
 <aside
-  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-16 lg:z-auto lg:block lg:h-[calc(100vh-5rem)] lg:w-96 lg:shrink-0 lg:translate-x-0 lg:overflow-visible lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
+  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full overflow-y-auto border-r border-warm-200 bg-white px-4 py-4 transition-transform duration-200 lg:sticky lg:top-[calc(4rem+var(--seam-filter-bar-h,0px))] lg:z-auto lg:block lg:h-[calc(100vh-5rem-var(--seam-filter-bar-h,0px))] lg:w-96 lg:shrink-0 lg:translate-x-0 lg:overflow-visible lg:border-r-0 lg:bg-transparent lg:px-0 lg:py-0"
   data-seam-mobile-nav-panel
   data-seam-sidenav-aside
 >
@@ -204,49 +188,9 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
     </ul>
 
-    <div class="mb-2">
-      <div class="flex items-center justify-between gap-2">
-        <p class="text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-          Standard
-        </p>
-        <div class="flex items-center gap-1.5 text-[10px] text-warm-500">
-          <button
-            type="button"
-            data-seam-info
-            aria-expanded="false"
-            aria-controls="seam-mode-info"
-            aria-label="What does the Hide non-applicable toggle do?"
-            class="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-warm-300 text-[9px] font-semibold text-warm-500 hover:border-seam-500 hover:text-seam-700"
-          >
-            ?
-          </button>
-          <span>Hide non-applicable</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked="false"
-            data-seam-mode-switch
-            class="relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center rounded-full border border-warm-300 bg-warm-100 transition-colors hover:border-seam-400 aria-checked:border-seam-600 aria-checked:bg-seam-600"
-          >
-            <span class="sr-only">Hide non-applicable activities</span>
-            <span
-              aria-hidden="true"
-              data-seam-mode-thumb
-              class="inline-block h-3 w-3 translate-x-0.5 transform rounded-full bg-white shadow-sm transition-transform"
-            />
-          </button>
-        </div>
-      </div>
-      <p
-        id="seam-mode-info"
-        data-seam-info-tip
-        class="mt-1.5 hidden rounded border border-warm-200 bg-warm-50 px-2 py-1.5 text-[11px] leading-snug text-warm-700"
-        role="note"
-      >
-        With a Product filter active, <strong>on</strong> hides activities that
-        don't match. <strong>Off</strong> keeps them visible but dimmed.
-      </p>
-    </div>
+    <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+      Standard
+    </p>
     <ul class="space-y-1 border-b border-warm-200 pb-4" data-seam-tree data-seam-filterable>
       {
         tree.map((pillar) => {
@@ -355,132 +299,6 @@ const PILLAR_GLYPHS: Record<string, string> = {
       }
     </ul>
 
-    <div class="mt-4 border-b border-warm-200 pb-4">
-      <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
-        Product filter
-      </p>
-
-      <div class="mt-1 flex items-baseline justify-between gap-2">
-        <p class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-warm-500">
-          <a
-            href="/certification"
-            class:list={['inline-flex items-center gap-1.5', current === 'certification' ? 'text-seam-700' : 'hover:text-seam-700']}
-            aria-current={current === 'certification' ? 'page' : undefined}
-          >
-            <ProductGlyph product="certification" size="xs" />
-            <span>Certification</span>
-          </a>
-        </p>
-        <button
-          type="button"
-          data-seam-share-link
-          title="Copy a link to this page with the current Product filter applied"
-          class="text-[10px] text-warm-400 hover:text-seam-700"
-        >
-          <span data-seam-share-label>share view</span>
-        </button>
-      </div>
-      <ul class="ml-1 mt-1 space-y-0.5 text-xs">
-        {
-          RS_OPTIONS.map((rs) => (
-            <li>
-              <button
-                type="button"
-                data-seam-rs-toggle={rs.key}
-                title={rs.title}
-                class="group/btn flex w-full items-center gap-2 rounded px-1 py-1 text-left text-warm-700 hover:bg-warm-50"
-              >
-                <span
-                  aria-hidden="true"
-                  class="inline-block h-2.5 w-2.5 shrink-0 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
-                  data-seam-rs-dot={rs.key}
-                />
-                <span class="font-mono" data-seam-rs-label={rs.key}>{rs.label}</span>
-              </button>
-            </li>
-          ))
-        }
-      </ul>
-
-      <p class="mt-3 text-[11px] font-semibold uppercase tracking-wider text-warm-500">
-        <a href="/seals" class="inline-flex items-center gap-1.5 hover:text-seam-700">
-          <ProductGlyph product="seals" size="xs" />
-          <span>SEALs</span>
-        </a>
-      </p>
-      <ul class="ml-1 mt-1 space-y-0.5 text-xs">
-        {seals.length === 0 ? (
-          <li class="px-1 py-1 italic text-warm-400">No SEALs yet</li>
-        ) : (
-          seals.map((s) => {
-            const isPageActive = activeSealSlug === s.slug
-            return (
-              <li class="flex items-center gap-2 rounded px-1 py-1 hover:bg-warm-50">
-                <button
-                  type="button"
-                  data-seam-seal-toggle={s.slug}
-                  title={`Filter to activities in ${s.name}`}
-                  class="group/btn shrink-0"
-                  aria-label={`Filter by ${s.name}`}
-                >
-                  <span
-                    aria-hidden="true"
-                    class="inline-block h-2.5 w-2.5 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
-                    data-seam-seal-dot={s.slug}
-                  />
-                </button>
-                <a
-                  href={`/seals/${s.slug}`}
-                  class:list={['flex-1 truncate', isPageActive ? 'font-semibold text-seam-700' : 'text-warm-700 hover:text-seam-700']}
-                  aria-current={isPageActive ? 'page' : undefined}
-                  title={s.name}
-                  data-seam-seal-label={s.slug}
-                >
-                  {s.name.replace(/\s+SEAL$/, '')}
-                </a>
-              </li>
-            )
-          })
-        )}
-      </ul>
-
-      <p class="mt-3 text-[11px] font-semibold uppercase tracking-wider text-warm-500">
-        <a
-          href="/marks"
-          class:list={['inline-flex items-center gap-1.5', current === 'marks' ? 'text-seam-700' : 'hover:text-seam-700']}
-          aria-current={current === 'marks' ? 'page' : undefined}
-        >
-          <ProductGlyph product="marks" size="xs" />
-          <span>Marks</span>
-        </a>
-      </p>
-      <ul class="ml-1 mt-1 text-xs">
-        <li class="flex items-center gap-2 rounded px-1 py-1 hover:bg-warm-50">
-          <button
-            type="button"
-            data-seam-mark-toggle
-            title="Filter to Mark-eligible activities"
-            class="group/btn shrink-0"
-            aria-label="Filter by Marks"
-          >
-            <span
-              aria-hidden="true"
-              class="inline-block h-2.5 w-2.5 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
-              data-seam-mark-dot
-            />
-          </button>
-          <a
-            href="/marks"
-            class:list={['flex-1', current === 'marks' ? 'font-semibold text-seam-700' : 'text-warm-700 hover:text-seam-700']}
-            aria-current={current === 'marks' ? 'page' : undefined}
-            data-seam-mark-label
-          >
-            Mark-eligible activities
-          </a>
-        </li>
-      </ul>
-    </div>
-
     <p class="mt-4 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
       Reference
     </p>
@@ -536,7 +354,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
 
 <!-- Resize handle — sibling flex item next to the aside on desktop -->
 <div
-  class="group relative hidden cursor-col-resize touch-none select-none bg-warm-200 hover:bg-seam-500 lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-5rem)] lg:w-1.5 lg:shrink-0 lg:items-center lg:justify-center"
+  class="group relative hidden cursor-col-resize touch-none select-none bg-warm-200 hover:bg-seam-500 lg:sticky lg:top-[calc(4rem+var(--seam-filter-bar-h,0px))] lg:flex lg:h-[calc(100vh-5rem-var(--seam-filter-bar-h,0px))] lg:w-1.5 lg:shrink-0 lg:items-center lg:justify-center"
   data-seam-sidenav-resize
   role="separator"
   aria-orientation="vertical"
@@ -677,234 +495,5 @@ const PILLAR_GLYPHS: Record<string, string> = {
       document.body.classList.remove('overflow-hidden')
     }
   })
-</script>
-
-<style is:global>
-  /* Filter state lives on <html> so any [data-seam-filterable] container
-     (side-nav tree, /standard page tree) responds to the same toggles. */
-  html[data-seam-rs-active='bid'] [data-seam-filterable] [data-filter-item]:not([data-rs-bid]) { opacity: 0.35; }
-  html[data-seam-rs-active='bio'] [data-seam-filterable] [data-filter-item]:not([data-rs-bio]) { opacity: 0.35; }
-  html[data-seam-rs-active='omd'] [data-seam-filterable] [data-filter-item]:not([data-rs-omd]) { opacity: 0.35; }
-  html[data-seam-rs-active='omo'] [data-seam-filterable] [data-filter-item]:not([data-rs-omo]) { opacity: 0.35; }
-  html[data-seam-mark-active]    [data-seam-filterable] [data-filter-item]:not([data-mark])   { opacity: 0.35; }
-
-  html[data-seam-filter-mode='hide'][data-seam-rs-active='bid'] [data-seam-filterable] [data-filter-item]:not([data-rs-bid]) { display: none; }
-  html[data-seam-filter-mode='hide'][data-seam-rs-active='bio'] [data-seam-filterable] [data-filter-item]:not([data-rs-bio]) { display: none; }
-  html[data-seam-filter-mode='hide'][data-seam-rs-active='omd'] [data-seam-filterable] [data-filter-item]:not([data-rs-omd]) { display: none; }
-  html[data-seam-filter-mode='hide'][data-seam-rs-active='omo'] [data-seam-filterable] [data-filter-item]:not([data-rs-omo]) { display: none; }
-  html[data-seam-filter-mode='hide'][data-seam-mark-active]    [data-seam-filterable] [data-filter-item]:not([data-mark])   { display: none; }
-</style>
-
-<script>
-  // Single-source filter state. One of: rs-bid | rs-bio | rs-omd | rs-omo |
-  // seal:<slug> | mark | (null = no filter). Persisted in localStorage and
-  // applied as data attributes on the sidenav.
-  const STORAGE = 'seam:filter'
-
-  const sidenav = document.querySelector<HTMLElement>('[data-seam-sidenav]')
-  if (sidenav) {
-    const rsButtons = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-rs-toggle]')
-    const rsDots = sidenav.querySelectorAll<HTMLElement>('[data-seam-rs-dot]')
-    const rsLabels = sidenav.querySelectorAll<HTMLElement>('[data-seam-rs-label]')
-    const sealButtons = sidenav.querySelectorAll<HTMLButtonElement>('[data-seam-seal-toggle]')
-    const sealDots = sidenav.querySelectorAll<HTMLElement>('[data-seam-seal-dot]')
-    const sealLabels = sidenav.querySelectorAll<HTMLElement>('[data-seam-seal-label]')
-    const markBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-mark-toggle]')
-    const markDot = sidenav.querySelector<HTMLElement>('[data-seam-mark-dot]')
-    const markLabel = sidenav.querySelector<HTMLElement>('[data-seam-mark-label]')
-
-    const SEAL_STYLE_ID = 'seam-seal-dim-style'
-
-    function read(): string | null {
-      try { return localStorage.getItem(STORAGE) } catch { return null }
-    }
-    function write(v: string | null) {
-      try {
-        if (v) localStorage.setItem(STORAGE, v)
-        else localStorage.removeItem(STORAGE)
-      } catch {}
-    }
-
-    // URL <-> filter sync. The ?filter= query param mirrors the active filter
-    // so links can be shared with the filter pre-applied.
-    function readFromUrl(): string | null {
-      const v = new URL(location.href).searchParams.get('filter')
-      return v && /^(rs-(bid|bio|omd|omo)|seal:[a-z0-9-]+|mark)$/.test(v) ? v : null
-    }
-    function writeToUrl(v: string | null) {
-      const url = new URL(location.href)
-      if (v) url.searchParams.set('filter', v)
-      else url.searchParams.delete('filter')
-      history.replaceState(null, '', url.toString())
-    }
-
-    function paintActive(dot: HTMLElement | null, label: HTMLElement | null, on: boolean) {
-      if (dot) {
-        dot.classList.toggle('bg-seam-600', on)
-        dot.classList.toggle('border-seam-600', on)
-        dot.classList.toggle('border-warm-400', !on)
-      }
-      if (label) {
-        label.classList.toggle('text-seam-700', on)
-        label.classList.toggle('font-semibold', on)
-      }
-    }
-
-    function ensureSealStyle(slug: string | null) {
-      let style = document.getElementById(SEAL_STYLE_ID)
-      if (!slug) { if (style) style.remove(); return }
-      if (!style) {
-        style = document.createElement('style')
-        style.id = SEAL_STYLE_ID
-        document.head.appendChild(style)
-      }
-      const safe = slug.replace(/["\\]/g, '\\$&')
-      style.textContent =
-        `html[data-seam-seal-active='${safe}'] [data-seam-filterable] [data-filter-item]:not([data-seals~="${safe}"]) { opacity: 0.35; }
-         html[data-seam-filter-mode='hide'][data-seam-seal-active='${safe}'] [data-seam-filterable] [data-filter-item]:not([data-seals~="${safe}"]) { display: none; }`
-    }
-
-    // Mode switch (dim ↔ hide) — finds every [data-seam-mode-switch] on the
-    // page (the side nav's and any other instance, e.g. on /standard) and
-    // keeps them all in sync.
-    const MODE_KEY = 'seam:filter-mode'
-    const modeSwitches = document.querySelectorAll<HTMLButtonElement>('[data-seam-mode-switch]')
-    const modeThumbs = document.querySelectorAll<HTMLElement>('[data-seam-mode-thumb]')
-
-    function applyMode(mode: 'dim' | 'hide') {
-      document.documentElement.setAttribute('data-seam-filter-mode', mode)
-      const on = mode === 'hide'
-      modeSwitches.forEach((s) => s.setAttribute('aria-checked', String(on)))
-      modeThumbs.forEach((t) => {
-        t.classList.toggle('translate-x-3', on)
-        t.classList.toggle('translate-x-0.5', !on)
-      })
-    }
-
-    function readMode(): 'dim' | 'hide' {
-      try {
-        const v = localStorage.getItem(MODE_KEY)
-        return v === 'hide' ? 'hide' : 'dim'
-      } catch { return 'dim' }
-    }
-
-    modeSwitches.forEach((s) => {
-      s.addEventListener('click', () => {
-        const next = readMode() === 'hide' ? 'dim' : 'hide'
-        try { localStorage.setItem(MODE_KEY, next) } catch {}
-        applyMode(next)
-        window.dispatchEvent(new CustomEvent('seam:mode-change', { detail: { mode: next } }))
-      })
-    })
-
-    window.addEventListener('seam:mode-change', (e: Event) => {
-      const detail = (e as CustomEvent<{ mode: 'dim' | 'hide' }>).detail
-      if (detail?.mode) applyMode(detail.mode)
-    })
-
-    applyMode(readMode())
-
-    // Info note (click toggles a sibling note that lives in normal flow,
-    // so it can't be clipped or pushed off-screen)
-    const infoBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-info]')
-    const infoTip = sidenav.querySelector<HTMLElement>('[data-seam-info-tip]')
-    if (infoBtn && infoTip) {
-      infoBtn.addEventListener('click', (e) => {
-        e.preventDefault()
-        const showing = !infoTip.classList.toggle('hidden')
-        infoBtn.setAttribute('aria-expanded', String(showing))
-      })
-    }
-
-    function apply(filter: string | null) {
-      const root = document.documentElement
-      root.removeAttribute('data-seam-rs-active')
-      root.removeAttribute('data-seam-seal-active')
-      root.removeAttribute('data-seam-mark-active')
-
-      rsDots.forEach((d) => {
-        const label = sidenav.querySelector<HTMLElement>(`[data-seam-rs-label="${d.dataset.seamRsDot}"]`)
-        paintActive(d, label, false)
-      })
-      sealDots.forEach((d) => {
-        const label = sidenav.querySelector<HTMLElement>(`[data-seam-seal-label="${d.dataset.seamSealDot}"]`)
-        paintActive(d, label, false)
-      })
-      paintActive(markDot, markLabel, false)
-
-      if (filter?.startsWith('rs-')) {
-        const k = filter.slice(3)
-        root.setAttribute('data-seam-rs-active', k)
-        const dot = sidenav.querySelector<HTMLElement>(`[data-seam-rs-dot="${k}"]`)
-        const label = sidenav.querySelector<HTMLElement>(`[data-seam-rs-label="${k}"]`)
-        paintActive(dot, label, true)
-        ensureSealStyle(null)
-      } else if (filter?.startsWith('seal:')) {
-        const slug = filter.slice('seal:'.length)
-        root.setAttribute('data-seam-seal-active', slug)
-        const dot = sidenav.querySelector<HTMLElement>(`[data-seam-seal-dot="${slug}"]`)
-        const label = sidenav.querySelector<HTMLElement>(`[data-seam-seal-label="${slug}"]`)
-        paintActive(dot, label, true)
-        ensureSealStyle(slug)
-      } else if (filter === 'mark') {
-        root.setAttribute('data-seam-mark-active', '1')
-        paintActive(markDot, markLabel, true)
-        ensureSealStyle(null)
-      } else {
-        ensureSealStyle(null)
-      }
-    }
-
-    function set(filter: string | null) {
-      const current = read()
-      const next = current === filter ? null : filter
-      write(next)
-      writeToUrl(next)
-      apply(next)
-      window.dispatchEvent(new CustomEvent('seam:filter-change', { detail: { filter: next } }))
-    }
-
-    rsButtons.forEach((b) => {
-      b.addEventListener('click', () => set(`rs-${b.dataset.seamRsToggle}`))
-    })
-
-    sealButtons.forEach((b) => {
-      b.addEventListener('click', (e) => {
-        e.preventDefault()
-        set(`seal:${b.dataset.seamSealToggle}`)
-      })
-    })
-
-    markBtn?.addEventListener('click', (e) => {
-      e.preventDefault()
-      set('mark')
-    })
-
-    // On page load: prefer the URL filter (link-sharing wins), else localStorage.
-    const initial = readFromUrl() ?? read()
-    if (readFromUrl()) write(initial)
-    apply(initial)
-    writeToUrl(initial)
-
-    // Share link button
-    const shareBtn = sidenav.querySelector<HTMLButtonElement>('[data-seam-share-link]')
-    const shareLabel = sidenav.querySelector<HTMLElement>('[data-seam-share-label]')
-    shareBtn?.addEventListener('click', async () => {
-      const url = new URL(location.href)
-      const cur = read()
-      if (cur) url.searchParams.set('filter', cur)
-      else url.searchParams.delete('filter')
-      try {
-        await navigator.clipboard.writeText(url.toString())
-        if (shareLabel) {
-          const original = shareLabel.textContent
-          shareLabel.textContent = 'copied!'
-          setTimeout(() => { if (shareLabel) shareLabel.textContent = original }, 1400)
-        }
-      } catch {
-        if (shareLabel) shareLabel.textContent = 'copy failed'
-      }
-    })
-  }
 </script>
 
