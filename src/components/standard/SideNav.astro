@@ -320,6 +320,17 @@ const PILLAR_GLYPHS: Record<string, string> = {
     <ul class="mb-4 space-y-0.5 border-b border-warm-200 pb-4 text-sm">
       <li>
         <a
+          href="/standard"
+          data-seam-product-link="all"
+          data-seam-clear-filter
+          title="Show every activity — no product filter"
+          class:list={['block py-0.5', idleClass]}
+        >
+          All activities
+        </a>
+      </li>
+      <li>
+        <a
           href="/marks?filter=mark"
           data-seam-product-link="mark"
           data-server-active={current === 'marks' ? '1' : undefined}
@@ -637,6 +648,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
       })()
 
       // Build matcher and parent key for the current filter (may be null).
+      // When no filter is active, highlight the "All activities" entry.
       let matchValue: string | null = null
       let parentKey: string | null = null
       if (filter === 'mark') {
@@ -647,6 +659,8 @@ const PILLAR_GLYPHS: Record<string, string> = {
       } else if (filter?.startsWith('rs-')) {
         matchValue = filter
         parentKey = 'cert'
+      } else {
+        matchValue = 'all'
       }
 
       // Clear filter-driven highlights from every product link, then re-apply

@@ -96,6 +96,22 @@ const outerClass =
         <button
           type="button"
           role="tab"
+          data-seam-tab="all"
+          data-seam-tab-clears
+          title="Show every activity — no product filter"
+          class="group/tab inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-warm-700 hover:text-seam-700 aria-selected:border-warm-300 aria-selected:bg-white"
+          aria-selected="false"
+        >
+          <span
+            aria-hidden="true"
+            class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400"
+            data-seam-tab-dot="all"
+          />
+          <span>All</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
           data-seam-tab="rs"
           class="group/tab inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-warm-700 hover:text-seam-700 aria-selected:border-warm-300 aria-selected:bg-white"
           aria-selected="true"
@@ -199,6 +215,10 @@ const outerClass =
 
     <!-- Row 2: options for the active tab -->
     <div class="mx-auto flex h-9 max-w-7xl items-center border-t border-warm-200/60 px-3 leading-none sm:px-6">
+      <!-- all panel -->
+      <div role="tabpanel" data-seam-tab-panel="all" class="hidden items-center text-[12px] italic text-warm-500">
+        No filter — every activity in the Standard is visible.
+      </div>
       <!-- rs panel -->
       <div role="tabpanel" data-seam-tab-panel="rs" class="flex flex-wrap items-center gap-1.5">
         {
@@ -301,6 +321,15 @@ const outerClass =
   [data-seam-filter-bar][data-seam-active-tab='seal'] [data-seam-tab-panel='mark'],
   [data-seam-filter-bar][data-seam-active-tab='mark'] [data-seam-tab-panel='rs'],
   [data-seam-filter-bar][data-seam-active-tab='mark'] [data-seam-tab-panel='seal'] { display: none; }
+
+  /* All tab shows only the "no filter" panel; hides other panels. */
+  [data-seam-filter-bar][data-seam-active-tab='all']  [data-seam-tab-panel='all']  { display: flex; }
+  [data-seam-filter-bar][data-seam-active-tab='all']  [data-seam-tab-panel='rs'],
+  [data-seam-filter-bar][data-seam-active-tab='all']  [data-seam-tab-panel='seal'],
+  [data-seam-filter-bar][data-seam-active-tab='all']  [data-seam-tab-panel='mark']  { display: none; }
+  [data-seam-filter-bar][data-seam-active-tab='rs']   [data-seam-tab-panel='all'],
+  [data-seam-filter-bar][data-seam-active-tab='seal'] [data-seam-tab-panel='all'],
+  [data-seam-filter-bar][data-seam-active-tab='mark'] [data-seam-tab-panel='all']   { display: none; }
 </style>
 
 <script>
@@ -321,7 +350,7 @@ const outerClass =
   const SEAL_STYLE_ID = 'seam-seal-dim-style'
 
   type Filter = string | null
-  type Tab = 'rs' | 'seal' | 'mark'
+  type Tab = 'all' | 'rs' | 'seal' | 'mark'
 
   const bars = document.querySelectorAll<HTMLElement>('[data-seam-filter-bar]')
   if (bars.length > 0) {
@@ -363,9 +392,9 @@ const outerClass =
     function readTab(): Tab {
       try {
         const v = localStorage.getItem(TAB_KEY)
-        if (v === 'rs' || v === 'seal' || v === 'mark') return v
+        if (v === 'all' || v === 'rs' || v === 'seal' || v === 'mark') return v
       } catch {}
-      return familyOf(read()) ?? 'rs'
+      return familyOf(read()) ?? 'all'
     }
     function writeTab(t: Tab) {
       try { localStorage.setItem(TAB_KEY, t) } catch {}
@@ -384,8 +413,9 @@ const outerClass =
     }
 
     function paintTabDots(family: Tab | null) {
-      (['rs', 'seal', 'mark'] as const).forEach((f) => {
-        const on = f === family
+      // 'all' lights up when no filter family is active (family is null).
+      (['all', 'rs', 'seal', 'mark'] as const).forEach((f) => {
+        const on = f === 'all' ? family === null : f === family
         document.querySelectorAll<HTMLElement>(`[data-seam-tab-dot="${f}"]`).forEach((d) => {
           d.classList.toggle('bg-seam-600', on)
           d.classList.toggle('border-seam-600', on)
@@ -523,12 +553,14 @@ const outerClass =
     }
 
     // Tab clicks switch which option panel is visible. They do not change the
-    // filter — that only happens when an option in the panel is clicked.
+    // filter — except the "All" tab, which clears any active filter so users
+    // can explicitly return to the no-filter state.
     document.querySelectorAll<HTMLButtonElement>('[data-seam-tab]').forEach((b) => {
       b.addEventListener('click', () => {
         const t = b.dataset.seamTab as Tab
         writeTab(t)
         applyTab(t)
+        if (b.hasAttribute('data-seam-tab-clears')) clearFilter()
       })
     })
 
@@ -642,6 +674,13 @@ const outerClass =
       write(initialFilter)
       const fam = familyOf(initialFilter)
       if (fam) writeTab(fam)
+    }
+    // If a filter is active but the stored tab is 'all', realign so the
+    // visible tab and the active filter stay consistent.
+    {
+      const fam = familyOf(initialFilter)
+      const t = readTab()
+      if (fam && t === 'all') writeTab(fam)
     }
     applyMode(readMode())
     applyTab(readTab())
