@@ -321,6 +321,8 @@ const PILLAR_GLYPHS: Record<string, string> = {
       <li>
         <a
           href="/marks?filter=mark"
+          data-seam-product-link="mark"
+          data-server-active={current === 'marks' ? '1' : undefined}
           class:list={['block py-0.5', current === 'marks' ? activeClass : idleClass]}
           aria-current={current === 'marks' ? 'page' : undefined}
         >
@@ -328,7 +330,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
         </a>
       </li>
       <li>
-        <details open={current === 'seals' || current?.startsWith('seals:')} class="group/seals-nav">
+        <details open={current === 'seals' || current?.startsWith('seals:')} data-seam-product-section="seals" class="group/seals-nav">
           <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 marker:hidden">
             <span class="inline-block w-3 shrink-0 text-warm-400 group-open/seals-nav:rotate-90 transition-transform">›</span>
             <a
@@ -347,6 +349,8 @@ const PILLAR_GLYPHS: Record<string, string> = {
                 <li>
                   <a
                     href={`/seals/${s.slug}?filter=seal%3A${s.slug}`}
+                    data-seam-product-link={`seal:${s.slug}`}
+                    data-server-active={activeSealSlug === s.slug ? '1' : undefined}
                     class:list={['block py-0.5', activeSealSlug === s.slug ? activeClass : idleClass]}
                     aria-current={activeSealSlug === s.slug ? 'page' : undefined}
                     title={s.name}
@@ -360,7 +364,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
         </details>
       </li>
       <li>
-        <details open={current === 'certification' || current?.startsWith('certification:')} class="group/cert-nav">
+        <details open={current === 'certification' || current?.startsWith('certification:')} data-seam-product-section="cert" class="group/cert-nav">
           <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 marker:hidden">
             <span class="inline-block w-3 shrink-0 text-warm-400 group-open/cert-nav:rotate-90 transition-transform">›</span>
             <a
@@ -376,6 +380,8 @@ const PILLAR_GLYPHS: Record<string, string> = {
               <li>
                 <a
                   href={`/certification/${rs.key}?filter=rs-${rs.key}`}
+                  data-seam-product-link={`rs-${rs.key}`}
+                  data-server-active={activeRsSlug === rs.key ? '1' : undefined}
                   class:list={['flex items-baseline gap-1.5 py-0.5', activeRsSlug === rs.key ? activeClass : idleClass]}
                   aria-current={activeRsSlug === rs.key ? 'page' : undefined}
                   title={rs.title}
@@ -586,5 +592,89 @@ const PILLAR_GLYPHS: Record<string, string> = {
       document.body.classList.remove('overflow-hidden')
     }
   })
+</script>
+
+<script>
+  // Persist the Products section's active context across navigation.
+  // 1. Highlight the sidenav product link that matches the active filter
+  //    (so users know which product they're currently scoped to, even on
+  //    pages that aren't that product's detail page).
+  // 2. Auto-expand the matching parent (SEALs / Certification).
+  // 3. Remember user-toggled expansion state per section in localStorage,
+  //    so manually expanding SEALs sticks across navigation.
+  function syncSidenavProductState() {
+    try {
+      const sidenav = document.querySelector<HTMLElement>('[data-seam-sidenav]')
+      if (!sidenav) return
+
+      // Restore per-section expansion preference (only when not already
+      // opened by the server based on current page).
+      sidenav.querySelectorAll<HTMLDetailsElement>('[data-seam-product-section]').forEach((d) => {
+        const key = d.dataset.seamProductSection
+        if (!key) return
+        try {
+          const stored = localStorage.getItem('seam:sidenav-' + key)
+          if (stored === 'open') d.open = true
+          // 'closed' only collapses if the server didn't open it for the current page
+          else if (stored === 'closed' && !d.hasAttribute('data-server-open')) {
+            // leave server-driven state alone; only honor 'closed' when user
+            // hasn't navigated into the section
+          }
+        } catch {}
+        d.addEventListener('toggle', () => {
+          try {
+            localStorage.setItem('seam:sidenav-' + key, d.open ? 'open' : 'closed')
+          } catch {}
+        })
+      })
+
+      const filter = (() => {
+        try {
+          return localStorage.getItem('seam:filter')
+        } catch {
+          return null
+        }
+      })()
+
+      // Build matcher and parent key for the current filter (may be null).
+      let matchValue: string | null = null
+      let parentKey: string | null = null
+      if (filter === 'mark') {
+        matchValue = 'mark'
+      } else if (filter?.startsWith('seal:')) {
+        matchValue = filter
+        parentKey = 'seals'
+      } else if (filter?.startsWith('rs-')) {
+        matchValue = filter
+        parentKey = 'cert'
+      }
+
+      // Clear filter-driven highlights from every product link, then re-apply
+      // to the one that matches. Links the SERVER already marked active (via
+      // data-server-active="1") are left alone — those reflect the page itself.
+      sidenav.querySelectorAll<HTMLAnchorElement>('[data-seam-product-link]').forEach((l) => {
+        if (l.dataset.serverActive === '1') return
+        if (matchValue && l.dataset.seamProductLink === matchValue) {
+          l.classList.add('font-semibold', 'text-seam-700')
+          l.classList.remove('text-warm-600')
+        } else {
+          l.classList.remove('font-semibold', 'text-seam-700')
+          l.classList.add('text-warm-600')
+        }
+      })
+
+      // Auto-expand the parent section for the matching filter family.
+      if (parentKey) {
+        const section = sidenav.querySelector<HTMLDetailsElement>(
+          `[data-seam-product-section="${parentKey}"]`,
+        )
+        if (section) section.open = true
+      }
+    } catch {}
+  }
+
+  if (document.readyState !== 'loading') syncSidenavProductState()
+  else document.addEventListener('DOMContentLoaded', syncSidenavProductState)
+  window.addEventListener('seam:filter-change', syncSidenavProductState as EventListener)
 </script>
 
