@@ -166,10 +166,14 @@ export interface RatingSystemApplication {
 export interface Activity {
   activityId: string
   title: string
+  /** Plain-language marketing-surface title; falls back to `title` when not set. */
+  marketingTitle?: string
   slug: string
   activityType: 'Driver' | 'Impact'
   ratingSystemApplication?: RatingSystemApplication
   markEligible?: boolean
+  /** When set, this activity is Mark-eligible only as part of the linked activity's combined Mark. */
+  markCombinedWith?: { activityId: string; title: string; marketingTitle?: string; slug: string; pillarSlug: string; conceptSlug: string; objectiveSlug: string }
   /** UN SDG numbers this activity aligns with (per Appendix A). */
   sdgs?: number[]
   /** Seals this activity belongs to (resolved at query time). */
@@ -203,10 +207,20 @@ export interface Activity {
 const activityProjection = `{
   activityId,
   title,
+  marketingTitle,
   "slug": slug.current,
   activityType,
   ratingSystemApplication,
   markEligible,
+  "markCombinedWith": markCombinedWith->{
+    activityId,
+    title,
+    marketingTitle,
+    "slug": slug.current,
+    "pillarSlug": pillar->slug.current,
+    "conceptSlug": concept->slug.current,
+    "objectiveSlug": objective->slug.current
+  },
   sdgs,
   "seals": *[_type == "seal" && references(^._id)] | order(order asc, name asc) {
     name,
@@ -923,6 +937,7 @@ export async function getSealBySlug(slug: string): Promise<SealDetail | null> {
 export interface MarkActivity {
   activityId: string
   title: string
+  marketingTitle?: string
   slug: string
   activityType: 'Driver' | 'Impact'
   pillarSlug: string
@@ -931,12 +946,18 @@ export interface MarkActivity {
   objectiveSlug: string
 }
 
+/**
+ * Activities that can be earned as standalone Marks. Excludes activities
+ * whose Mark eligibility is `combinedWith` another host (they're listed on
+ * the host via `markPrerequisites`).
+ */
 export async function listMarkActivities(): Promise<MarkActivity[]> {
   const client = requireClient()
   if (!client) return []
-  return client.fetch(`*[_type == "activity" && markEligible == true] | order(activityId asc) {
+  return client.fetch(`*[_type == "activity" && markEligible == true && !defined(markCombinedWith)] | order(activityId asc) {
     activityId,
     title,
+    marketingTitle,
     "slug": slug.current,
     activityType,
     "pillarSlug": pillar->slug.current,

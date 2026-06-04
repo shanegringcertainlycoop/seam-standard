@@ -69,7 +69,17 @@ const ratingFlags = [
   {
     ((activity.seals && activity.seals.length > 0) || activity.markEligible || (activity.sdgs && activity.sdgs.length > 0)) && (
       <div class="mt-3 flex flex-wrap items-center gap-2 border-b border-warm-300 pb-3 text-xs">
-        {activity.markEligible && (
+        {activity.markEligible && activity.markCombinedWith && (
+          <a
+            href={`/${activity.markCombinedWith.pillarSlug}/${activity.markCombinedWith.conceptSlug}/${activity.markCombinedWith.objectiveSlug}/${activity.markCombinedWith.slug}`}
+            class="inline-flex items-center gap-1 rounded-full border border-gold-400 bg-gold-50 px-2 py-0.5 font-medium text-gold-700 hover:border-gold-500"
+            title={`Mark eligible — earned in combination with ${activity.markCombinedWith.activityId}`}
+          >
+            <span aria-hidden="true">★</span> Mark eligible{' '}
+            <span class="font-mono text-[10px] text-gold-600">(with {activity.markCombinedWith.activityId})</span>
+          </a>
+        )}
+        {activity.markEligible && !activity.markCombinedWith && (
           <a
             href="/marks"
             class="inline-flex items-center gap-1 rounded-full border border-gold-400 bg-gold-50 px-2 py-0.5 font-medium text-gold-700 hover:border-gold-500"
