@@ -2,9 +2,11 @@
 import ConceptBadge from './ConceptBadge.astro'
 import {
   listIntroSections,
+  listSeals,
   type NavPillar,
   type RatingSystemApplication,
   type IntroSection,
+  type SealSummary,
 } from '@/lib/sanity.queries'
 
 interface Props {
@@ -13,7 +15,7 @@ interface Props {
   currentObjectiveSlug?: string
   currentConceptSlug?: string
   currentPillarSlug?: string
-  /** One of: 'home' | 'intro' | `intro:<slug>` | 'glossary' | 'bibliography' | 'seals' | `seals:<slug>` | 'marks' */
+  /** One of: 'home' | 'intro' | `intro:<slug>` | 'glossary' | 'bibliography' | 'seals' | `seals:<slug>` | 'marks' | 'certification' | `certification:<rs>` */
   current?: string
 }
 
@@ -26,7 +28,20 @@ const {
   current,
 } = Astro.props
 
-const introSections = (await listIntroSections()) as IntroSection[]
+const [introSections, productSeals] = await Promise.all([
+  listIntroSections() as Promise<IntroSection[]>,
+  listSeals() as Promise<SealSummary[]>,
+])
+
+const activeSealSlug = current?.startsWith('seals:') ? current.slice('seals:'.length) : undefined
+const activeRsSlug = current?.startsWith('certification:') ? current.slice('certification:'.length) : undefined
+
+const RS_OPTIONS = [
+  { key: 'bid', label: 'B+I:D', title: 'Buildings + Interiors: Developer' },
+  { key: 'bio', label: 'B+I:O', title: 'Buildings + Interiors: Occupier' },
+  { key: 'omd', label: 'O+M:D', title: 'Operations + Maintenance: Developer' },
+  { key: 'omo', label: 'O+M:O', title: 'Operations + Maintenance: Occupier' },
+] as const
 
 // Determine which branch(es) to auto-expand based on the current page.
 let openPillar = currentPillarSlug ?? ''
@@ -297,6 +312,82 @@ const PILLAR_GLYPHS: Record<string, string> = {
           )
         })
       }
+    </ul>
+
+    <p class="mt-4 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
+      Products
+    </p>
+    <ul class="mb-4 space-y-0.5 border-b border-warm-200 pb-4 text-sm">
+      <li>
+        <a
+          href="/marks?filter=mark"
+          class:list={['block py-0.5', current === 'marks' ? activeClass : idleClass]}
+          aria-current={current === 'marks' ? 'page' : undefined}
+        >
+          Marks
+        </a>
+      </li>
+      <li>
+        <details open={current === 'seals' || current?.startsWith('seals:')} class="group/seals-nav">
+          <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 marker:hidden">
+            <span class="inline-block w-3 shrink-0 text-warm-400 group-open/seals-nav:rotate-90 transition-transform">›</span>
+            <a
+              href="/seals"
+              class:list={['inline-flex flex-1 items-center', current === 'seals' ? activeClass : idleClass]}
+              aria-current={current === 'seals' ? 'page' : undefined}
+            >
+              SEALs
+            </a>
+          </summary>
+          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-[13px]">
+            {productSeals.length === 0 ? (
+              <li class="py-0.5 italic text-warm-400">No SEALs yet</li>
+            ) : (
+              productSeals.map((s) => (
+                <li>
+                  <a
+                    href={`/seals/${s.slug}?filter=seal%3A${s.slug}`}
+                    class:list={['block py-0.5', activeSealSlug === s.slug ? activeClass : idleClass]}
+                    aria-current={activeSealSlug === s.slug ? 'page' : undefined}
+                    title={s.name}
+                  >
+                    {s.name.replace(/\s+SEAL$/, '')}
+                  </a>
+                </li>
+              ))
+            )}
+          </ul>
+        </details>
+      </li>
+      <li>
+        <details open={current === 'certification' || current?.startsWith('certification:')} class="group/cert-nav">
+          <summary class="flex cursor-pointer list-none items-center gap-1.5 py-0.5 marker:hidden">
+            <span class="inline-block w-3 shrink-0 text-warm-400 group-open/cert-nav:rotate-90 transition-transform">›</span>
+            <a
+              href="/certification"
+              class:list={['inline-flex flex-1 items-center', current === 'certification' ? activeClass : idleClass]}
+              aria-current={current === 'certification' ? 'page' : undefined}
+            >
+              Certification
+            </a>
+          </summary>
+          <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-[13px]">
+            {RS_OPTIONS.map((rs) => (
+              <li>
+                <a
+                  href={`/certification/${rs.key}?filter=rs-${rs.key}`}
+                  class:list={['flex items-baseline gap-1.5 py-0.5', activeRsSlug === rs.key ? activeClass : idleClass]}
+                  aria-current={activeRsSlug === rs.key ? 'page' : undefined}
+                  title={rs.title}
+                >
+                  <span class="font-mono text-[11px] text-warm-500">{rs.label}</span>
+                  <span class="truncate">{rs.title.replace(/^(Buildings \+ Interiors|Operations \+ Maintenance): /, '')}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </li>
     </ul>
 
     <p class="mt-4 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gold-500">
