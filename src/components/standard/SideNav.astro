@@ -338,12 +338,12 @@ const PILLAR_GLYPHS: Record<string, string> = {
               class:list={['inline-flex flex-1 items-center', current === 'seals' ? activeClass : idleClass]}
               aria-current={current === 'seals' ? 'page' : undefined}
             >
-              SEALs
+              Seals
             </a>
           </summary>
           <ul class="ml-4 mt-0.5 space-y-0.5 border-l border-warm-200 pl-3 text-[13px]">
             {productSeals.length === 0 ? (
-              <li class="py-0.5 italic text-warm-400">No SEALs yet</li>
+              <li class="py-0.5 italic text-warm-400">No Seals yet</li>
             ) : (
               productSeals.map((s) => (
                 <li>
@@ -355,7 +355,7 @@ const PILLAR_GLYPHS: Record<string, string> = {
                     aria-current={activeSealSlug === s.slug ? 'page' : undefined}
                     title={s.name}
                   >
-                    {s.name.replace(/\s+SEAL$/, '')}
+                    {s.name.replace(/\s+Seal$/, '')}
                   </a>
                 </li>
               ))
@@ -599,9 +599,9 @@ const PILLAR_GLYPHS: Record<string, string> = {
   // 1. Highlight the sidenav product link that matches the active filter
   //    (so users know which product they're currently scoped to, even on
   //    pages that aren't that product's detail page).
-  // 2. Auto-expand the matching parent (SEALs / Certification).
+  // 2. Auto-expand the matching parent (Seals / Certification).
   // 3. Remember user-toggled expansion state per section in localStorage,
-  //    so manually expanding SEALs sticks across navigation.
+  //    so manually expanding Seals sticks across navigation.
   function syncSidenavProductState() {
     try {
       const sidenav = document.querySelector<HTMLElement>('[data-seam-sidenav]')

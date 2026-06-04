@@ -177,7 +177,7 @@ if (activity.seals && activity.seals.length > 0) {
             mismatch = true
             const labelEl = document.querySelector(`[data-seam-seal-label="${slug}"]`)
             const baseName = labelEl?.textContent?.trim() || slug
-            const sealName = /SEAL$/i.test(baseName) ? baseName : `${baseName} SEAL`
+            const sealName = /Seal$/i.test(baseName) ? baseName : `${baseName} Seal`
             html = `<strong>Heads up:</strong> this activity is not part of the <em>${sealName}</em>.`
           }
         } else if (filter === 'mark') {

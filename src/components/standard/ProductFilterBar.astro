@@ -121,7 +121,7 @@ const outerClass =
             data-seam-tab-dot="seal"
           />
           <ProductGlyph product="seals" size="xs" />
-          <span>SEAL</span>
+          <span>Seal</span>
         </button>
         <button
           type="button"
@@ -224,7 +224,7 @@ const outerClass =
       <div role="tabpanel" data-seam-tab-panel="seal" class="hidden flex-wrap items-center gap-1.5">
         {
           seals.length === 0 ? (
-            <span class="text-[12px] italic text-warm-400">No SEALs yet</span>
+            <span class="text-[12px] italic text-warm-400">No Seals yet</span>
           ) : (
             seals.map((s) => (
               <button
@@ -238,7 +238,7 @@ const outerClass =
                   class="inline-block h-2 w-2 shrink-0 rounded-full border border-warm-400 group-hover/btn:border-seam-600"
                   data-seam-seal-dot={s.slug}
                 />
-                <span data-seam-seal-label={s.slug}>{s.name.replace(/\s+SEAL$/, '')}</span>
+                <span data-seam-seal-label={s.slug}>{s.name.replace(/\s+Seal$/, '')}</span>
               </button>
             ))
           )

@@ -21,7 +21,7 @@ const [seal, navTree, lookup] = await Promise.all([
   getFootnoteLookup(),
 ])
 
-if (!seal) return new Response('SEAL not found', { status: 404 })
+if (!seal) return new Response('Seal not found', { status: 404 })
 
 lookup.activityUrls = buildActivityUrlMap(navTree)
 ---
@@ -32,12 +32,12 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
 
     <article class="min-w-0 flex-1 max-w-4xl">
       <Breadcrumb items={[
-        { href: '/seals', label: 'SEALs', glyph: { type: 'product', product: 'seals' } },
+        { href: '/seals', label: 'Seals', glyph: { type: 'product', product: 'seals' } },
         { label: seal.name },
       ]} />
 
       <header class="border-b border-warm-300 pb-4">
-        <p class="text-xs uppercase tracking-wider text-gold-500">SEAL</p>
+        <p class="text-xs uppercase tracking-wider text-gold-500">Seal</p>
         <h1 class="mt-1 text-3xl font-semibold text-warm-900">{seal.name}</h1>
         {seal.summary && (
           <p class="mt-3 text-base font-light leading-relaxed text-seam-800">
@@ -58,7 +58,7 @@ lookup.activityUrls = buildActivityUrlMap(navTree)
 
       <section class="mt-8">
         <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-warm-500">
-          Activities in this SEAL
+          Activities in this Seal
         </h2>
         {seal.activities.length > 0 ? (
           <ul class="divide-y divide-warm-200 overflow-hidden rounded border border-warm-200 bg-white">

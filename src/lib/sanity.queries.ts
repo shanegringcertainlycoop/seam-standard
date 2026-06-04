@@ -871,10 +871,18 @@ export interface SealDetail extends SealSummary {
   }>
 }
 
+/** Normalize legacy uppercase "SEAL" in Sanity-stored names. */
+function normalizeSealName<T extends { name?: string }>(s: T): T {
+  if (s && typeof s.name === 'string') {
+    s.name = s.name.replace(/\bSEAL\b/g, 'Seal').replace(/\bSEALs\b/g, 'Seals')
+  }
+  return s
+}
+
 export async function listSeals(): Promise<SealSummary[]> {
   const client = requireClient()
   if (!client) return []
-  return client.fetch(`*[_type == "seal"] | order(order asc, name asc) {
+  const seals = await client.fetch<SealSummary[]>(`*[_type == "seal"] | order(order asc, name asc) {
     name,
     "slug": slug.current,
     order,
@@ -882,12 +890,13 @@ export async function listSeals(): Promise<SealSummary[]> {
     accentColor,
     "activityCount": count(activities)
   }`)
+  return seals.map(normalizeSealName)
 }
 
 export async function getSealBySlug(slug: string): Promise<SealDetail | null> {
   const client = requireClient()
   if (!client) return null
-  return client.fetch(
+  const seal = await client.fetch<SealDetail | null>(
     `*[_type == "seal" && slug.current == $slug][0]{
       name,
       "slug": slug.current,
@@ -908,6 +917,7 @@ export async function getSealBySlug(slug: string): Promise<SealDetail | null> {
     }`,
     { slug },
   )
+  return seal ? normalizeSealName(seal) : null
 }
 
 export interface MarkActivity {

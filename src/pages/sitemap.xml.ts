@@ -52,7 +52,7 @@ export const GET: APIRoute = async () => {
     entries.push(urlEntry(`/certification/${rs}`, 0.8))
   }
 
-  // SEALs
+  // Seals
   for (const s of seals) entries.push(urlEntry(`/seals/${s.slug}`, 0.8))
 
   // Pillars / concepts / objectives / activities

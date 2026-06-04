@@ -76,7 +76,7 @@ export const GET: APIRoute = async () => {
   }`)
 
   body.seals = seals.map((s) => ({
-    name: s.name,
+    name: s.name?.replace(/\bSEAL\b/g, 'Seal').replace(/\bSEALs\b/g, 'Seals'),
     slug: s.slug,
     summary: s.summary,
     url: `${SITE_URL}/seals/${s.slug}`,
