@@ -634,9 +634,15 @@ const outerClass =
       window.addEventListener('resize', syncBarHeight)
     }
 
-    // Initial state: URL wins over localStorage (link-sharing).
+    // Initial state: URL wins over localStorage (link-sharing). When the URL
+    // brings a new filter, also align the active tab to its family so the
+    // displayed pills always match the active filter.
     const initialFilter = readFromUrl() ?? read()
-    if (readFromUrl()) write(initialFilter)
+    if (readFromUrl()) {
+      write(initialFilter)
+      const fam = familyOf(initialFilter)
+      if (fam) writeTab(fam)
+    }
     applyMode(readMode())
     applyTab(readTab())
     applyFilter(initialFilter)
