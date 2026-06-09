@@ -14,20 +14,37 @@ Related: [`SEAM`](../SEAM) (marketing site — separate domain, separate codebas
 ## Setup
 ```bash
 npm install
-cp .env.example .env.local       # fill in SANITY_PROJECT_ID once studio is wired
+cp .env.example .env.local       # SANITY_PROJECT_ID=2eylxib9, SANITY_DATASET=production
 npm run dev
+```
+
+## Scripts
+```bash
+npm run dev       # local dev server
+npm run build     # production build → dist/
+npm run preview   # serve the production build locally
 ```
 
 ## URL shape
 ```
 /                                                  → home
-/[pillar]                                          → pillar landing
-/[pillar]/[concept]                                → concept landing
-/[pillar]/[concept]/[objective]                    → objective landing
-/[pillar]/[concept]/[objective]/[activity]         → activity page (e.g. /social-impact/impact-assessment/contextual-analysis/iaa1-1)
+/standard                                          → standard overview
+/[pillar]                                           → pillar landing
+/[pillar]/[concept]                                 → concept landing
+/[pillar]/[concept]/[objective]                     → objective landing
+/[pillar]/[concept]/[objective]/[activity]          → activity page (e.g. /social-impact/impact-assessment/contextual-analysis/iaa1-1)
+/marks, /seals, /seals/[slug]                       → SEAM Marks + Seals product pages
+/intro, /appendix, /glossary, /bibliography         → front/back matter
+/certification, /certification/[rs]                 → rating-system / certification pages
 ```
 
-## Status
-Scaffold only. Section renderers (Scope, Requirements, Indicators, Scoring,
-Documentation, Definitions, Guidance, Referenced Source) intentionally not
-built yet — first content load will be Activity IAa1.1, hand-modeled in Sanity.
+## JSON APIs
+```
+/api/activities.json     /api/marks.json     /api/seals.json     /api/search-index.json
+```
+
+## Content sections
+Activity pages render from Sanity via discrete section components in
+`src/components/standard/` — Scope, Requirements, Indicators, Scoring,
+Documentation, Definitions, Guidance, ReferencedSources — plus navigation
+chrome (SideNav, Breadcrumb, PrevNextNav, SiteSearch, ProductFilterBar).
