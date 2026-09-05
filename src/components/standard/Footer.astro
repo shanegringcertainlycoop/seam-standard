@@ -1,10 +1,17 @@
 ---
+import { isPreview } from '@/lib/env'
+
 // Mirror of the SEAM marketing-site footer (seamcertification.org).
 // All links are absolute back to the marketing site since this reference
 // site doesn't own those routes. Newsletter form posts to the marketing
 // site endpoint as a fallback.
 const HOST = 'https://seamcertification.org'
 const year = new Date().getFullYear()
+
+// The noindex preview is unauthenticated, so its copy of this form must not be
+// able to write to the live marketing-site newsletter. Same markup and layout,
+// inert target.
+const newsletterAction = isPreview() ? '#' : `${HOST}/api/newsletter`
 ---
 
 <footer class="bg-warm-900 text-warm-300">
@@ -126,8 +133,8 @@ const year = new Date().getFullYear()
     <!-- Newsletter -->
     <div class="mt-16 border-t border-warm-700/50 pt-10">
       <form
-        action="https://seamcertification.org/api/newsletter"
-        method="post"
+        action={newsletterAction}
+        method={isPreview() ? 'get' : 'post'}
         class="flex flex-col items-center gap-3 sm:flex-row"
       >
         <p class="shrink-0 text-[13px] font-medium uppercase tracking-[0.15em] text-warm-400 sm:mr-2">

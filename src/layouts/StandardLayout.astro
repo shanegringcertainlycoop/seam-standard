@@ -3,6 +3,7 @@ import '@/styles/global.css'
 import TopBar from '@/components/standard/TopBar.astro'
 import Footer from '@/components/standard/Footer.astro'
 import ProductFilterBar from '@/components/standard/ProductFilterBar.astro'
+import { isPreview } from '@/lib/env'
 
 interface Props {
   title: string
@@ -28,6 +29,10 @@ const {
   jsonLd,
   showProductFilter = false,
 } = Astro.props
+
+// The Cloudflare preview serves the same pages on a *.workers.dev host, so
+// every page there is noindex regardless of what the caller asked for.
+const robotsNoindex = noindex || isPreview()
 
 const siteName = 'The SEAM Standard'
 const siteUrl = 'https://standard.seamcertification.org'
@@ -56,8 +61,8 @@ const jsonLdList = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []
 
     <link rel="canonical" href={canonicalUrl} />
 
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
-    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
+    {robotsNoindex && <meta name="robots" content="noindex, nofollow" />}
+    {!robotsNoindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
 
     <!-- Open Graph -->
     <meta property="og:type" content="article" />
