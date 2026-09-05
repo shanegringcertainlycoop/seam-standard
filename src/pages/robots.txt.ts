@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { isPreview } from '@/lib/env'
 
 export const prerender = false
 
@@ -48,8 +49,15 @@ Allow: /
 Sitemap: ${SITE}/sitemap.xml
 `
 
+// The Cloudflare preview deploy serves the same pages on a *.workers.dev host,
+// so it must never be crawlable regardless of what production allows.
+const previewBody = `# SEAM Standard - preview deploy, not for indexing
+User-agent: *
+Disallow: /
+`
+
 export const GET: APIRoute = () =>
-  new Response(body, {
+  new Response(isPreview() ? previewBody : body, {
     status: 200,
     headers: {
       'content-type': 'text/plain; charset=utf-8',

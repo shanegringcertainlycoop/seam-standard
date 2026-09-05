@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Default target is the noindex pilot preview on *.workers.dev, so a bare
+  // `wrangler deploy` can never publish an indexable build. Production lives
+  // under env.production and is not deployed by this WorkOrder.
+  "name": "seam-standard-preview",
+  "main": "./dist/_worker.js/index.js",
+  "compatibility_date": "2025-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // Public Sanity project; the dataset is world-readable and needs no token.
+    "SANITY_PROJECT_ID": "2eylxib9",
+    "SANITY_DATASET": "production",
+    "PREVIEW_NOINDEX": "1"
+  },
+  "env": {
+    "production": {
+      "name": "seam-standard",
+      "vars": {
+        "SANITY_PROJECT_ID": "2eylxib9",
+        "SANITY_DATASET": "production"
+      }
+    }
+  }
+}

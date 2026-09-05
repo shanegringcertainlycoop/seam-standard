@@ -2,11 +2,12 @@
 import StandardLayout from '@/layouts/StandardLayout.astro'
 import SideNav from '@/components/standard/SideNav.astro'
 import Breadcrumb from '@/components/standard/Breadcrumb.astro'
-import { sanity } from '@/lib/sanity'
+import { getSanity } from '@/lib/sanity'
 import { getNavigationTree, type FootnoteRef } from '@/lib/sanity.queries'
 
 export const prerender = false
 
+const sanity = getSanity()
 const navTree = await getNavigationTree()
 const rawEntries: FootnoteRef[] = sanity
   ? await sanity.fetch(`*[_type == "bibliographyEntry"]{

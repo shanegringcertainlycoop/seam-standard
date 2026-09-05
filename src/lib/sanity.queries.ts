@@ -1,9 +1,8 @@
-import { sanity } from './sanity'
+import { getSanity } from './sanity'
 import type { PortableTextBlock } from '@portabletext/types'
 
 function requireClient() {
-  if (!sanity) return null
-  return sanity
+  return getSanity()
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────

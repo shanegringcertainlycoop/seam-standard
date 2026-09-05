@@ -1,20 +1,25 @@
 import { createClient, type SanityClient } from '@sanity/client'
+import { readEnv } from './env'
 
-// Read at runtime so the Netlify function picks up env vars at request time,
-// not build time. (import.meta.env is resolved by Vite at build, which means
-// missing env vars during the build get inlined as undefined.)
-const projectId =
-  process.env.SANITY_PROJECT_ID ?? import.meta.env.SANITY_PROJECT_ID
-const dataset =
-  process.env.SANITY_DATASET ?? import.meta.env.SANITY_DATASET ?? 'production'
+// Built lazily on first use rather than at module scope: Cloudflare only
+// attaches env vars once a request is in flight, so a module-scope read would
+// always see an unconfigured project. Cached after the first call.
+let cached: SanityClient | null | undefined
 
-export const sanityConfigured = Boolean(projectId)
+export function getSanity(): SanityClient | null {
+  if (cached !== undefined) return cached
 
-export const sanity: SanityClient | null = projectId
-  ? createClient({
-      projectId,
-      dataset,
-      apiVersion: '2025-01-01',
-      useCdn: false,
-    })
-  : null
+  const projectId = readEnv('SANITY_PROJECT_ID')
+  const dataset = readEnv('SANITY_DATASET') ?? 'production'
+
+  cached = projectId
+    ? createClient({
+        projectId,
+        dataset,
+        apiVersion: '2025-01-01',
+        useCdn: false,
+      })
+    : null
+
+  return cached
+}

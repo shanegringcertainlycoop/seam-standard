@@ -1,11 +1,13 @@
 import { defineConfig } from 'astro/config'
-import netlify from '@astrojs/netlify'
+import cloudflare from '@astrojs/cloudflare'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://standard.seamcertification.org',
   output: 'server',
-  adapter: netlify(),
+  adapter: cloudflare({
+    platformProxy: { enabled: true },
+  }),
   vite: {
     plugins: [tailwindcss()],
   },

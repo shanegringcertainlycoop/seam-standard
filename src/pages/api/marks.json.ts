@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { sanity } from '@/lib/sanity'
+import { getSanity } from '@/lib/sanity'
 import type { RatingSystemApplication } from '@/lib/sanity.queries'
 
 export const prerender = false
@@ -37,6 +37,7 @@ function ratingSystems(rs?: RatingSystemApplication): string[] {
 }
 
 export const GET: APIRoute = async () => {
+  const sanity = getSanity()
   const body = {
     generatedAt: new Date().toISOString(),
     source: SITE_URL,

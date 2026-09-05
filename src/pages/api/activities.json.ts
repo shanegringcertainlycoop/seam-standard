@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { sanity } from '@/lib/sanity'
+import { getSanity } from '@/lib/sanity'
 
 export const prerender = false
 
@@ -23,6 +23,7 @@ type RawActivity = {
 }
 
 export const GET: APIRoute = async () => {
+  const sanity = getSanity()
   const body = {
     generatedAt: new Date().toISOString(),
     source: SITE_URL,

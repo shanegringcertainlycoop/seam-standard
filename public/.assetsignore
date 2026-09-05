@@ -1,0 +1,3 @@
+# Server bundle and Pages-only routing manifest are not public assets.
+_worker.js
+_routes.json

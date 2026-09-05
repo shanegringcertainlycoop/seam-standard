@@ -1,0 +1,7 @@
+# Static-asset parity with netlify.toml [[headers]]. On-demand responses get
+# the same set from src/middleware.ts.
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

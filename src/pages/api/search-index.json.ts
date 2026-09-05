@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { sanity } from '@/lib/sanity'
+import { getSanity } from '@/lib/sanity'
 import type { PortableTextBlock } from '@portabletext/types'
 
 export const prerender = false
@@ -28,6 +28,7 @@ function pt2text(blocks?: PortableTextBlock[], max = 280): string {
 }
 
 export const GET: APIRoute = async () => {
+  const sanity = getSanity()
   if (!sanity) {
     return new Response(JSON.stringify({ entries: [] }), {
       status: 200,
